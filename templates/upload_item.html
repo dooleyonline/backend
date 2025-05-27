@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Upload Item</title>
+  </head>
+  <body>
+    <h1>Create a New Item</h1>
+    <form
+      method="post"
+      enctype="multipart/form-data"
+      action="/api/items/">
+      {% csrf_token %}
+      <p>
+        <label>Name:<br/>
+          <input type="text" name="name" required/>
+        </label>
+      </p>
+      <p>
+        <label>Images:<br/>
+          <input type="file" name="images" multiple/>
+        </label>
+      </p>
+      <button type="submit">Upload</button>
+    </form>
+  </body>
+</html>

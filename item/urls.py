@@ -7,5 +7,5 @@ router = DefaultRouter()
 router.register(r'items', ItemViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),  # This gives you /items/, /items/<id>/ etc.
+    path('', include(router.urls)),
 ]
