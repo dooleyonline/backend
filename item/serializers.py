@@ -4,11 +4,12 @@ from .models import Item
 
 class ItemSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
-        child=serializers.ImageField(), 
+        child=serializers.ImageField(), # validates iamge files in the the images list
         write_only=True,
         required=False  
-    ) 
-    # this is not an item field, the attribute is only f
+    ) # custom image field, not item_model 
+
+    image_urls = serializers.ListField(read_only=True, required=False) 
     class Meta:
         model = Item
-        fields = ["id", "name", "images", "image_urls"]
+        fields = ["id", "name", "image_urls", 'images']

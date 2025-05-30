@@ -13,7 +13,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser]
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = ItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         images = serializer.validated_data.pop("images", [])
