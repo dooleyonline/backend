@@ -6,28 +6,76 @@ from .serializers import ItemSerializer
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import render
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+import uuid
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.all()
+    queryset = Item.objects.all().order_by("-id")
     serializer_class = ItemSerializer 
     parser_classes = [MultiPartParser, FormParser]
+    
+    
+    def perform_file_upload(self, file):
+        """
+        Handles the file upload and returns the path where the file is stored.
+        """
+        filename = f"{uuid.uuid4()}_{file.name}"
+        if settings.USE_S3:
+            return default_storage.save(f"uploads/{filename}", file)
+        else:
+            fs = FileSystemStorage()
+            return fs.save(filename, file)
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('name', openapi.IN_FORM, type=openapi.TYPE_STRING),
+            openapi.Parameter('description', openapi.IN_FORM, type=openapi.TYPE_STRING),
+            openapi.Parameter(
+                'images',
+                openapi.IN_FORM,
+                type=openapi.TYPE_FILE,
+                description="Multiple image files",
+                required=True,
+                collection_format='multi',
+            ),
+        ]
+    )
     def create(self, request, *args, **kwargs):
         serializer = ItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        images = serializer.validated_data.pop("images", [])
+        images = request.FILES.getlist("images")  
         image_urls = []
-        for f in images:
-            path = default_storage.save(f"uploads/{f.name}", f)
+        self.validate_images(images)
+        for img in images:
+            path = self.perform_file_upload(img)
+            # path = default_storage.save(f"uploads/{img.name}", f=img)
+            url = default_storage.url(path) if settings.USE_S3 else FileSystemStorage().url(path)
             image_urls.append(default_storage.url(path))
 
         item = Item.objects.create(
             name=serializer.validated_data["name"],
+            description=serializer.validated_data["description"],
             image_urls=image_urls
         )
-        out = ItemSerializer(item)
-        return Response(out.data, status=status.HTTP_201_CREATED)
+        output = ItemSerializer(item)
+        return Response(output.data, status=status.HTTP_201_CREATED)
+    
+    def validate_images(self, images):
+        """
+        Validates the uploaded images.
+        """
+        if not images:
+            raise serializers.ValidationError("No images provided.")
+        
+        for img in images:
+            if not img.name.lower().endswith(('.png', '.jpg', '.jpeg')):
+                raise serializers.ValidationError(f"Invalid image format: {img.name}")
+            if img.size > 5 * 1024 * 1024:
+                raise ValidationError(f"{img.name} exceeds 5MB limit.")
 
 def upload_item_page(request):
     return render(request, "upload_item.html")
