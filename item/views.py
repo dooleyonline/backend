@@ -1,8 +1,8 @@
 # items/views.py
 from rest_framework import viewsets, status
-from .models import Item
+from .models import Item, Category
 from django.core.files.storage import default_storage
-from .serializers import ItemSerializer
+from .serializers import ItemSerializer, CategorySerializer
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import render
@@ -93,6 +93,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         item = Item.objects.create(
             name=serializer.validated_data["name"],
             description=serializer.validated_data["description"],
+            category=serializer.validated_data["category"],
             image_urls=image_urls
         )
         output = ItemSerializer(item)
@@ -111,5 +112,13 @@ class ItemViewSet(viewsets.ModelViewSet):
             if img.size > 5 * 1024 * 1024:
                 raise ValidationError(f"{img.name} exceeds 5MB limit.")
 
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all().order_by("category_name")
+    serializer_class = CategorySerializer 
+    
+    
+
 def upload_item_page(request):
     return render(request, "upload_item.html")
+
