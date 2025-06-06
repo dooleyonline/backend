@@ -126,8 +126,8 @@ USE_I18N = True
 
 USE_TZ = True
 
-CORS_ALLOWED_ORIGINS = ["http://0.0.0.0:8080",]
-CSRF_TRUSTED_ORIGINS = ["http://0.0.0.0:8080",]
+CORS_ALLOWED_ORIGINS = ["http://0.0.0.0:8080", "https://backend-production-9918.up.railway.app/"]
+CSRF_TRUSTED_ORIGINS = ["http://0.0.0.0:8080", "https://backend-production-9918.up.railway.app/"]
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Static files (CSS, JavaScript, Images)
