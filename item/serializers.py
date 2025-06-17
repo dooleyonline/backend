@@ -16,7 +16,12 @@ class ItemSerializer(serializers.ModelSerializer):
    
     class Meta:
         model = Item
-        fields = ["id", "description", "name", "image_urls", 'category']
+        fields = [
+            "id", "name", "description", "image_urls", "price",
+            "postedAt", "isSold", "views", "condition", "isNegotiable",
+            "category", "subcategory", "seller"
+        ]
+        read_only_fields = ["id", "postedAt", "views"]
         
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

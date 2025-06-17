@@ -79,22 +79,6 @@ class ItemViewSet(viewsets.ModelViewSet):
     #     ]
     # )
     
-    @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=['name', 'description', 'category'],
-            properties={
-                'name': openapi.Schema(type=openapi.TYPE_STRING),
-                'description': openapi.Schema(type=openapi.TYPE_STRING),
-                'category': openapi.Schema(type=openapi.TYPE_STRING),
-                'image_urls': openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(type=openapi.TYPE_STRING),
-                    description="List of image URL strings"
-                ),
-            }
-        )
-    )
     def create(self, request, *args, **kwargs):
         serializer = ItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -113,8 +97,13 @@ class ItemViewSet(viewsets.ModelViewSet):
             name=serializer.validated_data["name"],
             description=serializer.validated_data["description"],
             category=serializer.validated_data["category"],
-            image_urls=serializer.validated_data.get("image_urls", []),
-            # image_urls=image_urls
+            subcategory=serializer.validated_data["subcategory"],
+            seller=serializer.validated_data["seller"],
+            price=serializer.validated_data['price'],
+            isSold=serializer.validated_data['isSold'],
+            condition=serializer.validated_data['condition'],
+            isNegotiable=serializer.validated_data['isNegotiable'],
+            image_urls=serializer.validated_data.get("image_urls", [])
         )
         output = ItemSerializer(item)
         return Response(output.data, status=status.HTTP_201_CREATED)
