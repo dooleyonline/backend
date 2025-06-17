@@ -12,7 +12,8 @@ class ItemSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(),
         slug_field='category_name'
     )
-    image_urls = serializers.ListField(read_only=True) 
+    image_urls = serializers.ListField(child=serializers.CharField()) 
+   
     class Meta:
         model = Item
         fields = ["id", "description", "name", "image_urls", 'category']

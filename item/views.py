@@ -33,7 +33,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         category = self.request.query_params.get('category')
 
         if q:
-            queryset = queryset.filter(Q(name__icontains=q)) # | Q(description__icontains=q))
+            queryset = queryset.filter(Q(name__icontains=q) | Q(description__icontains=q))
         if category:
             queryset = queryset.filter(category__category_name__iexact=category)
 
@@ -64,38 +64,42 @@ class ItemViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('name', openapi.IN_FORM, type=openapi.TYPE_STRING),
-            openapi.Parameter('description', openapi.IN_FORM, type=openapi.TYPE_STRING),
-            openapi.Parameter(
-                'images',
-                openapi.IN_FORM,
-                type=openapi.TYPE_FILE,
-                description="Multiple image files",
-                required=True,
-                collection_format='multi',
-            ),
-        ]
-    )
+    # @swagger_auto_schema(
+    #     manual_parameters=[
+    #         openapi.Parameter('name', openapi.IN_FORM, type=openapi.TYPE_STRING),
+    #         openapi.Parameter('description', openapi.IN_FORM, type=openapi.TYPE_STRING),
+    #         openapi.Parameter(
+    #             'images',
+    #             openapi.IN_FORM,
+    #             type=openapi.TYPE_FILE,
+    #             description="Multiple image files",
+    #             required=True,
+    #             collection_format='multi',
+    #         ),
+    #     ]
+    # )
+    
     def create(self, request, *args, **kwargs):
         serializer = ItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        images = request.FILES.getlist("images")  
-        image_urls = []
-        self.validate_images(images)
-        for img in images:
-            path = self.perform_file_upload(img)
-            # path = default_storage.save(f"uploads/{img.name}", f=img)
-            url = default_storage.url(path) if settings.USE_S3 else FileSystemStorage().url(path)
-            image_urls.append(default_storage.url(path))
+        # Handle image uploads
+        # images = request.FILES.getlist("images")  
+        # image_urls = []
+        # self.validate_images(images)
+        # for img in images:
+        #     path = self.perform_file_upload(img)
+        #     # path = default_storage.save(f"uploads/{img.name}", f=img)
+        #     url = default_storage.url(path) if settings.USE_S3 else FileSystemStorage().url(path)
+        #     image_urls.append(default_storage.url(path))
 
         item = Item.objects.create(
             name=serializer.validated_data["name"],
             description=serializer.validated_data["description"],
             category=serializer.validated_data["category"],
-            image_urls=image_urls
+            image_urls=serializer.validated_data["image_urls"],
+            # image_urls=serializer.validated_data.get("image_urls", []),
+            # image_urls=image_urls
         )
         output = ItemSerializer(item)
         return Response(output.data, status=status.HTTP_201_CREATED)
