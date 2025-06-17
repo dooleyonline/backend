@@ -15,6 +15,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework.decorators import action
 from django.db.models import Q
+from rest_framework import serializers
 
 
 
@@ -110,7 +111,7 @@ class ItemViewSet(viewsets.ModelViewSet):
             if not img.name.lower().endswith(('.png', '.jpg', '.jpeg')):
                 raise serializers.ValidationError(f"Invalid image format: {img.name}")
             if img.size > 5 * 1024 * 1024:
-                raise ValidationError(f"{img.name} exceeds 5MB limit.")
+                raise serializers.ValidationError(f"{img.name} exceeds 5MB limit.")
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
