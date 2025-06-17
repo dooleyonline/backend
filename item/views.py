@@ -22,7 +22,7 @@ from rest_framework import serializers
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all().order_by("-id")
     serializer_class = ItemSerializer 
-    parser_classes = [MultiPartParser, FormParser]
+    # parser_classes = [MultiPartParser, FormParser]
     # filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     # search_fields = ['name'] # add description if needed
     # filterset_fields = ['category__category_name']
@@ -79,6 +79,22 @@ class ItemViewSet(viewsets.ModelViewSet):
     #     ]
     # )
     
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['name', 'description', 'category'],
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'description': openapi.Schema(type=openapi.TYPE_STRING),
+                'category': openapi.Schema(type=openapi.TYPE_STRING),
+                'image_urls': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(type=openapi.TYPE_STRING),
+                    description="List of image URL strings"
+                ),
+            }
+        )
+    )
     def create(self, request, *args, **kwargs):
         serializer = ItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -97,8 +113,7 @@ class ItemViewSet(viewsets.ModelViewSet):
             name=serializer.validated_data["name"],
             description=serializer.validated_data["description"],
             category=serializer.validated_data["category"],
-            image_urls=serializer.validated_data["image_urls"],
-            # image_urls=serializer.validated_data.get("image_urls", []),
+            image_urls=serializer.validated_data.get("image_urls", []),
             # image_urls=image_urls
         )
         output = ItemSerializer(item)
