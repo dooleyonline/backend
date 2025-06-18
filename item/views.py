@@ -11,8 +11,6 @@ from django.core.files.storage import FileSystemStorage
 import uuid
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
 from rest_framework.decorators import action
 from django.db.models import Q
 from rest_framework import serializers
@@ -23,9 +21,6 @@ class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all().order_by("-id")
     serializer_class = ItemSerializer 
     # parser_classes = [MultiPartParser, FormParser]
-    # filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    # search_fields = ['name'] # add description if needed
-    # filterset_fields = ['category__category_name']
     
     def get_queryset(self):
         queryset = super().get_queryset()
