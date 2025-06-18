@@ -24,6 +24,10 @@ class ItemSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "postedAt", "views"]
         
 class CategorySerializer(serializers.ModelSerializer):
+    subcategories = serializers.ListField(
+        child=serializers.CharField(max_length=20),
+    )
+    
     class Meta:
         model = Category
         fields = '__all__'
