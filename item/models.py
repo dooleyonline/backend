@@ -25,10 +25,12 @@ class Item(models.Model):
     views = models.PositiveIntegerField(default=0)
     condition = models.PositiveSmallIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(5)])  # 1 to 5 
     isNegotiable = models.BooleanField(default=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='items')
     subcategory = models.CharField(max_length=20) 
     seller = models.CharField(max_length=100)  # temporary field for seller's name
-    
+
+    class Meta:
+        ordering = ['-postedAt']    
 
     def __str__(self): 
         return self.name 
