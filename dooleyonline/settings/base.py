@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv()  # will use .env or whatever is loaded from shell
 
@@ -27,6 +28,8 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     'storages',
+    'rest_framework_simplejwt.token_blacklist',
+
 
     # local
     'item',
@@ -35,7 +38,15 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
-    )
+    ), 
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ]
+}
+
+SIMPLE_JWT = {
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=15), 
+    'ROTATE_REFRESH_TOKENS': True,
 }
 
 MIDDLEWARE = [

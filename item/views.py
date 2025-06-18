@@ -14,12 +14,14 @@ from drf_yasg import openapi
 from rest_framework.decorators import action
 from django.db.models import Q
 from rest_framework import serializers
+from rest_framework.permissions import IsAuthenticated
 
 
 
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all().order_by("-id")
     serializer_class = ItemSerializer 
+    permission_classes = [IsAuthenticated]
     # parser_classes = [MultiPartParser, FormParser]
     
     def get_queryset(self):
