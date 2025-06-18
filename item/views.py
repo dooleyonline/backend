@@ -39,6 +39,18 @@ class ItemViewSet(viewsets.ModelViewSet):
 
         return queryset
     
+    @swagger_auto_schema(
+        method='post',
+        request_body=ItemSerializer(many=True),
+        responses={201: "Items created successfully"}
+    )
+    @action(detail=False, methods=['post'], url_path='bulk-create')
+    def bulk_create(self, request):
+        serializer = ItemSerializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        items = Item.objects.bulk_create([Item(**item) for item in serializer.validated_data])
+        return Response(ItemSerializer(items, many=True).data, status=status.HTTP_201_CREATED)
+    
     @action(detail=False, methods=['get'], url_path='ids')
     def get_ids(self, request):
         ids = list(Item.objects.values_list('id', flat=True))
