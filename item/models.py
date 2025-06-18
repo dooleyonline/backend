@@ -8,6 +8,7 @@ class Category(models.Model):
     subcategories = ArrayField(models.CharField(max_length=20), default=list, blank=True) # List of subcategories
     # subcategories = models.CharField(max_length=20, default='', blank=True)
     icon = models.CharField(max_length=100)  # URL or path to the icon image
+    
     def __str__(self):
         return self.category_name
     
