@@ -112,7 +112,7 @@ class ItemViewSet(viewsets.ModelViewSet):
             isSold=serializer.validated_data['isSold'],
             condition=serializer.validated_data['condition'],
             isNegotiable=serializer.validated_data['isNegotiable'],
-            image_urls=serializer.validated_data.get("image_urls", [])
+            images=serializer.validated_data.get("images", [])
         )
         output = ItemSerializer(item)
         return Response(output.data, status=status.HTTP_201_CREATED)
