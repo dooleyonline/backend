@@ -4,13 +4,13 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Category(models.Model):
-    category_name = models.CharField(max_length=20, primary_key=True)
+    name = models.CharField(max_length=20, primary_key=True)
     subcategories = ArrayField(models.CharField(max_length=20), default=list, blank=True) # List of subcategories
     # subcategories = models.CharField(max_length=20, default='', blank=True)
     icon = models.CharField(max_length=100)  # URL or path to the icon image
     
     def __str__(self):
-        return self.category_name
+        return self.name
     
     
     
@@ -19,7 +19,7 @@ class Item(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=300)
     # image_urls = models.JSONField(default=list, blank=True)
-    image_urls = ArrayField(models.CharField(max_length=255), default=list, blank=True)
+    images = ArrayField(models.CharField(max_length=255), default=list, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     postedAt = models.DateTimeField(auto_now_add=True)
     isSold = models.BooleanField(default=False)

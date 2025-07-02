@@ -10,7 +10,7 @@ class ItemSerializer(serializers.ModelSerializer):
     # ) 
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
-        slug_field='category_name'
+        slug_field='name'
     )
     image_urls = serializers.ListField(child=serializers.CharField(), required=False) 
    

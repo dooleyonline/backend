@@ -132,7 +132,7 @@ class ItemViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all().order_by("category_name")
+    queryset = Category.objects.all().order_by("name")
     serializer_class = CategorySerializer 
     
     

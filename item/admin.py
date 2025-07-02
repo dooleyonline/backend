@@ -11,7 +11,7 @@ class ItemAdmin(admin.ModelAdmin):
     
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'category_name', 'subcategories')
+    list_display = ('pk', 'name', 'subcategories')
 
 admin.site.unregister(Group)  # Unregister the Group model 
 
