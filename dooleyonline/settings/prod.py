@@ -39,5 +39,5 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
 ]
-CORS_ALLOWED_ORIGINS = ["http://localhost:8000","http://0.0.0.0:8080", "https://api.dooleyonline.net", "https://backend-production-9918.up.railway.app"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:8000","http://0.0.0.0:8080", "https://api.dooleyonline.net", "https://backend-production-9918.up.railway.app", " https://dooleyonline.net/"]
 CSRF_TRUSTED_ORIGINS = ["http://0.0.0.0:8080", "https://api.dooleyonline.net", "https://backend-production-9918.up.railway.app", "https://dooleyonline.net/"]
