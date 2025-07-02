@@ -32,7 +32,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         if q:
             queryset = queryset.filter(Q(name__icontains=q) | Q(description__icontains=q))
         if category:
-            queryset = queryset.filter(category__category_name__iexact=category)
+            queryset = queryset.filter(category__name__iexact=category)
 
         return queryset
     
