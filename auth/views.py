@@ -35,16 +35,20 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         response = super().post(request, *args, **kwargs)
 
         if response.status_code == 200:
-            refresh_token = response.data.get('refresh')
+            refresh_token = response.data.get("refresh")
             if refresh_token:
+                secure = not settings.DEBUG
+                samesite = "None" if not settings.DEBUG else "Lax"
+
                 response.set_cookie(
-                    'refresh_token',
+                    "refresh_token",
                     refresh_token,
                     httponly=True,
-                    samesite='None',
-                    secure=True,
+                    samesite=samesite,
+                    secure=secure,
+                    path="/api/",
                 )
-                del response.data['refresh']
+                del response.data["refresh"]
 
         return response
 
@@ -55,15 +59,20 @@ class CookieTokenRefreshView(TokenRefreshView):
         response = super().post(request, *args, **kwargs)
 
         if response.status_code == 200:
-            access_token = response.data.get('access')
-            refresh_token = response.data.get('refresh')
+            access_token = response.data.get("access")
+            refresh_token = response.data.get("refresh")
 
             if access_token and refresh_token:
+                secure = not settings.DEBUG
+                samesite = "None" if not settings.DEBUG else "Lax"
+
                 response.set_cookie(
-                    'refresh_token',
+                    "refresh_token",
                     refresh_token,
                     httponly=True,
-                    samesite='None',
-                    secure=True,
+                    samesite=samesite,
+                    secure=secure,
+                    path="/api/",
                 )
+
         return response
