@@ -62,6 +62,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 ROOT_URLCONF = 'dooleyonline.urls'
 
 TEMPLATES = [
