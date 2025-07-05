@@ -46,7 +46,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
                     httponly=True,
                     samesite=samesite,
                     secure=secure,
-                    path="/auth/",
+                    path="/",
                 )
                 del response.data["refresh"]
 
@@ -72,7 +72,7 @@ class CookieTokenRefreshView(TokenRefreshView):
                     httponly=True,
                     samesite=samesite,
                     secure=secure,
-                    path="/auth/",
+                    path="/",
                 )
 
         return response
