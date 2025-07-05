@@ -14,16 +14,16 @@ class RegisterView(generics.CreateAPIView): # for create-only endpoints
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
-    
+
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
-    
+
     def post(self, request):
-        try: 
+        try:
             refresh_token = request.COOKIES.get('refresh_token')
             token = RefreshToken(refresh_token)
             token.blacklist()  # Blacklist the refresh token
-            
+
             response = Response(status=status.HTTP_205_RESET_CONTENT)
             response.delete_cookie('refresh_token')
             return response
@@ -33,20 +33,19 @@ class LogoutView(APIView):
 class CookieTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-        
+
         if response.status_code == 200:
             refresh_token = response.data.get('refresh')
             if refresh_token:
                 response.set_cookie(
-                    'refresh_token', 
-                    refresh_token, 
-                    httponly=True, 
+                    'refresh_token',
+                    refresh_token,
+                    httponly=True,
                     samesite='None',
                     secure=True,
-                    path='/api/auth/'
                 )
                 del response.data['refresh']
-        
+
         return response
 
 class CookieTokenRefreshView(TokenRefreshView):
@@ -66,6 +65,5 @@ class CookieTokenRefreshView(TokenRefreshView):
                     httponly=True,
                     samesite='None',
                     secure=True,
-                    path='/api/auth/'
                 )
         return response
