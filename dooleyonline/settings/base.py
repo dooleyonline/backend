@@ -28,11 +28,13 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     'storages',
+    'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
 
 
     # local
     'item',
+    'users',
 ]
 
 REST_FRAMEWORK = {
@@ -44,13 +46,13 @@ REST_FRAMEWORK = {
     ]
 }
 
-REST_AUTH = {
-    'USE_JWT': True,
-    'JWT_AUTH_HTTPONLY': True,
-    'JWT_AUTH_RETURN_EXPIRATION': False,
-    'JWT_AUTH_COOKIE': 'refresh-token',
-    'JWT_AUTH_SAMESITE': 'Lax',
-}   
+# REST_AUTH = {
+#     'USE_JWT': True,
+#     'JWT_AUTH_HTTPONLY': True,
+#     'JWT_AUTH_RETURN_EXPIRATION': False,
+#     'JWT_AUTH_COOKIE': 'refresh-token',
+#     'JWT_AUTH_SAMESITE': 'Lax',
+# }   
 
 SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=15), 
@@ -112,3 +114,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+AUTH_USER_MODEL = 'users.CustomUser'
