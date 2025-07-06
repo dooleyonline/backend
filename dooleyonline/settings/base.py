@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     'storages',
+    'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
 
 
@@ -45,13 +46,13 @@ REST_FRAMEWORK = {
     ]
 }
 
-REST_AUTH = {
-    'USE_JWT': True,
-    'JWT_AUTH_HTTPONLY': True,
-    'JWT_AUTH_RETURN_EXPIRATION': False,
-    'JWT_AUTH_COOKIE': 'refresh-token',
-    'JWT_AUTH_SAMESITE': 'Lax',
-}   
+# REST_AUTH = {
+#     'USE_JWT': True,
+#     'JWT_AUTH_HTTPONLY': True,
+#     'JWT_AUTH_RETURN_EXPIRATION': False,
+#     'JWT_AUTH_COOKIE': 'refresh-token',
+#     'JWT_AUTH_SAMESITE': 'Lax',
+# }   
 
 SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=15), 

@@ -39,7 +39,8 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('auth/', include('auth.urls')),
+    # path('auth/', include('auth.urls')),
+    path('users/', include('users.urls')),
     path("marketplace/", include("item.urls")),
     path("upload-item/", upload_item_page, name="upload-item"),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
