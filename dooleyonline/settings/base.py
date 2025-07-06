@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 
     # local
     'item',
+    'users',
 ]
 
 REST_FRAMEWORK = {
@@ -112,3 +113,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+AUTH_USER_MODEL = 'users.CustomUser'
