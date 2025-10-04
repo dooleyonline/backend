@@ -90,10 +90,22 @@ info:
   version: "1.0"
 paths:
   /item:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/sql.Item'
+            type: array
+      summary: Get all items
+      tags:
+      - item
     post:
       consumes:
       - application/json
-      description: Create item
       parameters:
       - description: Item
         in: body
@@ -113,36 +125,28 @@ paths:
       - item
   /item/{id}:
     delete:
-      consumes:
-      - application/json
-      description: Delete item by ID
       parameters:
       - description: Item ID
         in: path
         name: id
-        type: integer
-      - description: Item
-        in: body
-        name: item
         required: true
-        schema:
-          $ref: '#/definitions/sql.UpdateItemParams'
+        type: integer
       produces:
-      - application/json
+      - text/plain
       responses:
         "200":
-          description: OK
+          description: Item ID
           schema:
-            $ref: '#/definitions/sql.Item'
-      summary: Delete item
+            type: string
+      summary: Delete item by ID
       tags:
       - item
     get:
-      description: Get all items or by ID
       parameters:
       - description: Item ID
         in: path
         name: id
+        required: true
         type: integer
       produces:
       - application/json
@@ -151,17 +155,17 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/sql.Item'
-      summary: Get item
+      summary: Get item by ID
       tags:
       - item
     put:
       consumes:
       - application/json
-      description: Update item by ID
       parameters:
       - description: Item ID
         in: path
         name: id
+        required: true
         type: integer
       - description: Item
         in: body
@@ -176,7 +180,25 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/sql.Item'
-      summary: Update item
+      summary: Update item by ID
+      tags:
+      - item
+  /item/{id}/views:
+    post:
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Item ID
+          schema:
+            type: string
+      summary: Increment item views by ID
       tags:
       - item
 swagger: "2.0"

@@ -1,16 +1,14 @@
 version: 3
 
+dotenv:
+  - .env
 tasks:
   run:
-    dotenv:
-      - .env
     cmds:
       - go run ./cmd/server/main.go
     silent: true
 
   test:
-    dotenv:
-      - .env
     cmds:
       - go test ./... -v
     silent: true

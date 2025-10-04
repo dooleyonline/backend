@@ -15,6 +15,7 @@ type Config struct {
 }
 
 const (
+	envPort                = "PORT"
 	envDatabaseUrl         = "DATABASE_URL"
 	envStorageUrl          = "STORAGE_URL"
 	envStorageRegion       = "STORAGE_REGION"
@@ -23,6 +24,11 @@ const (
 )
 
 func New() (*Config, error) {
+	port, ok := os.LookupEnv(envPort)
+	if !ok {
+		return nil, fmt.Errorf("environment variable %s is required", envPort)
+	}
+
 	databaseUrl, ok := os.LookupEnv(envDatabaseUrl)
 	if !ok {
 		return nil, fmt.Errorf("environment variable %s is required", envDatabaseUrl)
@@ -49,7 +55,7 @@ func New() (*Config, error) {
 	}
 
 	cfg := &Config{
-		ServerAddr:          ":8080",
+		ServerAddr:          ":" + port,
 		DatabaseUrl:         databaseUrl,
 		StorageUrl:          storageUrl,
 		StorageRegion:       storageRegion,

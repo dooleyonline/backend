@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 
 	"github.com/dooleyonline/backend/internal/config"
@@ -26,10 +27,14 @@ import (
 
 // @host		localhost:8080
 // @BasePath	/
-func New(ctx context.Context, cfg *config.Config, db *db.DB) (*http.Server, error) {
+func New(ctx context.Context, cfg *config.Config, db *db.DB, logger *slog.Logger) (*echo.Echo, error) {
 	e := echo.New()
+	e.HideBanner = true
+	e.HidePort = true
 
+	e.Use(loggerMiddleware(logger))
 	e.Use(errorMiddleware())
+	e.Use(contextMiddleware(cfg, db))
 
 	// TODO: auth middleware
 
@@ -39,24 +44,20 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*http.Server, erro
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// item routes
-	e.GET("/item", getItem(ctx, db))
-	e.GET("/item/:id", getItem(ctx, db))
-	e.PUT("/item/:id", updateItem(ctx, db))
-	e.DELETE("/item/:id", deleteItem(ctx, db))
-	e.POST("/item", createItem(ctx, db))
+	e.GET("/item", getAllItems)
+	e.POST("/item", createItem)
+	e.GET("/item/:id", getItem)
+	e.PUT("/item/:id", updateItem)
+	e.DELETE("/item/:id", deleteItem)
+	e.POST("/item/:id/views", incrementItemViews)
 
 	// TODO: category routes
 
 	// TODO: user routes
 
-	e.POST("/storage/presign-upload", presignUpload(ctx, cfg))
+	e.POST("/storage/presign-upload", presignUpload)
 
-	s := &http.Server{
-		Addr:    cfg.ServerAddr,
-		Handler: e,
-	}
-
-	return s, nil
+	return e, nil
 }
 
 func hello() echo.HandlerFunc {

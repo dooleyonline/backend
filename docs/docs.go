@@ -25,8 +25,27 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/item": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Get all items",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/sql.Item"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
-                "description": "Create item",
                 "consumes": [
                     "application/json"
                 ],
@@ -60,20 +79,20 @@ const docTemplate = `{
         },
         "/item/{id}": {
             "get": {
-                "description": "Get all items or by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "item"
                 ],
-                "summary": "Get item",
+                "summary": "Get item by ID",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "Item ID",
                         "name": "id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -86,7 +105,6 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update item by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -96,13 +114,14 @@ const docTemplate = `{
                 "tags": [
                     "item"
                 ],
-                "summary": "Update item",
+                "summary": "Update item by ID",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "Item ID",
                         "name": "id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "description": "Item",
@@ -124,39 +143,55 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete item by ID",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "tags": [
                     "item"
                 ],
-                "summary": "Delete item",
+                "summary": "Delete item by ID",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "Item ID",
                         "name": "id",
-                        "in": "path"
-                    },
-                    {
-                        "description": "Item",
-                        "name": "item",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/sql.UpdateItemParams"
-                        }
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Item ID",
                         "schema": {
-                            "$ref": "#/definitions/sql.Item"
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/item/{id}/views": {
+            "post": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Increment item views by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item ID",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
