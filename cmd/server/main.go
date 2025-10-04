@@ -2,30 +2,71 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log/slog"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/dooleyonline/backend/db"
-	"github.com/jackc/pgx/v5"
+	"github.com/dooleyonline/backend/internal/api"
+	"github.com/dooleyonline/backend/internal/config"
+	"github.com/dooleyonline/backend/internal/db"
+	"github.com/lmittmann/tint"
 )
 
 func main() {
-	slog.Info("server")
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
-	ctx := context.Background()
-
-	conn, err := pgx.Connect(ctx, "user=pqgotest dbname=pqgotest sslmode=verify-full")
+	cfg, err := config.New()
 	if err != nil {
-		slog.Error("failed to connect to db", slog.Any("error", err))
-	}
-	defer conn.Close(ctx)
-
-	queries := db.New(conn)
-
-	authors, err := queries.ListAuthors(ctx)
-	if err != nil {
-		slog.Error("failed to execute query", slog.Any("error", err))
+		slog.Error("failed to initialize config", slog.Any("error", err))
+		return
 	}
 
-	fmt.Println(authors)
+	db, err := db.New(ctx, cfg)
+	if err != nil {
+		slog.Error("failed to initialize DB", slog.Any("error", err))
+		return
+	}
+	defer db.Close()
+
+	server, err := api.New(ctx, cfg, db)
+	if err != nil {
+		slog.Error("failed to initialize API", slog.Any("error", err))
+		return
+	}
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			slog.Error("failed to start server", slog.Any("error", err))
+			stop()
+		}
+	}()
+	slog.Info("server started", slog.String("addr", cfg.ServerAddr))
+
+	<-ctx.Done()
+
+	stop()
+
+	// force shutdown after 5 seconds
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		slog.Error("failed to stop server", slog.Any("error", err))
+	}
+	slog.Info("server stopped")
+}
+
+func init() {
+	// initialize logger
+	slog.SetDefault(slog.New(
+		tint.NewHandler(os.Stderr, &tint.Options{
+			Level:      slog.LevelDebug,
+			TimeFormat: time.Kitchen,
+		}),
+	))
 }

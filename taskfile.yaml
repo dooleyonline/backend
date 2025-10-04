@@ -2,6 +2,26 @@ version: 3
 
 tasks:
   run:
+    dotenv:
+      - .env
     cmds:
       - go run ./cmd/server/main.go
+    silent: true
+
+  test:
+    dotenv:
+      - .env
+    cmds:
+      - go test ./... -v
+    silent: true
+
+  docs:
+    cmds:
+      - swag fmt
+      - swag init --dir ./internal/api,./sql --generalInfo api.go --parseInternal
+    silent: true
+
+  sql:
+    cmds:
+      - sqlc generate
     silent: true

@@ -5,6 +5,14 @@ sql:
     schema: "schema.sql"
     gen:
       go:
-        package: "db"
-        out: "db"
+        package: "sql"
+        out: "sql"
         sql_package: "pgx/v5"
+overrides:
+  go:
+    overrides:
+      - db_type: "pg_catalog.timestamptz"
+        go_type: "time.Time"
+      - db_type: "pg_catalog.timestamptz"
+        nullable: true
+        go_type: "*time.Time"

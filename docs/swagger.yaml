@@ -1,0 +1,182 @@
+basePath: /
+definitions:
+  sql.CreateItemParams:
+    properties:
+      condition:
+        format: int32
+        type: integer
+      description:
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+      isNegotiable:
+        type: boolean
+      name:
+        type: string
+      price:
+        format: float64
+        type: number
+    type: object
+  sql.Item:
+    properties:
+      condition:
+        format: int32
+        type: integer
+      description:
+        type: string
+      id:
+        format: int64
+        type: integer
+      images:
+        items:
+          type: string
+        type: array
+      isNegotiable:
+        type: boolean
+      name:
+        type: string
+      postedAt:
+        type: string
+      price:
+        format: float64
+        type: number
+      soldAt:
+        type: string
+      views:
+        format: int64
+        type: integer
+    type: object
+  sql.UpdateItemParams:
+    properties:
+      condition:
+        format: int32
+        type: integer
+      description:
+        type: string
+      id:
+        format: int64
+        type: integer
+      images:
+        items:
+          type: string
+        type: array
+      isNegotiable:
+        type: boolean
+      name:
+        type: string
+      price:
+        format: float64
+        type: number
+      soldAt:
+        type: string
+      views:
+        format: int64
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is the REST API for DooleyOnline.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: DooleyOnline API
+  version: "1.0"
+paths:
+  /item:
+    post:
+      consumes:
+      - application/json
+      description: Create item
+      parameters:
+      - description: Item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/sql.CreateItemParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sql.Item'
+      summary: Create item
+      tags:
+      - item
+  /item/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete item by ID
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        type: integer
+      - description: Item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/sql.UpdateItemParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sql.Item'
+      summary: Delete item
+      tags:
+      - item
+    get:
+      description: Get all items or by ID
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sql.Item'
+      summary: Get item
+      tags:
+      - item
+    put:
+      consumes:
+      - application/json
+      description: Update item by ID
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        type: integer
+      - description: Item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/sql.UpdateItemParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sql.Item'
+      summary: Update item
+      tags:
+      - item
+swagger: "2.0"

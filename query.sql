@@ -1,25 +1,50 @@
--- name: GetAuthor :one
-SELECT * FROM authors
-WHERE id = $1 LIMIT 1;
+-- name: GetAllItems :many
+SELECT
+ *
+FROM
+ item;
 
--- name: ListAuthors :many
-SELECT * FROM authors
-ORDER BY name;
+-- name: GetItem :one
+SELECT
+  *
+FROM
+  item
+WHERE
+  id = $1;
 
--- name: CreateAuthor :one
-INSERT INTO authors (
-  name, bio
-) VALUES (
-  $1, $2
-)
+-- name: CreateItem :one
+INSERT INTO
+  item (name, description, images, price, condition, is_negotiable)
+VALUES
+  ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
--- name: UpdateAuthor :exec
-UPDATE authors
-  set name = $2,
-  bio = $3
-WHERE id = $1;
+-- name: UpdateItem :one
+UPDATE
+  item
+SET
+  name = $2,
+  description = $3,
+  images = $4,
+  price = $5,
+  condition = $6,
+  is_negotiable = $7,
+  sold_at = $8,
+  views = $9
+WHERE
+  id = $1
+RETURNING *;
 
--- name: DeleteAuthor :exec
-DELETE FROM authors
-WHERE id = $1;
+-- name: IncrementItemView :exec
+UPDATE
+  item
+SET
+  views = views + 1
+WHERE
+  id = $1;
+
+-- name: DeleteItem :exec
+DELETE FROM
+  item
+WHERE
+  id = $1;
