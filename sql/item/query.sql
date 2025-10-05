@@ -1,10 +1,10 @@
--- name: GetAllItems :many
+-- name: GetAll :many
 SELECT
  *
 FROM
  item;
 
--- name: GetItem :one
+-- name: Get :one
 SELECT
   *
 FROM
@@ -12,14 +12,14 @@ FROM
 WHERE
   id = $1;
 
--- name: CreateItem :one
+-- name: Create :one
 INSERT INTO
   item (name, description, images, price, condition, is_negotiable)
 VALUES
   ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
--- name: UpdateItem :one
+-- name: Update :one
 UPDATE
   item
 SET
@@ -34,7 +34,7 @@ WHERE
   id = $1
 RETURNING *;
 
--- name: SellItem :exec
+-- name: Sell :exec
 UPDATE
   item
 SET
@@ -42,7 +42,7 @@ SET
 WHERE
   id = $1;
 
--- name: IncrementItemView :exec
+-- name: IncrementView :exec
 UPDATE
   item
 SET
@@ -50,7 +50,7 @@ SET
 WHERE
   id = $1;
 
--- name: DeleteItem :exec
+-- name: Delete :exec
 DELETE FROM
   item
 WHERE

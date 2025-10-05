@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createItem = `-- name: CreateItem :one
+const create = `-- name: Create :one
 INSERT INTO
   item (name, description, images, price, condition, is_negotiable)
 VALUES
@@ -19,7 +19,7 @@ VALUES
 RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views
 `
 
-type CreateItemParams struct {
+type CreateParams struct {
 	Name         string   `json:"name"`
 	Description  string   `json:"description"`
 	Images       []string `json:"images"`
@@ -28,8 +28,8 @@ type CreateItemParams struct {
 	IsNegotiable bool     `json:"is_negotiable"`
 }
 
-func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (Item, error) {
-	row := q.db.QueryRow(ctx, createItem,
+func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
+	row := q.db.QueryRow(ctx, create,
 		arg.Name,
 		arg.Description,
 		arg.Images,
@@ -53,27 +53,54 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (Item, e
 	return i, err
 }
 
-const deleteItem = `-- name: DeleteItem :exec
+const delete = `-- name: Delete :exec
 DELETE FROM
   item
 WHERE
   id = $1
 `
 
-func (q *Queries) DeleteItem(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteItem, id)
+func (q *Queries) Delete(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, delete, id)
 	return err
 }
 
-const getAllItems = `-- name: GetAllItems :many
+const get = `-- name: Get :one
+SELECT
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views
+FROM
+  item
+WHERE
+  id = $1
+`
+
+func (q *Queries) Get(ctx context.Context, id int64) (Item, error) {
+	row := q.db.QueryRow(ctx, get, id)
+	var i Item
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.Images,
+		&i.Price,
+		&i.Condition,
+		&i.IsNegotiable,
+		&i.PostedAt,
+		&i.SoldAt,
+		&i.Views,
+	)
+	return i, err
+}
+
+const getAll = `-- name: GetAll :many
 SELECT
  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views
 FROM
  item
 `
 
-func (q *Queries) GetAllItems(ctx context.Context) ([]Item, error) {
-	rows, err := q.db.Query(ctx, getAllItems)
+func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
+	rows, err := q.db.Query(ctx, getAll)
 	if err != nil {
 		return nil, err
 	}
@@ -103,34 +130,7 @@ func (q *Queries) GetAllItems(ctx context.Context) ([]Item, error) {
 	return items, nil
 }
 
-const getItem = `-- name: GetItem :one
-SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views
-FROM
-  item
-WHERE
-  id = $1
-`
-
-func (q *Queries) GetItem(ctx context.Context, id int64) (Item, error) {
-	row := q.db.QueryRow(ctx, getItem, id)
-	var i Item
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.Images,
-		&i.Price,
-		&i.Condition,
-		&i.IsNegotiable,
-		&i.PostedAt,
-		&i.SoldAt,
-		&i.Views,
-	)
-	return i, err
-}
-
-const incrementItemView = `-- name: IncrementItemView :exec
+const incrementView = `-- name: IncrementView :exec
 UPDATE
   item
 SET
@@ -139,12 +139,12 @@ WHERE
   id = $1
 `
 
-func (q *Queries) IncrementItemView(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, incrementItemView, id)
+func (q *Queries) IncrementView(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, incrementView, id)
 	return err
 }
 
-const sellItem = `-- name: SellItem :exec
+const sell = `-- name: Sell :exec
 UPDATE
   item
 SET
@@ -153,17 +153,17 @@ WHERE
   id = $1
 `
 
-type SellItemParams struct {
+type SellParams struct {
 	ID     int64              `json:"id" param:"id"`
 	SoldAt pgtype.Timestamptz `json:"sold_at"`
 }
 
-func (q *Queries) SellItem(ctx context.Context, arg SellItemParams) error {
-	_, err := q.db.Exec(ctx, sellItem, arg.ID, arg.SoldAt)
+func (q *Queries) Sell(ctx context.Context, arg SellParams) error {
+	_, err := q.db.Exec(ctx, sell, arg.ID, arg.SoldAt)
 	return err
 }
 
-const updateItem = `-- name: UpdateItem :one
+const update = `-- name: Update :one
 UPDATE
   item
 SET
@@ -179,7 +179,7 @@ WHERE
 RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views
 `
 
-type UpdateItemParams struct {
+type UpdateParams struct {
 	ID           int64    `json:"id" param:"id"`
 	Name         string   `json:"name"`
 	Description  string   `json:"description"`
@@ -190,8 +190,8 @@ type UpdateItemParams struct {
 	Views        int64    `json:"views"`
 }
 
-func (q *Queries) UpdateItem(ctx context.Context, arg UpdateItemParams) (Item, error) {
-	row := q.db.QueryRow(ctx, updateItem,
+func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
+	row := q.db.QueryRow(ctx, update,
 		arg.ID,
 		arg.Name,
 		arg.Description,

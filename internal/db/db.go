@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/dooleyonline/backend/internal/config"
-	"github.com/dooleyonline/backend/item"
 	"github.com/dooleyonline/backend/sql/category"
+	"github.com/dooleyonline/backend/sql/item"
 
 	"github.com/jackc/pgx/v5"
 )

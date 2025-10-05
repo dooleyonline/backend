@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
-	"github.com/dooleyonline/backend/sql"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
+
+	sqlitem "github.com/dooleyonline/backend/sql/item"
 )
 
 // GetAll godoc
@@ -26,7 +27,7 @@ func GetAll(c echo.Context) error {
 	)
 	defer req.Body.Close()
 
-	items, err := db.GetAllItems(ctx)
+	items, err := db.Item.GetAll(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get all items: %w", err)
 	}
@@ -55,7 +56,7 @@ func Get(c echo.Context) error {
 		return fmt.Errorf("failed to bind id: %w", err)
 	}
 
-	item, err := db.GetItem(ctx, id)
+	item, err := db.Item.Get(ctx, id)
 	if err != nil {
 		return fmt.Errorf("failed to get item: %w", err)
 	}
@@ -80,12 +81,12 @@ func Create(c echo.Context) error {
 	)
 	defer req.Body.Close()
 
-	var params sql.CreateItemParams
+	var params sqlitem.CreateParams
 	if err := c.Bind(&params); err != nil {
 		return fmt.Errorf("failed to bind params: %w", err)
 	}
 
-	item, err := db.CreateItem(ctx, params)
+	item, err := db.Item.Create(ctx, params)
 	if err != nil {
 		return fmt.Errorf("failed to create item: %w", err)
 	}
@@ -111,7 +112,7 @@ func Update(c echo.Context) error {
 	)
 	defer req.Body.Close()
 
-	var params sql.UpdateItemParams
+	var params sqlitem.UpdateParams
 	if err := c.Bind(&params); err != nil {
 		return fmt.Errorf("failed to bind params: %w", err)
 	}
@@ -119,7 +120,7 @@ func Update(c echo.Context) error {
 		return fmt.Errorf("failed to bind id: %w", err)
 	}
 
-	item, err := db.UpdateItem(ctx, params)
+	item, err := db.Item.Update(ctx, params)
 	if err != nil {
 		return fmt.Errorf("failed to update item: %w", err)
 	}
@@ -142,7 +143,7 @@ func Sell(c echo.Context) error {
 	)
 	defer req.Body.Close()
 
-	var params sql.SellItemParams
+	var params sqlitem.SellParams
 	if err := echo.PathParamsBinder(c).Int64("id", &params.ID).BindError(); err != nil {
 		return fmt.Errorf("failed to bind id: %w", err)
 	}
@@ -151,7 +152,7 @@ func Sell(c echo.Context) error {
 		Valid: true,
 	}
 
-	if err := db.SellItem(ctx, params); err != nil {
+	if err := db.Item.Sell(ctx, params); err != nil {
 		return fmt.Errorf("failed to update item: %w", err)
 	}
 
@@ -178,7 +179,7 @@ func IncrementView(c echo.Context) error {
 		return fmt.Errorf("failed to bind id: %w", err)
 	}
 
-	if err := db.IncrementItemView(ctx, id); err != nil {
+	if err := db.Item.IncrementView(ctx, id); err != nil {
 		return fmt.Errorf("failed to increment views: %w", err)
 	}
 
@@ -205,7 +206,7 @@ func Delete(c echo.Context) error {
 		return fmt.Errorf("failed to bind id: %w", err)
 	}
 
-	if err := db.DeleteItem(ctx, id); err != nil {
+	if err := db.Item.Delete(ctx, id); err != nil {
 		return fmt.Errorf("failed to get item: %w", err)
 	}
 
