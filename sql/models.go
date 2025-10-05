@@ -6,17 +6,19 @@ package sql
 
 import (
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Item struct {
-	ID           int64
-	Name         string
-	Description  string
-	Images       []string
-	Price        float64
-	Condition    int16
-	IsNegotiable bool
-	PostedAt     time.Time
-	SoldAt       **time.Time
-	Views        int64
+	ID           int64              `json:"id" param:"id"`
+	Name         string             `json:"name"`
+	Description  string             `json:"description"`
+	Images       []string           `json:"images"`
+	Price        float64            `json:"price"`
+	Condition    int16              `json:"condition"`
+	IsNegotiable bool               `json:"is_negotiable"`
+	PostedAt     time.Time          `json:"posted_at"`
+	SoldAt       pgtype.Timestamptz `json:"sold_at"`
+	Views        int64              `json:"views"`
 }

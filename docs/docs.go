@@ -24,6 +24,22 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Greeting",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/item": {
             "get": {
                 "produces": [
@@ -143,9 +159,6 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "produces": [
-                    "text/plain"
-                ],
                 "tags": [
                     "item"
                 ],
@@ -169,11 +182,33 @@ const docTemplate = `{
                 }
             }
         },
-        "/item/{id}/views": {
+        "/item/{id}/sell": {
             "post": {
-                "produces": [
-                    "text/plain"
+                "tags": [
+                    "item"
                 ],
+                "summary": "Update sold_at property by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/item/{id}/view": {
+            "post": {
                 "tags": [
                     "item"
                 ],
@@ -199,12 +234,39 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "pgtype.InfinityModifier": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+                1,
+                0,
+                -1
+            ],
+            "x-enum-varnames": [
+                "Infinity",
+                "Finite",
+                "NegativeInfinity"
+            ]
+        },
+        "pgtype.Timestamptz": {
+            "type": "object",
+            "properties": {
+                "infinityModifier": {
+                    "$ref": "#/definitions/pgtype.InfinityModifier"
+                },
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
         "sql.CreateItemParams": {
             "type": "object",
             "properties": {
                 "condition": {
-                    "type": "integer",
-                    "format": "int32"
+                    "type": "integer"
                 },
                 "description": {
                     "type": "string"
@@ -215,15 +277,14 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "isNegotiable": {
+                "is_negotiable": {
                     "type": "boolean"
                 },
                 "name": {
                     "type": "string"
                 },
                 "price": {
-                    "type": "number",
-                    "format": "float64"
+                    "type": "number"
                 }
             }
         },
@@ -231,15 +292,13 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "condition": {
-                    "type": "integer",
-                    "format": "int32"
+                    "type": "integer"
                 },
                 "description": {
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer",
-                    "format": "int64"
+                    "type": "integer"
                 },
                 "images": {
                     "type": "array",
@@ -247,25 +306,23 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "isNegotiable": {
+                "is_negotiable": {
                     "type": "boolean"
                 },
                 "name": {
                     "type": "string"
                 },
-                "postedAt": {
+                "posted_at": {
                     "type": "string"
                 },
                 "price": {
-                    "type": "number",
-                    "format": "float64"
+                    "type": "number"
                 },
-                "soldAt": {
-                    "type": "string"
+                "sold_at": {
+                    "$ref": "#/definitions/pgtype.Timestamptz"
                 },
                 "views": {
-                    "type": "integer",
-                    "format": "int64"
+                    "type": "integer"
                 }
             }
         },
@@ -273,15 +330,13 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "condition": {
-                    "type": "integer",
-                    "format": "int32"
+                    "type": "integer"
                 },
                 "description": {
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer",
-                    "format": "int64"
+                    "type": "integer"
                 },
                 "images": {
                     "type": "array",
@@ -289,22 +344,17 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "isNegotiable": {
+                "is_negotiable": {
                     "type": "boolean"
                 },
                 "name": {
                     "type": "string"
                 },
                 "price": {
-                    "type": "number",
-                    "format": "float64"
-                },
-                "soldAt": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "views": {
-                    "type": "integer",
-                    "format": "int64"
+                    "type": "integer"
                 }
             }
         }

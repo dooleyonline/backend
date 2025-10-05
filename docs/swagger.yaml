@@ -1,9 +1,28 @@
 basePath: /
 definitions:
+  pgtype.InfinityModifier:
+    enum:
+    - 1
+    - 0
+    - -1
+    format: int32
+    type: integer
+    x-enum-varnames:
+    - Infinity
+    - Finite
+    - NegativeInfinity
+  pgtype.Timestamptz:
+    properties:
+      infinityModifier:
+        $ref: '#/definitions/pgtype.InfinityModifier'
+      time:
+        type: string
+      valid:
+        type: boolean
+    type: object
   sql.CreateItemParams:
     properties:
       condition:
-        format: int32
         type: integer
       description:
         type: string
@@ -11,68 +30,57 @@ definitions:
         items:
           type: string
         type: array
-      isNegotiable:
+      is_negotiable:
         type: boolean
       name:
         type: string
       price:
-        format: float64
         type: number
     type: object
   sql.Item:
     properties:
       condition:
-        format: int32
         type: integer
       description:
         type: string
       id:
-        format: int64
         type: integer
       images:
         items:
           type: string
         type: array
-      isNegotiable:
+      is_negotiable:
         type: boolean
       name:
         type: string
-      postedAt:
+      posted_at:
         type: string
       price:
-        format: float64
         type: number
-      soldAt:
-        type: string
+      sold_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
       views:
-        format: int64
         type: integer
     type: object
   sql.UpdateItemParams:
     properties:
       condition:
-        format: int32
         type: integer
       description:
         type: string
       id:
-        format: int64
         type: integer
       images:
         items:
           type: string
         type: array
-      isNegotiable:
+      is_negotiable:
         type: boolean
       name:
         type: string
       price:
-        format: float64
         type: number
-      soldAt:
-        type: string
       views:
-        format: int64
         type: integer
     type: object
 host: localhost:8080
@@ -89,6 +97,16 @@ info:
   title: DooleyOnline API
   version: "1.0"
 paths:
+  /:
+    get:
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Greeting
   /item:
     get:
       produces:
@@ -131,8 +149,6 @@ paths:
         name: id
         required: true
         type: integer
-      produces:
-      - text/plain
       responses:
         "200":
           description: Item ID
@@ -183,7 +199,7 @@ paths:
       summary: Update item by ID
       tags:
       - item
-  /item/{id}/views:
+  /item/{id}/sell:
     post:
       parameters:
       - description: Item ID
@@ -191,8 +207,22 @@ paths:
         name: id
         required: true
         type: integer
-      produces:
-      - text/plain
+      responses:
+        "200":
+          description: Item ID
+          schema:
+            type: string
+      summary: Update sold_at property by ID
+      tags:
+      - item
+  /item/{id}/view:
+    post:
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: Item ID

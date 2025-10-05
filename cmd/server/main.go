@@ -21,7 +21,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	logger := slog.New(
+	lg := slog.New(
 		tint.NewHandler(os.Stderr, &tint.Options{
 			Level:      slog.LevelDebug,
 			TimeFormat: time.Kitchen,
@@ -30,31 +30,31 @@ func main() {
 
 	cfg, err := config.New()
 	if err != nil {
-		logger.Error("failed to initialize config", slog.Any("error", err))
+		lg.Error("failed to initialize config", slog.Any("error", err))
 		return
 	}
 
 	db, err := db.New(ctx, cfg)
 	if err != nil {
-		logger.Error("failed to initialize DB", slog.Any("error", err))
+		lg.Error("failed to initialize DB", slog.Any("error", err))
 		return
 	}
 	defer db.Close()
 
-	server, err := api.New(ctx, cfg, db, logger)
+	server, err := api.New(ctx, cfg, db, lg)
 	if err != nil {
-		logger.Error("failed to initialize API", slog.Any("error", err))
+		lg.Error("failed to initialize API", slog.Any("error", err))
 		return
 	}
 
 	go func() {
 		if err := server.Start(cfg.ServerAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Error("server error", slog.Any("error", err))
+			lg.Error("server error", slog.Any("error", err))
 			stop()
 		}
 	}()
 
-	logger.Info("server started",
+	lg.Info("server started",
 		slog.String("addr", cfg.ServerAddr),
 		slog.String("docs", fmt.Sprintf("%s/swagger/index.html", cfg.ServerAddr)),
 	)
@@ -68,7 +68,7 @@ func main() {
 	defer cancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		logger.Error("failed to stop server", slog.Any("error", err))
+		lg.Error("failed to stop server", slog.Any("error", err))
 	}
-	logger.Info("server stopped")
+	lg.Info("server stopped")
 }

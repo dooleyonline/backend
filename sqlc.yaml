@@ -13,11 +13,11 @@ sql:
         package: "sql"
         out: "sql"
         sql_package: "pgx/v5"
+        emit_json_tags: true
 overrides:
   go:
     overrides:
       - db_type: "pg_catalog.timestamptz"
         go_type: "time.Time"
-      - db_type: "pg_catalog.timestamptz"
-        nullable: true
-        go_type: "*time.Time"
+      - column: item.id
+        go_struct_tag: 'param:"id"'

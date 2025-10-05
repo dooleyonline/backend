@@ -8,7 +8,7 @@ package sql
 import (
 	"context"
 
-	"time"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createItem = `-- name: CreateItem :one
@@ -20,12 +20,12 @@ RETURNING id, name, description, images, price, condition, is_negotiable, posted
 `
 
 type CreateItemParams struct {
-	Name         string
-	Description  string
-	Images       []string
-	Price        float64
-	Condition    int16
-	IsNegotiable bool
+	Name         string   `json:"name"`
+	Description  string   `json:"description"`
+	Images       []string `json:"images"`
+	Price        float64  `json:"price"`
+	Condition    int16    `json:"condition"`
+	IsNegotiable bool     `json:"is_negotiable"`
 }
 
 func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (Item, error) {
@@ -144,6 +144,25 @@ func (q *Queries) IncrementItemView(ctx context.Context, id int64) error {
 	return err
 }
 
+const sellItem = `-- name: SellItem :exec
+UPDATE
+  item
+SET
+  sold_at = $2
+WHERE
+  id = $1
+`
+
+type SellItemParams struct {
+	ID     int64              `json:"id" param:"id"`
+	SoldAt pgtype.Timestamptz `json:"sold_at"`
+}
+
+func (q *Queries) SellItem(ctx context.Context, arg SellItemParams) error {
+	_, err := q.db.Exec(ctx, sellItem, arg.ID, arg.SoldAt)
+	return err
+}
+
 const updateItem = `-- name: UpdateItem :one
 UPDATE
   item
@@ -154,23 +173,21 @@ SET
   price = $5,
   condition = $6,
   is_negotiable = $7,
-  sold_at = $8,
-  views = $9
+  views = $8
 WHERE
   id = $1
 RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views
 `
 
 type UpdateItemParams struct {
-	ID           int64
-	Name         string
-	Description  string
-	Images       []string
-	Price        float64
-	Condition    int16
-	IsNegotiable bool
-	SoldAt       **time.Time
-	Views        int64
+	ID           int64    `json:"id" param:"id"`
+	Name         string   `json:"name"`
+	Description  string   `json:"description"`
+	Images       []string `json:"images"`
+	Price        float64  `json:"price"`
+	Condition    int16    `json:"condition"`
+	IsNegotiable bool     `json:"is_negotiable"`
+	Views        int64    `json:"views"`
 }
 
 func (q *Queries) UpdateItem(ctx context.Context, arg UpdateItemParams) (Item, error) {
@@ -182,7 +199,6 @@ func (q *Queries) UpdateItem(ctx context.Context, arg UpdateItemParams) (Item, e
 		arg.Price,
 		arg.Condition,
 		arg.IsNegotiable,
-		arg.SoldAt,
 		arg.Views,
 	)
 	var i Item

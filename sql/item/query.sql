@@ -29,11 +29,18 @@ SET
   price = $5,
   condition = $6,
   is_negotiable = $7,
-  sold_at = $8,
-  views = $9
+  views = $8
 WHERE
   id = $1
 RETURNING *;
+
+-- name: SellItem :exec
+UPDATE
+  item
+SET
+  sold_at = $2
+WHERE
+  id = $1;
 
 -- name: IncrementItemView :exec
 UPDATE

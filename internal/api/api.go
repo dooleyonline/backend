@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/dooleyonline/backend/internal/api/item"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	"github.com/labstack/echo/v4"
@@ -27,29 +28,30 @@ import (
 
 // @host		localhost:8080
 // @BasePath	/
-func New(ctx context.Context, cfg *config.Config, db *db.DB, logger *slog.Logger) (*echo.Echo, error) {
+func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*echo.Echo, error) {
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
 
-	e.Use(loggerMiddleware(logger))
+	e.Use(loggerMiddleware(lg))
 	e.Use(errorMiddleware())
 	e.Use(contextMiddleware(cfg, db))
 
 	// TODO: auth middleware
 
-	e.GET("/", hello())
+	e.GET("/", hello)
 
 	// swagger docs
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// item routes
-	e.GET("/item", getAllItems)
-	e.POST("/item", createItem)
-	e.GET("/item/:id", getItem)
-	e.PUT("/item/:id", updateItem)
-	e.DELETE("/item/:id", deleteItem)
-	e.POST("/item/:id/views", incrementItemViews)
+	e.GET("/item", item.GetAll)
+	e.POST("/item", item.Create)
+	e.GET("/item/:id", item.Get)
+	e.PUT("/item/:id", item.Update)
+	e.DELETE("/item/:id", item.Delete)
+	e.POST("/item/:id/view", item.IncrementView)
+	e.POST("/item/:id/sell", item.Sell)
 
 	// TODO: category routes
 
@@ -60,8 +62,12 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, logger *slog.Logger
 	return e, nil
 }
 
-func hello() echo.HandlerFunc {
-	return echo.HandlerFunc(func(c echo.Context) error {
-		return c.String(http.StatusOK, "Welcome! This is DooleyOnline.")
-	})
+// hello godoc
+//
+//	@Summary	Greeting
+//	@Produce	plain
+//	@Success	200	{string}	string
+//	@Router		/ [get]
+func hello(c echo.Context) error {
+	return c.String(http.StatusOK, "Welcome! This is DooleyOnline.")
 }

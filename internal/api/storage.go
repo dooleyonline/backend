@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/dooleyonline/backend/internal/api/shared"
 	"github.com/dooleyonline/backend/internal/storage"
 	"github.com/labstack/echo/v4"
 )
@@ -14,7 +15,7 @@ func presignUpload(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
-		cfg = c.(customContext).cfg
+		cfg = c.(shared.Context).Cfg
 	)
 	defer req.Body.Close()
 
