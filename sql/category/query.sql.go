@@ -9,15 +9,15 @@ import (
 	"context"
 )
 
-const getAllCategories = `-- name: GetAllCategories :many
+const getAll = `-- name: GetAll :many
 SELECT
   name, subcategory, icon
 FROM
   category
 `
 
-func (q *Queries) GetAllCategories(ctx context.Context) ([]Category, error) {
-	rows, err := q.db.Query(ctx, getAllCategories)
+func (q *Queries) GetAll(ctx context.Context) ([]Category, error) {
+	rows, err := q.db.Query(ctx, getAll)
 	if err != nil {
 		return nil, err
 	}

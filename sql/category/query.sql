@@ -1,5 +1,7 @@
--- name: GetAllCategories :many 
+-- name: GetAll :many 
 SELECT
   *
 FROM
   category;
+
+--name: 
