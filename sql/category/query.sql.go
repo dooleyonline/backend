@@ -7,7 +7,30 @@ package category
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const create = `-- name: Create :one
+INSERT INTO
+  category (name, subcategory, icon)
+VALUES
+  ($1, $2, $3)
+RETURNING name, subcategory, icon
+`
+
+type CreateParams struct {
+	Name        string      `json:"name"`
+	Subcategory []string    `json:"subcategory"`
+	Icon        pgtype.Text `json:"icon"`
+}
+
+func (q *Queries) Create(ctx context.Context, arg CreateParams) (Category, error) {
+	row := q.db.QueryRow(ctx, create, arg.Name, arg.Subcategory, arg.Icon)
+	var i Category
+	err := row.Scan(&i.Name, &i.Subcategory, &i.Icon)
+	return i, err
+}
 
 const getAll = `-- name: GetAll :many
 SELECT

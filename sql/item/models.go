@@ -21,4 +21,6 @@ type Item struct {
 	PostedAt     time.Time          `json:"posted_at"`
 	SoldAt       pgtype.Timestamptz `json:"sold_at"`
 	Views        int64              `json:"views"`
+	Category     string             `json:"category"`
+	SubCategory  string             `json:"sub_category"`
 }

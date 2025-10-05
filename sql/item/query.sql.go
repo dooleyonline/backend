@@ -16,7 +16,7 @@ INSERT INTO
   item (name, description, images, price, condition, is_negotiable)
 VALUES
   ($1, $2, $3, $4, $5, $6)
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views
+RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
 `
 
 type CreateParams struct {
@@ -49,6 +49,8 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
 		&i.PostedAt,
 		&i.SoldAt,
 		&i.Views,
+		&i.Category,
+		&i.SubCategory,
 	)
 	return i, err
 }
@@ -67,7 +69,7 @@ func (q *Queries) Delete(ctx context.Context, id int64) error {
 
 const get = `-- name: Get :one
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
 FROM
   item
 WHERE
@@ -88,13 +90,15 @@ func (q *Queries) Get(ctx context.Context, id int64) (Item, error) {
 		&i.PostedAt,
 		&i.SoldAt,
 		&i.Views,
+		&i.Category,
+		&i.SubCategory,
 	)
 	return i, err
 }
 
 const getAll = `-- name: GetAll :many
 SELECT
- id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views
+ id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
 FROM
  item
 `
@@ -119,6 +123,8 @@ func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
 			&i.PostedAt,
 			&i.SoldAt,
 			&i.Views,
+			&i.Category,
+			&i.SubCategory,
 		); err != nil {
 			return nil, err
 		}
@@ -176,7 +182,7 @@ SET
   views = $8
 WHERE
   id = $1
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views
+RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
 `
 
 type UpdateParams struct {
@@ -213,6 +219,8 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
 		&i.PostedAt,
 		&i.SoldAt,
 		&i.Views,
+		&i.Category,
+		&i.SubCategory,
 	)
 	return i, err
 }

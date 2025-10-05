@@ -4,4 +4,10 @@ SELECT
 FROM
   category;
 
---name: 
+-- name: Create :one
+INSERT INTO
+  category (name, subcategory, icon)
+VALUES
+  ($1, $2, $3)
+RETURNING *;
+
