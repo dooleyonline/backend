@@ -231,6 +231,39 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/storage/presign": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "other"
+                ],
+                "summary": "Generate presigned URL for s3 operation",
+                "parameters": [
+                    {
+                        "description": "Presign params",
+                        "name": "item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/storage.PresignParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sql.Item"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -355,6 +388,23 @@ const docTemplate = `{
                 },
                 "views": {
                     "type": "integer"
+                }
+            }
+        },
+        "storage.PresignParams": {
+            "type": "object",
+            "properties": {
+                "bucket": {
+                    "type": "string"
+                },
+                "contentType": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
                 }
             }
         }

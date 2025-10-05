@@ -17,7 +17,7 @@ func TestPresignUploadText(t *testing.T) {
 		t.Fatal("failed to initialize config:", err)
 	}
 
-	sreq := &StorageRequest{
+	sreq := &PresignParams{
 		Method:      http.MethodPut,
 		Bucket:      "image",
 		Key:         "test-plain.txt",
@@ -58,7 +58,7 @@ func TestPresignUploadImage(t *testing.T) {
 	}
 	defer payload.Close()
 
-	sreq := &StorageRequest{
+	sreq := &PresignParams{
 		Method:      http.MethodPut,
 		Bucket:      "image",
 		Key:         "test-image.png",

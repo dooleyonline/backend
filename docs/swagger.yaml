@@ -83,6 +83,17 @@ definitions:
       views:
         type: integer
     type: object
+  storage.PresignParams:
+    properties:
+      bucket:
+        type: string
+      contentType:
+        type: string
+      key:
+        type: string
+      method:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -231,4 +242,25 @@ paths:
       summary: Increment item views by ID
       tags:
       - item
+  /storage/presign:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Presign params
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/storage.PresignParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sql.Item'
+      summary: Generate presigned URL for s3 operation
+      tags:
+      - other
 swagger: "2.0"

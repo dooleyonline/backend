@@ -5,7 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/dooleyonline/backend/internal/api/item"
+	itemapi "github.com/dooleyonline/backend/internal/api/item"
+	storageapi "github.com/dooleyonline/backend/internal/api/storage"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	"github.com/labstack/echo/v4"
@@ -36,6 +37,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.Use(loggerMiddleware(lg))
 	e.Use(errorMiddleware())
 	e.Use(contextMiddleware(cfg, db))
+	e.Use(corsMiddleware())
 
 	// TODO: auth middleware
 
@@ -45,19 +47,19 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// item routes
-	e.GET("/item", item.GetAll)
-	e.POST("/item", item.Create)
-	e.GET("/item/:id", item.Get)
-	e.PUT("/item/:id", item.Update)
-	e.DELETE("/item/:id", item.Delete)
-	e.POST("/item/:id/view", item.IncrementView)
-	e.POST("/item/:id/sell", item.Sell)
+	e.GET("/item", itemapi.GetAll)
+	e.POST("/item", itemapi.Create)
+	e.GET("/item/:id", itemapi.Get)
+	e.PUT("/item/:id", itemapi.Update)
+	e.DELETE("/item/:id", itemapi.Delete)
+	e.POST("/item/:id/view", itemapi.IncrementView)
+	e.POST("/item/:id/sell", itemapi.Sell)
 
 	// TODO: category routes
 
 	// TODO: user routes
 
-	e.POST("/storage/presign-upload", presignUpload)
+	e.POST("/storage/presign", storageapi.Presign)
 
 	return e, nil
 }

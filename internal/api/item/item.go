@@ -1,4 +1,4 @@
-package item
+package itemapi
 
 import (
 	"fmt"

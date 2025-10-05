@@ -15,12 +15,12 @@ import (
 	"github.com/dooleyonline/backend/internal/config"
 )
 
-func Presign(ctx context.Context, cfg *config.Config, sreq *StorageRequest) (string, http.Header, error) {
+func Presign(ctx context.Context, cfg *config.Config, sreq *PresignParams) (string, http.Header, error) {
 	if !sreq.validate() {
 		return "", nil, fmt.Errorf("invalid storage request")
 	}
 
-	req, err := http.NewRequest(sreq.Method, sreq.url(cfg), nil)
+	req, err := http.NewRequest(sreq.Method, sreq.url(cfg.StorageUrl), nil)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -42,14 +42,14 @@ func Presign(ctx context.Context, cfg *config.Config, sreq *StorageRequest) (str
 	)
 }
 
-type StorageRequest struct {
+type PresignParams struct {
 	Method      string
 	Bucket      string
 	Key         string
 	ContentType string
 }
 
-func (sreq *StorageRequest) validate() bool {
+func (sreq *PresignParams) validate() bool {
 	// only allow get and put methods
 	switch sreq.Method {
 	case http.MethodGet, http.MethodPut:
@@ -61,8 +61,8 @@ func (sreq *StorageRequest) validate() bool {
 	return sreq.Bucket != "" && sreq.Key != "" && sreq.ContentType != ""
 }
 
-func (sreq *StorageRequest) url(cfg *config.Config) string {
-	return strings.Join([]string{cfg.StorageUrl, sreq.Bucket, sreq.Key}, "/")
+func (sreq *PresignParams) url(baseUrl string) string {
+	return strings.Join([]string{baseUrl, sreq.Bucket, sreq.Key}, "/")
 }
 
 func hashPayload(payload string) string {
