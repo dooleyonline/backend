@@ -10,8 +10,19 @@ sql:
     schema: "sql/item/schema.sql"
     gen:
       go:
-        package: "sql"
-        out: "sql"
+        package: "item"
+        out: "sql/item"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+  - engine: "postgresql"
+    database:
+      managed: true
+    queries: "sql/category/query.sql"
+    schema: "sql/category/schema.sql"
+    gen:
+      go:
+        package: "category"
+        out: "sql/category"
         sql_package: "pgx/v5"
         emit_json_tags: true
 overrides:

@@ -5,12 +5,15 @@ import (
 	"fmt"
 
 	"github.com/dooleyonline/backend/internal/config"
-	"github.com/dooleyonline/backend/sql"
+	"github.com/dooleyonline/backend/item"
+	"github.com/dooleyonline/backend/sql/category"
+
 	"github.com/jackc/pgx/v5"
 )
 
 type DB struct {
-	*sql.Queries
+	Item *item.Queries
+	Category *category.Queries
 	Conn *pgx.Conn
 }
 
@@ -20,10 +23,12 @@ func New(ctx context.Context, cfg *config.Config) (*DB, error) {
 		return nil, fmt.Errorf("failed to connect to db: %w", err)
 	}
 
-	queries := sql.New(conn)
+	item := item.New(conn)
+	category := category.New(conn)
 
 	return &DB{
-		Queries: queries,
+		Item:    item,
+		Category: category,
 		Conn:    conn,
 	}, nil
 }
