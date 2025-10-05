@@ -17,7 +17,7 @@ import (
 //	@Summary	Get all items
 //	@Tags		item
 //	@Produce	json
-//	@Success	200	{array}	sql.Item
+//	@Success	200	{array}	item.Item
 //	@Router		/item [get]
 func GetAll(c echo.Context) error {
 	var (
@@ -41,7 +41,7 @@ func GetAll(c echo.Context) error {
 //	@Tags		item
 //	@Produce	json
 //	@Param		id	path		int	true	"Item ID"
-//	@Success	200	{object}	sql.Item
+//	@Success	200	{object}	item.Item
 //	@Router		/item/{id} [get]
 func Get(c echo.Context) error {
 	var (
@@ -70,8 +70,8 @@ func Get(c echo.Context) error {
 //	@Tags		item
 //	@Accept		json
 //	@Produce	json
-//	@Param		item	body		sql.CreateItemParams	true	"Item"
-//	@Success	200		{object}	sql.Item
+//	@Param		item	body		item.CreateParams	true	"Item"
+//	@Success	200		{object}	item.Item
 //	@Router		/item [post]
 func Create(c echo.Context) error {
 	var (
@@ -100,9 +100,9 @@ func Create(c echo.Context) error {
 //	@Tags		item
 //	@Accept		json
 //	@Produce	json
-//	@Param		id		path		int						true	"Item ID"
-//	@Param		item	body		sql.UpdateItemParams	true	"Item"
-//	@Success	200		{object}	sql.Item
+//	@Param		id		path		int					true	"Item ID"
+//	@Param		item	body		item.UpdateParams	true	"Item"
+//	@Success	200		{object}	item.Item
 //	@Router		/item/{id} [put]
 func Update(c echo.Context) error {
 	var (
@@ -214,3 +214,32 @@ func Delete(c echo.Context) error {
 }
 
 // TODO: searchItem
+
+// Search godoc
+//
+//	@Summary	Search items by query
+//	@Tags		item
+//	@Param		query	query	string	true	"Search query"
+//	@Produce	json
+//	@Success	200	{array}	item.Item
+//	@Router		/item/search [get]
+func Search(c echo.Context) error {
+	var (
+		req = c.Request()
+		ctx = req.Context()
+		db  = c.(shared.Context).DB
+	)
+	defer req.Body.Close()
+
+	var query string
+	if err := echo.QueryParamsBinder(c).String("query", &query).BindError(); err != nil {
+		return fmt.Errorf("failed to bind query: %w", err)
+	}
+
+	items, err := db.Item.Search(ctx, query)
+	if err != nil {
+		return fmt.Errorf("failed to search items: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, items)
+}

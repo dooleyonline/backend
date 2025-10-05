@@ -1,5 +1,73 @@
 basePath: /
 definitions:
+  item.CreateParams:
+    properties:
+      condition:
+        type: integer
+      description:
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+      is_negotiable:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  item.Item:
+    properties:
+      category:
+        type: string
+      condition:
+        type: integer
+      description:
+        type: string
+      fts: {}
+      id:
+        type: integer
+      images:
+        items:
+          type: string
+        type: array
+      is_negotiable:
+        type: boolean
+      name:
+        type: string
+      posted_at:
+        type: string
+      price:
+        type: number
+      sold_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      sub_category:
+        type: string
+      views:
+        type: integer
+    type: object
+  item.UpdateParams:
+    properties:
+      condition:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      images:
+        items:
+          type: string
+        type: array
+      is_negotiable:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      views:
+        type: integer
+    type: object
   pgtype.InfinityModifier:
     enum:
     - 1
@@ -19,69 +87,6 @@ definitions:
         type: string
       valid:
         type: boolean
-    type: object
-  sql.CreateItemParams:
-    properties:
-      condition:
-        type: integer
-      description:
-        type: string
-      images:
-        items:
-          type: string
-        type: array
-      is_negotiable:
-        type: boolean
-      name:
-        type: string
-      price:
-        type: number
-    type: object
-  sql.Item:
-    properties:
-      condition:
-        type: integer
-      description:
-        type: string
-      id:
-        type: integer
-      images:
-        items:
-          type: string
-        type: array
-      is_negotiable:
-        type: boolean
-      name:
-        type: string
-      posted_at:
-        type: string
-      price:
-        type: number
-      sold_at:
-        $ref: '#/definitions/pgtype.Timestamptz'
-      views:
-        type: integer
-    type: object
-  sql.UpdateItemParams:
-    properties:
-      condition:
-        type: integer
-      description:
-        type: string
-      id:
-        type: integer
-      images:
-        items:
-          type: string
-        type: array
-      is_negotiable:
-        type: boolean
-      name:
-        type: string
-      price:
-        type: number
-      views:
-        type: integer
     type: object
   storage.PresignParams:
     properties:
@@ -127,7 +132,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/sql.Item'
+              $ref: '#/definitions/item.Item'
             type: array
       summary: Get all items
       tags:
@@ -141,14 +146,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/sql.CreateItemParams'
+          $ref: '#/definitions/item.CreateParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sql.Item'
+            $ref: '#/definitions/item.Item'
       summary: Create item
       tags:
       - item
@@ -181,7 +186,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sql.Item'
+            $ref: '#/definitions/item.Item'
       summary: Get item by ID
       tags:
       - item
@@ -199,14 +204,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/sql.UpdateItemParams'
+          $ref: '#/definitions/item.UpdateParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sql.Item'
+            $ref: '#/definitions/item.Item'
       summary: Update item by ID
       tags:
       - item
@@ -242,6 +247,26 @@ paths:
       summary: Increment item views by ID
       tags:
       - item
+  /item/search:
+    get:
+      parameters:
+      - description: Search query
+        in: query
+        name: query
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/item.Item'
+            type: array
+      summary: Search items by query
+      tags:
+      - item
   /storage/presign:
     post:
       consumes:
@@ -259,7 +284,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sql.Item'
+            $ref: '#/definitions/item.Item'
       summary: Generate presigned URL for s3 operation
       tags:
       - other

@@ -16,7 +16,7 @@ import (
 //	@Accept		json
 //	@Produce	json
 //	@Param		item	body		storage.PresignParams	true	"Presign params"
-//	@Success	200		{object}	sql.Item
+//	@Success	200		{object}	item.Item
 //	@Router		/storage/presign [post]
 func Presign(c echo.Context) error {
 	var (

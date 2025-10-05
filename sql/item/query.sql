@@ -56,3 +56,10 @@ DELETE FROM
 WHERE
   id = $1;
 
+-- name: Search :many
+SELECT
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
+FROM
+  item
+WHERE
+  fts @@ to_tsquery($1);

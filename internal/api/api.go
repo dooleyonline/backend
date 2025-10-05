@@ -54,6 +54,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.DELETE("/item/:id", itemapi.Delete)
 	e.POST("/item/:id/view", itemapi.IncrementView)
 	e.POST("/item/:id/sell", itemapi.Sell)
+	e.GET("/item/search", itemapi.Search)
 
 	// TODO: category routes
 

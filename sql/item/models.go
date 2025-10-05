@@ -23,4 +23,5 @@ type Item struct {
 	Views        int64              `json:"views"`
 	Category     string             `json:"category"`
 	SubCategory  string             `json:"sub_category"`
+	Fts          interface{}        `json:"fts"`
 }

@@ -12,9 +12,9 @@ import (
 )
 
 type DB struct {
-	Item *item.Queries
+	Item     *item.Queries
 	Category *category.Queries
-	Conn *pgx.Conn
+	Conn     *pgx.Conn
 }
 
 func New(ctx context.Context, cfg *config.Config) (*DB, error) {
@@ -27,9 +27,9 @@ func New(ctx context.Context, cfg *config.Config) (*DB, error) {
 	category := category.New(conn)
 
 	return &DB{
-		Item:    item,
+		Item:     item,
 		Category: category,
-		Conn:    conn,
+		Conn:     conn,
 	}, nil
 }
 

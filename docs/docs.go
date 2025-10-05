@@ -55,7 +55,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/sql.Item"
+                                "$ref": "#/definitions/item.Item"
                             }
                         }
                     }
@@ -79,7 +79,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sql.CreateItemParams"
+                            "$ref": "#/definitions/item.CreateParams"
                         }
                     }
                 ],
@@ -87,7 +87,38 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sql.Item"
+                            "$ref": "#/definitions/item.Item"
+                        }
+                    }
+                }
+            }
+        },
+        "/item/search": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Search items by query",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/item.Item"
+                            }
                         }
                     }
                 }
@@ -115,7 +146,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sql.Item"
+                            "$ref": "#/definitions/item.Item"
                         }
                     }
                 }
@@ -145,7 +176,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sql.UpdateItemParams"
+                            "$ref": "#/definitions/item.UpdateParams"
                         }
                     }
                 ],
@@ -153,7 +184,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sql.Item"
+                            "$ref": "#/definitions/item.Item"
                         }
                     }
                 }
@@ -259,7 +290,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sql.Item"
+                            "$ref": "#/definitions/item.Item"
                         }
                     }
                 }
@@ -267,6 +298,109 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "item.CreateParams": {
+            "type": "object",
+            "properties": {
+                "condition": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_negotiable": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "item.Item": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "condition": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "fts": {},
+                "id": {
+                    "type": "integer"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_negotiable": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "posted_at": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "sold_at": {
+                    "$ref": "#/definitions/pgtype.Timestamptz"
+                },
+                "sub_category": {
+                    "type": "string"
+                },
+                "views": {
+                    "type": "integer"
+                }
+            }
+        },
+        "item.UpdateParams": {
+            "type": "object",
+            "properties": {
+                "condition": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_negotiable": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "views": {
+                    "type": "integer"
+                }
+            }
+        },
         "pgtype.InfinityModifier": {
             "type": "integer",
             "format": "int32",
@@ -292,102 +426,6 @@ const docTemplate = `{
                 },
                 "valid": {
                     "type": "boolean"
-                }
-            }
-        },
-        "sql.CreateItemParams": {
-            "type": "object",
-            "properties": {
-                "condition": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "images": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "is_negotiable": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                }
-            }
-        },
-        "sql.Item": {
-            "type": "object",
-            "properties": {
-                "condition": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "images": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "is_negotiable": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "posted_at": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "sold_at": {
-                    "$ref": "#/definitions/pgtype.Timestamptz"
-                },
-                "views": {
-                    "type": "integer"
-                }
-            }
-        },
-        "sql.UpdateItemParams": {
-            "type": "object",
-            "properties": {
-                "condition": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "images": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "is_negotiable": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "views": {
-                    "type": "integer"
                 }
             }
         },
