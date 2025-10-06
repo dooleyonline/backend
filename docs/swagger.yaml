@@ -18,7 +18,7 @@ definitions:
         type: string
       price:
         type: number
-      sub_category:
+      subcategory:
         type: string
     type: object
   item.Item:
@@ -29,7 +29,8 @@ definitions:
         type: integer
       description:
         type: string
-      fts: {}
+      fts:
+        type: string
       id:
         type: integer
       images:
@@ -45,14 +46,16 @@ definitions:
       price:
         type: number
       sold_at:
-        $ref: '#/definitions/pgtype.Timestamptz'
-      sub_category:
+        type: string
+      subcategory:
         type: string
       views:
         type: integer
     type: object
   item.UpdateParams:
     properties:
+      category:
+        type: string
       condition:
         type: integer
       description:
@@ -69,28 +72,10 @@ definitions:
         type: string
       price:
         type: number
+      subcategory:
+        type: string
       views:
         type: integer
-    type: object
-  pgtype.InfinityModifier:
-    enum:
-    - 1
-    - 0
-    - -1
-    format: int32
-    type: integer
-    x-enum-varnames:
-    - Infinity
-    - Finite
-    - NegativeInfinity
-  pgtype.Timestamptz:
-    properties:
-      infinityModifier:
-        $ref: '#/definitions/pgtype.InfinityModifier'
-      time:
-        type: string
-      valid:
-        type: boolean
     type: object
   storage.PresignParams:
     properties:
