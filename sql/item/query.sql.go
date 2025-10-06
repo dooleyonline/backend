@@ -12,10 +12,10 @@ import (
 
 const create = `-- name: Create :one
 INSERT INTO
-  item (name, description, images, price, condition, is_negotiable, category, sub_category)
+  item (name, description, images, price, condition, is_negotiable, category, subcategory)
 VALUES
   ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category, fts
+RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts
 `
 
 type CreateParams struct {
@@ -26,7 +26,7 @@ type CreateParams struct {
 	Condition    int16    `json:"condition"`
 	IsNegotiable bool     `json:"is_negotiable"`
 	Category     string   `json:"category"`
-	SubCategory  string   `json:"sub_category"`
+	Subcategory  string   `json:"subcategory"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
@@ -38,7 +38,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
 		arg.Condition,
 		arg.IsNegotiable,
 		arg.Category,
-		arg.SubCategory,
+		arg.Subcategory,
 	)
 	var i Item
 	err := row.Scan(
@@ -53,7 +53,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
 		&i.SoldAt,
 		&i.Views,
 		&i.Category,
-		&i.SubCategory,
+		&i.Subcategory,
 		&i.Fts,
 	)
 	return i, err
@@ -73,31 +73,16 @@ func (q *Queries) Delete(ctx context.Context, id int64) error {
 
 const get = `-- name: Get :one
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts
 FROM
   item
 WHERE
   id = $1
 `
 
-type GetRow struct {
-	ID           int64      `json:"id" param:"id"`
-	Name         string     `json:"name"`
-	Description  string     `json:"description"`
-	Images       []string   `json:"images"`
-	Price        float64    `json:"price"`
-	Condition    int16      `json:"condition"`
-	IsNegotiable bool       `json:"is_negotiable"`
-	PostedAt     time.Time  `json:"posted_at"`
-	SoldAt       *time.Time `json:"sold_at"`
-	Views        int64      `json:"views"`
-	Category     string     `json:"category"`
-	SubCategory  string     `json:"sub_category"`
-}
-
-func (q *Queries) Get(ctx context.Context, id int64) (GetRow, error) {
+func (q *Queries) Get(ctx context.Context, id int64) (Item, error) {
 	row := q.db.QueryRow(ctx, get, id)
-	var i GetRow
+	var i Item
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -110,15 +95,15 @@ func (q *Queries) Get(ctx context.Context, id int64) (GetRow, error) {
 		&i.SoldAt,
 		&i.Views,
 		&i.Category,
-		&i.SubCategory,
+		&i.Subcategory,
+		&i.Fts,
 	)
 	return i, err
 }
 
 const getAll = `-- name: GetAll :many
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category, fts
- -- id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts
 FROM
   item
 `
@@ -144,7 +129,7 @@ func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
 			&i.SoldAt,
 			&i.Views,
 			&i.Category,
-			&i.SubCategory,
+			&i.Subcategory,
 			&i.Fts,
 		); err != nil {
 			return nil, err
@@ -173,8 +158,7 @@ func (q *Queries) IncrementView(ctx context.Context, id int64) error {
 
 const search = `-- name: Search :many
 SELECT
- id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category, fts
-  -- id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
+ id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts
 FROM
   item
 WHERE
@@ -202,7 +186,7 @@ func (q *Queries) Search(ctx context.Context, toTsquery string) ([]Item, error) 
 			&i.SoldAt,
 			&i.Views,
 			&i.Category,
-			&i.SubCategory,
+			&i.Subcategory,
 			&i.Fts,
 		); err != nil {
 			return nil, err
@@ -216,7 +200,6 @@ func (q *Queries) Search(ctx context.Context, toTsquery string) ([]Item, error) 
 }
 
 const sell = `-- name: Sell :exec
-
 UPDATE
   item
 SET
@@ -230,14 +213,12 @@ type SellParams struct {
 	SoldAt *time.Time `json:"sold_at"`
 }
 
-// RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category;
 func (q *Queries) Sell(ctx context.Context, arg SellParams) error {
 	_, err := q.db.Exec(ctx, sell, arg.ID, arg.SoldAt)
 	return err
 }
 
 const update = `-- name: Update :one
-
 UPDATE
   item
 SET
@@ -247,10 +228,12 @@ SET
   price = $5,
   condition = $6,
   is_negotiable = $7,
-  views = $8
+  category = $8,
+  subcategory = $9,
+  views = $10
 WHERE
   id = $1
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category, fts
+RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts
 `
 
 type UpdateParams struct {
@@ -261,10 +244,11 @@ type UpdateParams struct {
 	Price        float64  `json:"price"`
 	Condition    int16    `json:"condition"`
 	IsNegotiable bool     `json:"is_negotiable"`
+	Category     string   `json:"category"`
+	Subcategory  string   `json:"subcategory"`
 	Views        int64    `json:"views"`
 }
 
-// RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category;
 func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
 	row := q.db.QueryRow(ctx, update,
 		arg.ID,
@@ -274,6 +258,8 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
 		arg.Price,
 		arg.Condition,
 		arg.IsNegotiable,
+		arg.Category,
+		arg.Subcategory,
 		arg.Views,
 	)
 	var i Item
@@ -289,7 +275,7 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
 		&i.SoldAt,
 		&i.Views,
 		&i.Category,
-		&i.SubCategory,
+		&i.Subcategory,
 		&i.Fts,
 	)
 	return i, err
