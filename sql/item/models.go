@@ -20,6 +20,6 @@ type Item struct {
 	SoldAt       *time.Time `json:"sold_at"`
 	Views        int64      `json:"views"`
 	Category     string     `json:"category"`
-	SubCategory  string     `json:"sub_category"`
+	Subcategory  string     `json:"subcategory"`
 	Fts          string     `json:"fts"`
 }

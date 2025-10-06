@@ -325,7 +325,7 @@ const docTemplate = `{
                 "price": {
                     "type": "number"
                 },
-                "sub_category": {
+                "subcategory": {
                     "type": "string"
                 }
             }
@@ -342,7 +342,9 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "fts": {},
+                "fts": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -365,9 +367,9 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "sold_at": {
-                    "$ref": "#/definitions/pgtype.Timestamptz"
+                    "type": "string"
                 },
-                "sub_category": {
+                "subcategory": {
                     "type": "string"
                 },
                 "views": {
@@ -378,6 +380,9 @@ const docTemplate = `{
         "item.UpdateParams": {
             "type": "object",
             "properties": {
+                "category": {
+                    "type": "string"
+                },
                 "condition": {
                     "type": "integer"
                 },
@@ -402,36 +407,11 @@ const docTemplate = `{
                 "price": {
                     "type": "number"
                 },
-                "views": {
-                    "type": "integer"
-                }
-            }
-        },
-        "pgtype.InfinityModifier": {
-            "type": "integer",
-            "format": "int32",
-            "enum": [
-                1,
-                0,
-                -1
-            ],
-            "x-enum-varnames": [
-                "Infinity",
-                "Finite",
-                "NegativeInfinity"
-            ]
-        },
-        "pgtype.Timestamptz": {
-            "type": "object",
-            "properties": {
-                "infinityModifier": {
-                    "$ref": "#/definitions/pgtype.InfinityModifier"
-                },
-                "time": {
+                "subcategory": {
                     "type": "string"
                 },
-                "valid": {
-                    "type": "boolean"
+                "views": {
+                    "type": "integer"
                 }
             }
         },

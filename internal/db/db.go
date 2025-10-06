@@ -8,31 +8,31 @@ import (
 	"github.com/dooleyonline/backend/sql/category"
 	"github.com/dooleyonline/backend/sql/item"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type DB struct {
 	Item     *item.Queries
 	Category *category.Queries
-	Conn     *pgx.Conn
+	Pool     *pgxpool.Pool
 }
 
 func New(ctx context.Context, cfg *config.Config) (*DB, error) {
-	conn, err := pgx.Connect(ctx, cfg.DatabaseUrl)
+	pool, err := pgxpool.New(ctx, cfg.DatabaseUrl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to db: %w", err)
 	}
 
-	item := item.New(conn)
-	category := category.New(conn)
+	item := item.New(pool)
+	category := category.New(pool)
 
 	return &DB{
 		Item:     item,
 		Category: category,
-		Conn:     conn,
+		Pool:     pool,
 	}, nil
 }
 
 func (db *DB) Close() {
-	_ = db.Conn.Close(context.Background())
+	db.Pool.Close()
 }
