@@ -1,8 +1,9 @@
 -- name: GetAll :many
 SELECT
- id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
+  *
+ -- id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
 FROM
- item;
+  item;
 
 -- name: Get :one
 SELECT
@@ -17,7 +18,8 @@ INSERT INTO
   item (name, description, images, price, condition, is_negotiable, category, sub_category)
 VALUES
   ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category;
+RETURNING *;
+-- RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category;
 
 -- name: Update :one
 UPDATE
@@ -32,7 +34,8 @@ SET
   views = $8
 WHERE
   id = $1
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category;
+RETURNING *;
+-- RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category;
 
 -- name: Sell :exec
 UPDATE
@@ -58,7 +61,8 @@ WHERE
 
 -- name: Search :many
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
+ *
+  -- id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
 FROM
   item
 WHERE

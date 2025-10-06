@@ -7,7 +7,8 @@ sql:
     # database:
     #   managed: true
     queries: "sql/item/query.sql"
-    schema: "sql/item/schema.sql"
+    schema:
+      - "sql/item/schema.sql"
     gen:
       go:
         package: "item"
@@ -25,10 +26,22 @@ sql:
         out: "sql/category"
         sql_package: "pgx/v5"
         emit_json_tags: true
+
 overrides:
   go:
     overrides:
       - db_type: "pg_catalog.timestamptz"
-        go_type: "time.Time"
+        go_type:
+          import: "time"
+          type: "Time"
+          pointer: false
+      - db_type: "pg_catalog.timestamptz"
+        go_type:
+          import: "time"
+          type: "Time"
+          pointer: true
+        nullable: true
       - column: item.id
         go_struct_tag: 'param:"id"'
+      - column: "item.fts"
+        go_type: "string"

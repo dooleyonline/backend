@@ -1,4 +1,4 @@
-CREATE TABLE public.item (
+CREATE TABLE item (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   name text NOT NULL DEFAULT ''::text,
   description text NOT NULL DEFAULT ''::text,
@@ -11,7 +11,7 @@ CREATE TABLE public.item (
   views bigint NOT NULL DEFAULT '0'::bigint,
   category text NOT NULL,
   sub_category text NOT NULL,
-  fts tsvector DEFAULT to_tsvector('english'::regconfig, ((description || ' '::text) || name)),
+  fts tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, ((description || ' '::text) || name))) STORED,
   CONSTRAINT item_pkey PRIMARY KEY (id),
   CONSTRAINT item_category_fkey FOREIGN KEY (category) REFERENCES category(name)
 );

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 
 	sqlitem "github.com/dooleyonline/backend/sql/item"
@@ -147,10 +146,8 @@ func Sell(c echo.Context) error {
 	if err := echo.PathParamsBinder(c).Int64("id", &params.ID).BindError(); err != nil {
 		return fmt.Errorf("failed to bind id: %w", err)
 	}
-	params.SoldAt = pgtype.Timestamptz{
-		Time:  time.Now(),
-		Valid: true,
-	}
+	now := time.Now()
+	params.SoldAt = &now
 
 	if err := db.Item.Sell(ctx, params); err != nil {
 		return fmt.Errorf("failed to update item: %w", err)
