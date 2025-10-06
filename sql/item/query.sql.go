@@ -14,10 +14,10 @@ import (
 
 const create = `-- name: Create :one
 INSERT INTO
-  item (name, description, images, price, condition, is_negotiable)
+  item (name, description, images, price, condition, is_negotiable, category, sub_category)
 VALUES
-  ($1, $2, $3, $4, $5, $6)
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category, fts
+  ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
 `
 
 type CreateParams struct {
@@ -27,9 +27,26 @@ type CreateParams struct {
 	Price        float64  `json:"price"`
 	Condition    int16    `json:"condition"`
 	IsNegotiable bool     `json:"is_negotiable"`
+	Category     string   `json:"category"`
+	SubCategory  string   `json:"sub_category"`
 }
 
-func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
+type CreateRow struct {
+	ID           int64              `json:"id" param:"id"`
+	Name         string             `json:"name"`
+	Description  string             `json:"description"`
+	Images       []string           `json:"images"`
+	Price        float64            `json:"price"`
+	Condition    int16              `json:"condition"`
+	IsNegotiable bool               `json:"is_negotiable"`
+	PostedAt     time.Time          `json:"posted_at"`
+	SoldAt       pgtype.Timestamptz `json:"sold_at"`
+	Views        int64              `json:"views"`
+	Category     string             `json:"category"`
+	SubCategory  string             `json:"sub_category"`
+}
+
+func (q *Queries) Create(ctx context.Context, arg CreateParams) (CreateRow, error) {
 	row := q.db.QueryRow(ctx, create,
 		arg.Name,
 		arg.Description,
@@ -37,8 +54,10 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
 		arg.Price,
 		arg.Condition,
 		arg.IsNegotiable,
+		arg.Category,
+		arg.SubCategory,
 	)
-	var i Item
+	var i CreateRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -52,7 +71,6 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
 		&i.Views,
 		&i.Category,
 		&i.SubCategory,
-		&i.Fts,
 	)
 	return i, err
 }
@@ -71,16 +89,31 @@ func (q *Queries) Delete(ctx context.Context, id int64) error {
 
 const get = `-- name: Get :one
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category, fts
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
 FROM
   item
 WHERE
   id = $1
 `
 
-func (q *Queries) Get(ctx context.Context, id int64) (Item, error) {
+type GetRow struct {
+	ID           int64              `json:"id" param:"id"`
+	Name         string             `json:"name"`
+	Description  string             `json:"description"`
+	Images       []string           `json:"images"`
+	Price        float64            `json:"price"`
+	Condition    int16              `json:"condition"`
+	IsNegotiable bool               `json:"is_negotiable"`
+	PostedAt     time.Time          `json:"posted_at"`
+	SoldAt       pgtype.Timestamptz `json:"sold_at"`
+	Views        int64              `json:"views"`
+	Category     string             `json:"category"`
+	SubCategory  string             `json:"sub_category"`
+}
+
+func (q *Queries) Get(ctx context.Context, id int64) (GetRow, error) {
 	row := q.db.QueryRow(ctx, get, id)
-	var i Item
+	var i GetRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -94,27 +127,41 @@ func (q *Queries) Get(ctx context.Context, id int64) (Item, error) {
 		&i.Views,
 		&i.Category,
 		&i.SubCategory,
-		&i.Fts,
 	)
 	return i, err
 }
 
 const getAll = `-- name: GetAll :many
 SELECT
- id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category, fts
+ id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
 FROM
  item
 `
 
-func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
+type GetAllRow struct {
+	ID           int64              `json:"id" param:"id"`
+	Name         string             `json:"name"`
+	Description  string             `json:"description"`
+	Images       []string           `json:"images"`
+	Price        float64            `json:"price"`
+	Condition    int16              `json:"condition"`
+	IsNegotiable bool               `json:"is_negotiable"`
+	PostedAt     time.Time          `json:"posted_at"`
+	SoldAt       pgtype.Timestamptz `json:"sold_at"`
+	Views        int64              `json:"views"`
+	Category     string             `json:"category"`
+	SubCategory  string             `json:"sub_category"`
+}
+
+func (q *Queries) GetAll(ctx context.Context) ([]GetAllRow, error) {
 	rows, err := q.db.Query(ctx, getAll)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Item
+	var items []GetAllRow
 	for rows.Next() {
-		var i Item
+		var i GetAllRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -128,7 +175,6 @@ func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
 			&i.Views,
 			&i.Category,
 			&i.SubCategory,
-			&i.Fts,
 		); err != nil {
 			return nil, err
 		}
@@ -243,7 +289,7 @@ SET
   views = $8
 WHERE
   id = $1
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category, fts
+RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, sub_category
 `
 
 type UpdateParams struct {
@@ -257,7 +303,22 @@ type UpdateParams struct {
 	Views        int64    `json:"views"`
 }
 
-func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
+type UpdateRow struct {
+	ID           int64              `json:"id" param:"id"`
+	Name         string             `json:"name"`
+	Description  string             `json:"description"`
+	Images       []string           `json:"images"`
+	Price        float64            `json:"price"`
+	Condition    int16              `json:"condition"`
+	IsNegotiable bool               `json:"is_negotiable"`
+	PostedAt     time.Time          `json:"posted_at"`
+	SoldAt       pgtype.Timestamptz `json:"sold_at"`
+	Views        int64              `json:"views"`
+	Category     string             `json:"category"`
+	SubCategory  string             `json:"sub_category"`
+}
+
+func (q *Queries) Update(ctx context.Context, arg UpdateParams) (UpdateRow, error) {
 	row := q.db.QueryRow(ctx, update,
 		arg.ID,
 		arg.Name,
@@ -268,7 +329,7 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
 		arg.IsNegotiable,
 		arg.Views,
 	)
-	var i Item
+	var i UpdateRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -282,7 +343,6 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
 		&i.Views,
 		&i.Category,
 		&i.SubCategory,
-		&i.Fts,
 	)
 	return i, err
 }

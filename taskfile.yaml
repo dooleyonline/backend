@@ -16,7 +16,7 @@ tasks:
   docs:
     cmds:
       - swag fmt
-      - swag init --dir ./internal/api,./sql --generalInfo api.go --parseInternal --parseDependency
+      - swag init --dir ./internal/api,./sql/item,./sql/category --generalInfo api.go --parseInternal --parseDependency
     silent: true
 
   sql:

@@ -301,6 +301,9 @@ const docTemplate = `{
         "item.CreateParams": {
             "type": "object",
             "properties": {
+                "category": {
+                    "type": "string"
+                },
                 "condition": {
                     "type": "integer"
                 },
@@ -321,6 +324,9 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "sub_category": {
+                    "type": "string"
                 }
             }
         },

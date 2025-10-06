@@ -2,6 +2,8 @@ basePath: /
 definitions:
   item.CreateParams:
     properties:
+      category:
+        type: string
       condition:
         type: integer
       description:
@@ -16,6 +18,8 @@ definitions:
         type: string
       price:
         type: number
+      sub_category:
+        type: string
     type: object
   item.Item:
     properties:
