@@ -71,6 +71,14 @@ const docTemplate = `{
                     "item"
                 ],
                 "summary": "Get all items",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query",
+                        "name": "q",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -110,37 +118,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/item.Item"
-                        }
-                    }
-                }
-            }
-        },
-        "/item/search": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "item"
-                ],
-                "summary": "Search items by query",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Search query",
-                        "name": "query",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/item.Item"
-                            }
                         }
                     }
                 }

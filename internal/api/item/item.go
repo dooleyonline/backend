@@ -16,6 +16,7 @@ import (
 //	@Summary	Get all items
 //	@Tags		item
 //	@Produce	json
+//	@Param		q	query	string	false	"Search query"
 //	@Success	200	{array}	item.Item
 //	@Router		/item [get]
 func GetAll(c echo.Context) error {
@@ -25,6 +26,15 @@ func GetAll(c echo.Context) error {
 		db  = c.(shared.Context).DB
 	)
 	defer req.Body.Close()
+
+	query := c.QueryParam("q")
+	if query != "" {
+		items, err := db.Item.Search(ctx, query)
+		if err != nil {
+			return fmt.Errorf("failed to search items: %w", err)
+		}
+		return c.JSON(http.StatusOK, items)
+	}
 
 	items, err := db.Item.GetAll(ctx)
 	if err != nil {
@@ -208,35 +218,4 @@ func Delete(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
-}
-
-// TODO: searchItem
-
-// Search godoc
-//
-//	@Summary	Search items by query
-//	@Tags		item
-//	@Param		query	query	string	true	"Search query"
-//	@Produce	json
-//	@Success	200	{array}	item.Item
-//	@Router		/item/search [get]
-func Search(c echo.Context) error {
-	var (
-		req = c.Request()
-		ctx = req.Context()
-		db  = c.(shared.Context).DB
-	)
-	defer req.Body.Close()
-
-	var query string
-	if err := echo.QueryParamsBinder(c).String("query", &query).BindError(); err != nil {
-		return fmt.Errorf("failed to bind query: %w", err)
-	}
-
-	items, err := db.Item.Search(ctx, query)
-	if err != nil {
-		return fmt.Errorf("failed to search items: %w", err)
-	}
-
-	return c.JSON(http.StatusOK, items)
 }

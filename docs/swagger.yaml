@@ -139,6 +139,11 @@ paths:
       - category
   /item:
     get:
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        type: string
       produces:
       - application/json
       responses:
@@ -259,26 +264,6 @@ paths:
           schema:
             type: string
       summary: Increment item views by ID
-      tags:
-      - item
-  /item/search:
-    get:
-      parameters:
-      - description: Search query
-        in: query
-        name: query
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/item.Item'
-            type: array
-      summary: Search items by query
       tags:
       - item
   /storage/presign:
