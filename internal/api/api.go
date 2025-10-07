@@ -28,7 +28,7 @@ import (
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host		api.dooleyonline.net
+// @host		localhost:8080
 // @BasePath	/
 func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*echo.Echo, error) {
 	e := echo.New()
@@ -48,7 +48,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// item routes
-	e.GET("/item", itemapi.GetAll)
+	e.GET("/item", itemapi.GetMany)
 	e.POST("/item", itemapi.Create)
 	e.GET("/item/:id", itemapi.Get)
 	e.PUT("/item/:id", itemapi.Update)

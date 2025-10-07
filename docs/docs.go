@@ -70,7 +70,7 @@ const docTemplate = `{
                 "tags": [
                     "item"
                 ],
-                "summary": "Get all items",
+                "summary": "Get many items",
                 "parameters": [
                     {
                         "type": "string",

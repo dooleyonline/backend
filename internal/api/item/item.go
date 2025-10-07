@@ -11,16 +11,16 @@ import (
 	sqlitem "github.com/dooleyonline/backend/sql/item"
 )
 
-// GetAll godoc
+// GetMany godoc
 //
-//	@Summary	Get all items
+//	@Summary	Get many items
 //	@Tags		item
 //	@Produce	json
 //	@Param		q			query	string	false	"Search query"
 //	@param		category	query	string	false	"Category filter"
 //	@Success	200			{array}	item.Item
 //	@Router		/item [get]
-func GetAll(c echo.Context) error {
+func GetMany(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()

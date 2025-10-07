@@ -157,7 +157,7 @@ paths:
             items:
               $ref: '#/definitions/item.Item'
             type: array
-      summary: Get all items
+      summary: Get many items
       tags:
       - item
     post:
