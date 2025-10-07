@@ -4,12 +4,8 @@
 
 package category
 
-import (
-	"github.com/jackc/pgx/v5/pgtype"
-)
-
 type Category struct {
-	Name        string      `json:"name"`
-	Subcategory []string    `json:"subcategory"`
-	Icon        pgtype.Text `json:"icon"`
+	Name        string   `json:"name"`
+	Subcategory []string `json:"subcategory"`
+	Icon        string   `json:"icon"`
 }

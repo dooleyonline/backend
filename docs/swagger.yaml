@@ -1,5 +1,16 @@
 basePath: /
 definitions:
+  category.Category:
+    properties:
+      icon:
+        type: string
+      name:
+        type: string
+      subcategory:
+        items:
+          type: string
+        type: array
+    type: object
   item.CreateParams:
     properties:
       category:
@@ -88,7 +99,7 @@ definitions:
       method:
         type: string
     type: object
-host: api.dooleyonline.net
+host: localhost:8080
 info:
   contact:
     email: support@swagger.io
@@ -112,6 +123,20 @@ paths:
           schema:
             type: string
       summary: Greeting
+  /category:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/category.Category'
+            type: array
+      summary: Get all categories
+      tags:
+      - category
   /item:
     get:
       produces:

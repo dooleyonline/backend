@@ -40,6 +40,28 @@ const docTemplate = `{
                 }
             }
         },
+        "/category": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "Get all categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/category.Category"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/item": {
             "get": {
                 "produces": [
@@ -298,6 +320,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "category.Category": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "subcategory": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "item.CreateParams": {
             "type": "object",
             "properties": {
@@ -438,7 +477,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "api.dooleyonline.net",
+	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "DooleyOnline API",

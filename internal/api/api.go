@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	categoryapi "github.com/dooleyonline/backend/internal/api/category"
 	itemapi "github.com/dooleyonline/backend/internal/api/item"
 	storageapi "github.com/dooleyonline/backend/internal/api/storage"
 	"github.com/dooleyonline/backend/internal/config"
@@ -27,7 +28,7 @@ import (
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host		api.dooleyonline.net
+// @host		localhost:8080
 // @BasePath	/
 func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*echo.Echo, error) {
 	e := echo.New()
@@ -56,7 +57,8 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.POST("/item/:id/sell", itemapi.Sell)
 	e.GET("/item/search", itemapi.Search)
 
-	// TODO: category routes
+	// category
+	e.GET("/category", categoryapi.GetAll)
 
 	// TODO: user routes
 

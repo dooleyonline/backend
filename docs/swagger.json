@@ -15,7 +15,7 @@
         },
         "version": "1.0"
     },
-    "host": "api.dooleyonline.net",
+    "host": "localhost:8080",
     "basePath": "/",
     "paths": {
         "/": {
@@ -29,6 +29,28 @@
                         "description": "OK",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/category": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "Get all categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/category.Category"
+                            }
                         }
                     }
                 }
@@ -292,6 +314,23 @@
         }
     },
     "definitions": {
+        "category.Category": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "subcategory": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "item.CreateParams": {
             "type": "object",
             "properties": {

@@ -7,8 +7,6 @@ package category
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const create = `-- name: Create :one
@@ -20,9 +18,9 @@ RETURNING name, subcategory, icon
 `
 
 type CreateParams struct {
-	Name        string      `json:"name"`
-	Subcategory []string    `json:"subcategory"`
-	Icon        pgtype.Text `json:"icon"`
+	Name        string   `json:"name"`
+	Subcategory []string `json:"subcategory"`
+	Icon        string   `json:"icon"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (Category, error) {

@@ -1,4 +1,4 @@
-CREATE TABLE item (
+CREATE TABLE public.item (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   name text NOT NULL DEFAULT ''::text,
   description text NOT NULL DEFAULT ''::text,
