@@ -30,3 +30,32 @@ func GetAll(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, categories)
 }
+
+// Get godoc
+//
+//	@Summary	Get category by name
+//	@Tags		category
+//	@Produce	json
+//	@Param		name	path		string	true	"Category name"
+//	@Success	200		{object}	category.Category
+//	@Router		/category/{name} [get]
+func Get(c echo.Context) error {
+	var (
+		req = c.Request()
+		ctx = req.Context()
+		db  = c.(shared.Context).DB
+	)
+	defer req.Body.Close()
+
+	var name string
+	if err := echo.PathParamsBinder(c).String("name", &name).BindError(); err != nil {
+		return fmt.Errorf("failed to bind name: %w", err)
+	}
+
+	category, err := db.Category.Get(ctx, name)
+	if err != nil {
+		return fmt.Errorf("failed to get category: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, category)
+}

@@ -11,3 +11,10 @@ VALUES
   ($1, $2, $3)
 RETURNING *;
 
+-- name: Get :one
+SELECT
+  *
+FROM
+  category
+WHERE
+  name = $1;

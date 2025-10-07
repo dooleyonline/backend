@@ -30,6 +30,22 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (Category, error
 	return i, err
 }
 
+const get = `-- name: Get :one
+SELECT
+  name, subcategory, icon
+FROM
+  category
+WHERE
+  name = $1
+`
+
+func (q *Queries) Get(ctx context.Context, name string) (Category, error) {
+	row := q.db.QueryRow(ctx, get, name)
+	var i Category
+	err := row.Scan(&i.Name, &i.Subcategory, &i.Icon)
+	return i, err
+}
+
 const getAll = `-- name: GetAll :many
 SELECT
   name, subcategory, icon

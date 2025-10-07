@@ -137,6 +137,24 @@ paths:
       summary: Get all categories
       tags:
       - category
+  /category/{name}:
+    get:
+      parameters:
+      - description: Category name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/category.Category'
+      summary: Get category by name
+      tags:
+      - category
   /item:
     get:
       parameters:

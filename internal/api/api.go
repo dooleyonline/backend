@@ -58,6 +58,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 
 	// category
 	e.GET("/category", categoryapi.GetAll)
+	e.GET("/category/:name", categoryapi.Get)
 
 	// TODO: user routes
 
