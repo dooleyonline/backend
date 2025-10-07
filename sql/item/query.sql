@@ -65,3 +65,11 @@ FROM
   item
 WHERE
   fts @@ to_tsquery($1);
+
+-- name: GetByCategory :many
+SELECT
+  *
+FROM
+  item
+WHERE
+  category = $1;

@@ -142,6 +142,49 @@ func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
 	return items, nil
 }
 
+const getByCategory = `-- name: GetByCategory :many
+SELECT
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts
+FROM
+  item
+WHERE
+  category = $1
+`
+
+func (q *Queries) GetByCategory(ctx context.Context, category string) ([]Item, error) {
+	rows, err := q.db.Query(ctx, getByCategory, category)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Item
+	for rows.Next() {
+		var i Item
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Images,
+			&i.Price,
+			&i.Condition,
+			&i.IsNegotiable,
+			&i.PostedAt,
+			&i.SoldAt,
+			&i.Views,
+			&i.Category,
+			&i.Subcategory,
+			&i.Fts,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const incrementView = `-- name: IncrementView :exec
 UPDATE
   item

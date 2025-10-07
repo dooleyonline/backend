@@ -16,8 +16,9 @@ import (
 //	@Summary	Get all items
 //	@Tags		item
 //	@Produce	json
-//	@Param		q	query	string	false	"Search query"
-//	@Success	200	{array}	item.Item
+//	@Param		q			query	string	false	"Search query"
+//	@param		category	query	string	false	"Category filter"
+//	@Success	200			{array}	item.Item
 //	@Router		/item [get]
 func GetAll(c echo.Context) error {
 	var (
@@ -32,6 +33,15 @@ func GetAll(c echo.Context) error {
 		items, err := db.Item.Search(ctx, query)
 		if err != nil {
 			return fmt.Errorf("failed to search items: %w", err)
+		}
+		return c.JSON(http.StatusOK, items)
+	}
+
+	category := c.QueryParam("category")
+	if category != "" {
+		items, err := db.Item.GetByCategory(ctx, category)
+		if err != nil {
+			return fmt.Errorf("failed to get items by category: %w", err)
 		}
 		return c.JSON(http.StatusOK, items)
 	}

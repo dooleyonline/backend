@@ -144,6 +144,10 @@ paths:
         in: query
         name: q
         type: string
+      - description: Category filter
+        in: query
+        name: category
+        type: string
       produces:
       - application/json
       responses:

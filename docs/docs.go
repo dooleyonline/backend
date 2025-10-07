@@ -77,6 +77,12 @@ const docTemplate = `{
                         "description": "Search query",
                         "name": "q",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Category filter",
+                        "name": "category",
+                        "in": "query"
                     }
                 ],
                 "responses": {
