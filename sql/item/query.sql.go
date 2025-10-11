@@ -242,6 +242,54 @@ func (q *Queries) Search(ctx context.Context, toTsquery string) ([]Item, error) 
 	return items, nil
 }
 
+const searchByCategory = `-- name: SearchByCategory :many
+SELECT
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts
+FROM
+  item
+WHERE
+  category = $1 AND fts @@ to_tsquery($2)
+`
+
+type SearchByCategoryParams struct {
+	Category  string `json:"category"`
+	ToTsquery string `json:"to_tsquery"`
+}
+
+func (q *Queries) SearchByCategory(ctx context.Context, arg SearchByCategoryParams) ([]Item, error) {
+	rows, err := q.db.Query(ctx, searchByCategory, arg.Category, arg.ToTsquery)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Item
+	for rows.Next() {
+		var i Item
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Images,
+			&i.Price,
+			&i.Condition,
+			&i.IsNegotiable,
+			&i.PostedAt,
+			&i.SoldAt,
+			&i.Views,
+			&i.Category,
+			&i.Subcategory,
+			&i.Fts,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const sell = `-- name: Sell :exec
 UPDATE
   item

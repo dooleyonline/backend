@@ -73,3 +73,11 @@ FROM
   item
 WHERE
   category = $1;
+
+-- name: SearchByCategory :many 
+SELECT
+  *
+FROM
+  item
+WHERE
+  category = $1 AND fts @@ to_tsquery($2); 

@@ -7,6 +7,7 @@ import (
 
 	categoryapi "github.com/dooleyonline/backend/internal/api/category"
 	itemapi "github.com/dooleyonline/backend/internal/api/item"
+	"github.com/dooleyonline/backend/internal/api/shared"
 	storageapi "github.com/dooleyonline/backend/internal/api/storage"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
@@ -63,6 +64,16 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	// TODO: user routes
 
 	e.POST("/storage/presign", storageapi.Presign)
+	e.GET("/health", func(c echo.Context) error {
+        db := c.(shared.Context).DB
+        ctx := c.Request().Context()
+        
+        if err := db.Pool.Ping(ctx); err != nil {
+			return c.JSON(500, map[string]string{"status": "unhealthy", "error": err.Error()})
+		}
+        
+        return c.JSON(200, map[string]string{"status": "healthy"})
+    })
 
 	return e, nil
 }
