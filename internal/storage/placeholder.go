@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"image/png"
 	"net/http"
 
 	"github.com/disintegration/imaging"
@@ -33,7 +32,7 @@ func generatePlaceholder(cfg *config.Config, img string) (string, error) {
 	thumb := imaging.Thumbnail(src, 5, 5, imaging.Box)
 
 	var buf bytes.Buffer
-	if err = png.Encode(&buf, thumb); err != nil {
+	if err = imaging.Encode(&buf, thumb, imaging.PNG); err != nil {
 		return "", fmt.Errorf("failed to encode thumbnail: %w", err)
 	}
 
