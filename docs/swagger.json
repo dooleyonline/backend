@@ -366,6 +366,12 @@
                 "name": {
                     "type": "string"
                 },
+                "placeholder": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "price": {
                     "type": "number"
                 },
@@ -403,6 +409,12 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "placeholder": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "posted_at": {
                     "type": "string"
@@ -447,6 +459,12 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "placeholder": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "price": {
                     "type": "number"

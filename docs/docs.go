@@ -372,6 +372,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "placeholder": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "price": {
                     "type": "number"
                 },
@@ -409,6 +415,12 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "placeholder": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "posted_at": {
                     "type": "string"
@@ -453,6 +465,12 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "placeholder": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "price": {
                     "type": "number"

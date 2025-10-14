@@ -14,9 +14,9 @@ WHERE
 
 -- name: Create :one
 INSERT INTO
-  item (name, description, images, price, condition, is_negotiable, category, subcategory)
+  item (name, description, images, price, condition, is_negotiable, category, subcategory, placeholder)
 VALUES
-  ($1, $2, $3, $4, $5, $6, $7, $8)
+  ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING *;
 
 -- name: Update :one
@@ -31,7 +31,8 @@ SET
   is_negotiable = $7,
   category = $8,
   subcategory = $9,
-  views = $10
+  views = $10,
+  placeholder = $11
 WHERE
   id = $1
 RETURNING *;
