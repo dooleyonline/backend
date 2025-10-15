@@ -12,6 +12,7 @@ CREATE TABLE public.item (
   category text NOT NULL,
   subcategory text NOT NULL,
   fts tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, ((description || ' '::text) || name))) STORED,
+  placeholder text NOT NULL,
   CONSTRAINT item_pkey PRIMARY KEY (id),
   CONSTRAINT item_category_fkey FOREIGN KEY (category) REFERENCES category(name)
 );
