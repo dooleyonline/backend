@@ -7,6 +7,7 @@ import (
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/sql/category"
 	"github.com/dooleyonline/backend/sql/item"
+	"github.com/dooleyonline/backend/sql/user"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -14,6 +15,7 @@ import (
 type DB struct {
 	Item     *item.Queries
 	Category *category.Queries
+	User     *user.Queries
 	Pool     *pgxpool.Pool
 }
 

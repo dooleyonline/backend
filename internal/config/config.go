@@ -12,6 +12,7 @@ type Config struct {
 	StorageRegion       string
 	StorageAccessId     string
 	StorageAccessSecret string
+	HmacSecretKey       string
 }
 
 const (
@@ -21,6 +22,7 @@ const (
 	envStorageRegion       = "STORAGE_REGION"
 	envStorageAccessId     = "STORAGE_ACCESS_ID"
 	envStorageAccessSecret = "STORAGE_ACCESS_SECRET"
+	envHmacSecretKey       = "HMAC_SECRET_KEY"
 )
 
 func New() (*Config, error) {
@@ -54,6 +56,11 @@ func New() (*Config, error) {
 		return nil, fmt.Errorf("environment variable %s is required", envStorageAccessSecret)
 	}
 
+	hmacSecretKey, ok := os.LookupEnv(envHmacSecretKey)
+	if !ok {
+		return nil, fmt.Errorf("environment variable %s is required", envHmacSecretKey)
+	}
+
 	cfg := &Config{
 		ServerAddr:          ":" + port,
 		DatabaseUrl:         databaseUrl,
@@ -61,6 +68,7 @@ func New() (*Config, error) {
 		StorageRegion:       storageRegion,
 		StorageAccessId:     storageAccessId,
 		StorageAccessSecret: storageAccessSecret,
+		HmacSecretKey:       hmacSecretKey,
 	}
 
 	return cfg, nil

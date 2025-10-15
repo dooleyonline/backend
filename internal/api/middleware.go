@@ -4,12 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
+	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -73,4 +75,37 @@ func corsMiddleware() echo.MiddlewareFunc {
 			AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 		},
 	)
+}
+
+func authMiddleware(cfg *config.Config) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			// token_string := c.Request().Header.Get("jwt-token")
+
+			// _, err := validateJWT(token_string, cfg)
+			// if err != nil {
+			// 	return echo.NewHTTPError(http.StatusForbidden, err)
+			// }
+			token, _ := c.Cookie("Token")
+
+			fmt.Println("Printing token:", token)
+
+			return next(c)
+		}
+	}
+}
+
+func validateJWT(tokenString string, cfg *config.Config) (*jwt.Token, error) {
+	hmacSecretKey := []byte(cfg.HmacSecretKey)
+
+	// Source: https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-Parse-Hmac
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+		return hmacSecretKey, nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
+
+	if err != nil {
+		slog.Error("Invalid JWT: " + err.Error())
+		return nil, err
+	}
+	return token, nil
 }

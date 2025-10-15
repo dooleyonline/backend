@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	authapi "github.com/dooleyonline/backend/internal/api/auth"
 	categoryapi "github.com/dooleyonline/backend/internal/api/category"
 	itemapi "github.com/dooleyonline/backend/internal/api/item"
 	storageapi "github.com/dooleyonline/backend/internal/api/storage"
@@ -40,6 +41,8 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.Use(contextMiddleware(cfg, db))
 	e.Use(corsMiddleware())
 
+	e.Use(authMiddleware(cfg))
+
 	// TODO: auth middleware
 
 	e.GET("/", hello)
@@ -60,7 +63,10 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.GET("/category", categoryapi.GetAll)
 	e.GET("/category/:name", categoryapi.Get)
 
-	// TODO: user routes
+	// auth routes
+	e.POST("/auth/signup", authapi.Create)
+	e.POST("/auth/login", authapi.Login1)
+	e.POST("/auth/logout", authapi.Logout1)
 
 	e.POST("/storage/presign", storageapi.Presign)
 

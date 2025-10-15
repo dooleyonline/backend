@@ -26,6 +26,17 @@ sql:
         out: "sql/category"
         sql_package: "pgx/v5"
         emit_json_tags: true
+  - engine: "postgresql"
+    # database:
+    #   managed: true
+    queries: "sql/user/query.sql"
+    schema: "sql/user/schema.sql"
+    gen:
+      go:
+        package: "user"
+        out: "sql/user"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
 
 overrides:
   go:
