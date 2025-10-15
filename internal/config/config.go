@@ -3,17 +3,21 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 type Config struct {
-	Env                 string
+	IsProd              bool
 	ServerAddr          string
 	DatabaseUrl         string
 	StorageUrl          string
 	StorageRegion       string
 	StorageAccessId     string
 	StorageAccessSecret string
-	HmacSecretKey       string
+
+	AuthTokenName   string
+	AuthTokenExp    time.Duration
+	AuthTokenSecret string
 }
 
 const (
@@ -24,7 +28,7 @@ const (
 	envStorageRegion       = "STORAGE_REGION"
 	envStorageAccessId     = "STORAGE_ACCESS_ID"
 	envStorageAccessSecret = "STORAGE_ACCESS_SECRET"
-	envHmacSecretKey       = "HMAC_SECRET_KEY"
+	envAuthTokenSecret     = "AUTH_TOKEN_SECRET"
 )
 
 func New() (*Config, error) {
@@ -63,20 +67,23 @@ func New() (*Config, error) {
 		return nil, fmt.Errorf("environment variable %s is required", envStorageAccessSecret)
 	}
 
-	hmacSecretKey, ok := os.LookupEnv(envHmacSecretKey)
+	authTokenSecret, ok := os.LookupEnv(envAuthTokenSecret)
 	if !ok {
-		return nil, fmt.Errorf("environment variable %s is required", envHmacSecretKey)
+		return nil, fmt.Errorf("environment variable %s is required", envAuthTokenSecret)
 	}
 
 	cfg := &Config{
-		Env:                 env,
+		IsProd:              env == "prod",
 		ServerAddr:          ":" + port,
 		DatabaseUrl:         databaseUrl,
 		StorageUrl:          storageUrl,
 		StorageRegion:       storageRegion,
 		StorageAccessId:     storageAccessId,
 		StorageAccessSecret: storageAccessSecret,
-		HmacSecretKey:       hmacSecretKey,
+
+		AuthTokenName:   "dooleyonline_jwt",
+		AuthTokenExp:    time.Hour * 240,
+		AuthTokenSecret: authTokenSecret,
 	}
 
 	return cfg, nil

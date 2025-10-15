@@ -39,9 +39,9 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 
 	e.Use(loggerMiddleware(lg))
 	e.Use(errorMiddleware())
-	e.Use(contextMiddleware(cfg, db))
 	e.Use(corsMiddleware())
-	e.Use(authMiddleware(cfg))
+	e.Use(authMiddleware(cfg, protectedRoutes))
+	e.Use(contextMiddleware(cfg, db))
 
 	e.GET("/", hello)
 
@@ -63,7 +63,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 
 	// user routes
 	e.GET("/user", userapi.GetMany)
-	e.POST("/user/create", userapi.Create)
+	e.POST("/user", userapi.Create)
 
 	// auth routes
 	e.POST("/auth/login", authapi.Login)
@@ -73,6 +73,16 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.POST("/storage/presign", storageapi.Presign)
 
 	return e, nil
+}
+
+type routesConfig map[string][]string
+
+// define routes to protect with auth middleware
+var protectedRoutes = routesConfig{
+	"/item":          {http.MethodPost},
+	"/item/:id":      {http.MethodPut, http.MethodDelete},
+	"/item/:id/sell": {http.MethodPost},
+	"/auth/logout":   {http.MethodPost},
 }
 
 // hello godoc
