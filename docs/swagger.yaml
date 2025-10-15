@@ -1,6 +1,13 @@
 basePath: /
 definitions:
-  category.Category:
+  authapi.loginParams:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  sqlcategory.Category:
     properties:
       icon:
         type: string
@@ -11,7 +18,7 @@ definitions:
           type: string
         type: array
     type: object
-  item.CreateParams:
+  sqlitem.CreateParams:
     properties:
       category:
         type: string
@@ -34,7 +41,7 @@ definitions:
       subcategory:
         type: string
     type: object
-  item.Item:
+  sqlitem.Item:
     properties:
       category:
         type: string
@@ -67,7 +74,7 @@ definitions:
       views:
         type: integer
     type: object
-  item.UpdateParams:
+  sqlitem.UpdateParams:
     properties:
       category:
         type: string
@@ -93,6 +100,20 @@ definitions:
         type: string
       views:
         type: integer
+    type: object
+  sqluser.CreateParams:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  sqluser.User:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
     type: object
   storage.PresignParams:
     properties:
@@ -129,6 +150,41 @@ paths:
           schema:
             type: string
       summary: Greeting
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login Params
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/authapi.loginParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User
+          schema:
+            $ref: '#/definitions/sqluser.User'
+      summary: Log in
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Result
+          schema:
+            type: string
+      summary: Log out
+      tags:
+      - auth
   /category:
     get:
       produces:
@@ -138,7 +194,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/category.Category'
+              $ref: '#/definitions/sqlcategory.Category'
             type: array
       summary: Get all categories
       tags:
@@ -157,7 +213,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/category.Category'
+            $ref: '#/definitions/sqlcategory.Category'
       summary: Get category by name
       tags:
       - category
@@ -179,7 +235,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/item.Item'
+              $ref: '#/definitions/sqlitem.Item'
             type: array
       summary: Get many items
       tags:
@@ -193,14 +249,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/item.CreateParams'
+          $ref: '#/definitions/sqlitem.CreateParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/item.Item'
+            $ref: '#/definitions/sqlitem.Item'
       summary: Create item
       tags:
       - item
@@ -214,9 +270,7 @@ paths:
         type: integer
       responses:
         "200":
-          description: Item ID
-          schema:
-            type: string
+          description: OK
       summary: Delete item by ID
       tags:
       - item
@@ -233,7 +287,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/item.Item'
+            $ref: '#/definitions/sqlitem.Item'
       summary: Get item by ID
       tags:
       - item
@@ -251,14 +305,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/item.UpdateParams'
+          $ref: '#/definitions/sqlitem.UpdateParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/item.Item'
+            $ref: '#/definitions/sqlitem.Item'
       summary: Update item by ID
       tags:
       - item
@@ -288,9 +342,7 @@ paths:
         type: integer
       responses:
         "200":
-          description: Item ID
-          schema:
-            type: string
+          description: OK
       summary: Increment item views by ID
       tags:
       - item
@@ -311,8 +363,29 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/item.Item'
+            $ref: '#/definitions/sqlitem.Item'
       summary: Generate presigned URL for s3 operation
       tags:
       - other
+  /user/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/sqluser.CreateParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sqluser.User'
+      summary: Create user
+      tags:
+      - user
 swagger: "2.0"

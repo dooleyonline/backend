@@ -20,7 +20,7 @@ func Presign(ctx context.Context, cfg *config.Config, sreq *PresignParams) (stri
 		return "", nil, fmt.Errorf("invalid storage request")
 	}
 
-	req, err := http.NewRequest(sreq.Method, sreq.url(cfg.StorageUrl), nil)
+	req, err := http.NewRequest(sreq.Method, sreq.url(cfg.StorageS3Url), nil)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to create request: %w", err)
 	}

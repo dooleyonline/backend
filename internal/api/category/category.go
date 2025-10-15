@@ -13,7 +13,7 @@ import (
 //	@Summary	Get all categories
 //	@Tags		category
 //	@Produce	json
-//	@Success	200	{array}	category.Category
+//	@Success	200	{array}	sqlcategory.Category
 //	@Router		/category [get]
 func GetAll(c echo.Context) error {
 	var (
@@ -37,7 +37,7 @@ func GetAll(c echo.Context) error {
 //	@Tags		category
 //	@Produce	json
 //	@Param		name	path		string	true	"Category name"
-//	@Success	200		{object}	category.Category
+//	@Success	200		{object}	sqlcategory.Category
 //	@Router		/category/{name} [get]
 func Get(c echo.Context) error {
 	var (

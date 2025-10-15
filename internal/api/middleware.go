@@ -4,12 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
+	"slices"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
+	sqluser "github.com/dooleyonline/backend/sql/user"
+	"github.com/golang-jwt/jwt/v5"
+	echoJWT "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -56,10 +61,24 @@ func errorMiddleware() echo.MiddlewareFunc {
 func contextMiddleware(cfg *config.Config, db *db.DB) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			var user *sqluser.User
+			token, ok := c.Get("user").(*jwt.Token)
+			if ok {
+				claims, ok := token.Claims.(*shared.JWTClaims)
+				if ok {
+					data, err := db.User.Get(c.Request().Context(), claims.Email)
+					if err != nil {
+						return fmt.Errorf("failed to get user: %w", err)
+					}
+					user = &data
+				}
+			}
+
 			cc := shared.Context{
 				Context: c,
 				Cfg:     cfg,
 				DB:      db,
+				User:    user,
 			}
 			return next(cc)
 		}
@@ -69,8 +88,42 @@ func contextMiddleware(cfg *config.Config, db *db.DB) echo.MiddlewareFunc {
 func corsMiddleware() echo.MiddlewareFunc {
 	return middleware.CORSWithConfig(
 		middleware.CORSConfig{
-			AllowOrigins: []string{"*"},
-			AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+			AllowOrigins:     []string{"http://localhost:3000", "https://dooleyonline.net"},
+			AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderSetCookie},
+			AllowCredentials: true,
 		},
 	)
+}
+
+func authMiddleware(cfg *config.Config, protectedRoutes routesConfig) echo.MiddlewareFunc {
+	// determine if the route is public (hence no auth necessary)
+	isPublic := func(c echo.Context) bool {
+		r, ok := protectedRoutes[c.Path()]
+		if !ok {
+			return true
+		}
+		return !slices.Contains(r, c.Request().Method)
+	}
+
+	// configure how to extract token from a request
+	tokenLookup := func(c echo.Context) ([]string, error) {
+		tokenCookie, err := c.Cookie(cfg.AuthTokenName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get token cookie")
+		}
+
+		return []string{tokenCookie.Value}, nil
+	}
+
+	config := echoJWT.Config{
+		Skipper:    isPublic,
+		SigningKey: []byte(cfg.AuthTokenSecret),
+		ContextKey: "user",
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(shared.JWTClaims)
+		},
+		TokenLookupFuncs: []middleware.ValuesExtractor{tokenLookup},
+	}
+
+	return echoJWT.WithConfig(config)
 }

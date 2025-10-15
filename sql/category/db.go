@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.30.0
 
-package category
+package sqlcategory
 
 import (
 	"context"

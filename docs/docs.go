@@ -40,6 +40,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Log in",
+                "parameters": [
+                    {
+                        "description": "Login Params",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authapi.loginParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User",
+                        "schema": {
+                            "$ref": "#/definitions/sqluser.User"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Log out",
+                "responses": {
+                    "200": {
+                        "description": "Result",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/category": {
             "get": {
                 "produces": [
@@ -55,7 +110,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/category.Category"
+                                "$ref": "#/definitions/sqlcategory.Category"
                             }
                         }
                     }
@@ -84,7 +139,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/category.Category"
+                            "$ref": "#/definitions/sqlcategory.Category"
                         }
                     }
                 }
@@ -119,7 +174,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/item.Item"
+                                "$ref": "#/definitions/sqlitem.Item"
                             }
                         }
                     }
@@ -143,7 +198,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/item.CreateParams"
+                            "$ref": "#/definitions/sqlitem.CreateParams"
                         }
                     }
                 ],
@@ -151,7 +206,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/item.Item"
+                            "$ref": "#/definitions/sqlitem.Item"
                         }
                     }
                 }
@@ -179,7 +234,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/item.Item"
+                            "$ref": "#/definitions/sqlitem.Item"
                         }
                     }
                 }
@@ -209,7 +264,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/item.UpdateParams"
+                            "$ref": "#/definitions/sqlitem.UpdateParams"
                         }
                     }
                 ],
@@ -217,7 +272,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/item.Item"
+                            "$ref": "#/definitions/sqlitem.Item"
                         }
                     }
                 }
@@ -238,10 +293,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Item ID",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "description": "OK"
                     }
                 }
             }
@@ -288,10 +340,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Item ID",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "description": "OK"
                     }
                 }
             }
@@ -323,7 +372,40 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/item.Item"
+                            "$ref": "#/definitions/sqlitem.Item"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Create user",
+                "parameters": [
+                    {
+                        "description": "User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/sqluser.CreateParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sqluser.User"
                         }
                     }
                 }
@@ -331,7 +413,18 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "category.Category": {
+        "authapi.loginParams": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "sqlcategory.Category": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -348,7 +441,7 @@ const docTemplate = `{
                 }
             }
         },
-        "item.CreateParams": {
+        "sqlitem.CreateParams": {
             "type": "object",
             "properties": {
                 "category": {
@@ -383,7 +476,7 @@ const docTemplate = `{
                 }
             }
         },
-        "item.Item": {
+        "sqlitem.Item": {
             "type": "object",
             "properties": {
                 "category": {
@@ -433,7 +526,7 @@ const docTemplate = `{
                 }
             }
         },
-        "item.UpdateParams": {
+        "sqlitem.UpdateParams": {
             "type": "object",
             "properties": {
                 "category": {
@@ -471,6 +564,28 @@ const docTemplate = `{
                 },
                 "views": {
                     "type": "integer"
+                }
+            }
+        },
+        "sqluser.CreateParams": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "sqluser.User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },
