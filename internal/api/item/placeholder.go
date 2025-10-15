@@ -12,7 +12,7 @@ import (
 )
 
 func GeneratePlaceholder(cfg *config.Config, img string) (string, error) {
-	publicURL := fmt.Sprintf("%s/%s/%s", cfg.PublicUrl, "image", img)
+	publicURL := fmt.Sprintf("%s/%s/%s", cfg.StorageUrl, "image", img)
 
 	res, err := http.Get(publicURL)
 	if err != nil {

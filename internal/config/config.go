@@ -7,11 +7,12 @@ import (
 )
 
 type Config struct {
-	IsProd              bool
-	ServerAddr          string
-	DatabaseUrl         string
+	IsProd      bool
+	ServerAddr  string
+	DatabaseUrl string
+
 	StorageUrl          string
-	PublicUrl           string
+	StorageS3Url        string
 	StorageRegion       string
 	StorageAccessId     string
 	StorageAccessSecret string
@@ -22,15 +23,17 @@ type Config struct {
 }
 
 const (
-	envEnv                 = "ENV"
-	envPort                = "PORT"
-	envDatabaseUrl         = "DATABASE_URL"
+	envEnv         = "ENV"
+	envPort        = "PORT"
+	envDatabaseUrl = "DATABASE_URL"
+
 	envStorageUrl          = "STORAGE_URL"
-	envPublicUrl           = "PUBLIC_URL"
+	envStorageS3Url        = "STORAGE_S3_URL"
 	envStorageRegion       = "STORAGE_REGION"
 	envStorageAccessId     = "STORAGE_ACCESS_ID"
 	envStorageAccessSecret = "STORAGE_ACCESS_SECRET"
-	envAuthTokenSecret     = "AUTH_TOKEN_SECRET"
+
+	envAuthTokenSecret = "AUTH_TOKEN_SECRET"
 )
 
 func New() (*Config, error) {
@@ -54,9 +57,9 @@ func New() (*Config, error) {
 		return nil, fmt.Errorf("environment variable %s is required", envStorageUrl)
 	}
 
-	publicUrl, ok := os.LookupEnv(envPublicUrl)
+	storageS3Url, ok := os.LookupEnv(envStorageS3Url)
 	if !ok {
-		return nil, fmt.Errorf("environment variable %s is required", envPublicUrl)
+		return nil, fmt.Errorf("environment variable %s is required", envStorageS3Url)
 	}
 
 	storageRegion, ok := os.LookupEnv(envStorageRegion)
@@ -83,7 +86,7 @@ func New() (*Config, error) {
 		IsProd:              env == "prod",
 		ServerAddr:          ":" + port,
 		DatabaseUrl:         databaseUrl,
-		StorageUrl:          storageUrl,
+		StorageS3Url:        storageS3Url,
 		StorageRegion:       storageRegion,
 		StorageAccessId:     storageAccessId,
 		StorageAccessSecret: storageAccessSecret,
@@ -91,7 +94,7 @@ func New() (*Config, error) {
 		AuthTokenName:   "dooleyonline_jwt",
 		AuthTokenExp:    time.Hour * 240,
 		AuthTokenSecret: authTokenSecret,
-		PublicUrl:           publicUrl,
+		StorageUrl:      storageUrl,
 	}
 
 	return cfg, nil
