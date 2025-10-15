@@ -56,7 +56,7 @@ func Create(c echo.Context) error {
 
 	user, err := db.User.Create(ctx, params)
 	if err != nil {
-		return fmt.Errorf("failed to create item: %w", err)
+		return fmt.Errorf("failed to create user: %w", err)
 	}
 
 	return c.JSON(http.StatusOK, user)

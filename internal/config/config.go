@@ -34,7 +34,7 @@ const (
 func New() (*Config, error) {
 	env, ok := os.LookupEnv(envEnv)
 	if !ok {
-		return nil, fmt.Errorf("environment variable %s is required", envPort)
+		return nil, fmt.Errorf("environment variable %s is required", envEnv)
 	}
 
 	port, ok := os.LookupEnv(envPort)

@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/dooleyonline/backend/internal/config"
@@ -29,31 +28,4 @@ func CreateJWT(cfg *config.Config, email string) (string, error) {
 	}
 
 	return tokenString, nil
-}
-
-func ValidateJWT(cfg *config.Config, tokenString string) (*jwt.Token, error) {
-	hmacSecretKey := []byte(cfg.AuthTokenSecret)
-
-	token, err := jwt.Parse(
-		tokenString,
-		func(token *jwt.Token) (any, error) {
-			return hmacSecretKey, nil
-		},
-		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
-		jwt.WithExpirationRequired(),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse JWT: %w", err)
-	}
-
-	exp, err := token.Claims.GetExpirationTime()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get expiration time: %w", err)
-	}
-
-	if exp.Before(time.Now()) {
-		return nil, fmt.Errorf("token has expired")
-	}
-
-	return token, nil
 }
