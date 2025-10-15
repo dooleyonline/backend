@@ -15,6 +15,7 @@ import (
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	"github.com/lmittmann/tint"
+	"github.com/mattn/go-isatty"
 )
 
 func main() {
@@ -24,6 +25,7 @@ func main() {
 	lg := slog.New(
 		tint.NewHandler(os.Stderr, &tint.Options{
 			Level:      slog.LevelDebug,
+			NoColor:    !isatty.IsTerminal(os.Stderr.Fd()),
 			TimeFormat: time.Kitchen,
 		}),
 	)
