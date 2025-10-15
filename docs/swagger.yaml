@@ -451,6 +451,23 @@ paths:
             type: array
       summary: Get many users
       tags:
+      - other
+  /user:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/sqluser.User'
+            type: array
+      summary: Get many users
+      tags:
+      - user
       - user
     post:
       consumes:
