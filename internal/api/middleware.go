@@ -61,16 +61,16 @@ func errorMiddleware() echo.MiddlewareFunc {
 func contextMiddleware(cfg *config.Config, db *db.DB) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			var user sqluser.User
+			var user *sqluser.User
 			token, ok := c.Get("user").(*jwt.Token)
 			if ok {
 				claims, ok := token.Claims.(*shared.JWTClaims)
 				if ok {
-					var err error
-					user, err = db.User.Get(c.Request().Context(), claims.Email)
+					data, err := db.User.Get(c.Request().Context(), claims.Email)
 					if err != nil {
 						return fmt.Errorf("failed to get user: %w", err)
 					}
+					user = &data
 				}
 			}
 
@@ -78,7 +78,7 @@ func contextMiddleware(cfg *config.Config, db *db.DB) echo.MiddlewareFunc {
 				Context: c,
 				Cfg:     cfg,
 				DB:      db,
-				User:    &user,
+				User:    user,
 			}
 			return next(cc)
 		}

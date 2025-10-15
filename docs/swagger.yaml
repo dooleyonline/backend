@@ -7,7 +7,7 @@ definitions:
       password:
         type: string
     type: object
-  category.Category:
+  sqlcategory.Category:
     properties:
       icon:
         type: string
@@ -18,14 +18,7 @@ definitions:
           type: string
         type: array
     type: object
-  github_com_dooleyonline_backend_sql_user.User:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    type: object
-  item.CreateParams:
+  sqlitem.CreateParams:
     properties:
       category:
         type: string
@@ -46,7 +39,7 @@ definitions:
       subcategory:
         type: string
     type: object
-  item.Item:
+  sqlitem.Item:
     properties:
       category:
         type: string
@@ -77,7 +70,7 @@ definitions:
       views:
         type: integer
     type: object
-  item.UpdateParams:
+  sqlitem.UpdateParams:
     properties:
       category:
         type: string
@@ -102,6 +95,20 @@ definitions:
       views:
         type: integer
     type: object
+  sqluser.CreateParams:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  sqluser.User:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   storage.PresignParams:
     properties:
       bucket:
@@ -111,13 +118,6 @@ definitions:
       key:
         type: string
       method:
-        type: string
-    type: object
-  user.CreateParams:
-    properties:
-      email:
-        type: string
-      password:
         type: string
     type: object
 host: localhost:8080
@@ -159,9 +159,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: Result
+          description: User
           schema:
-            type: string
+            $ref: '#/definitions/sqluser.User'
       summary: Log in
       tags:
       - auth
@@ -188,7 +188,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/category.Category'
+              $ref: '#/definitions/sqlcategory.Category'
             type: array
       summary: Get all categories
       tags:
@@ -207,7 +207,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/category.Category'
+            $ref: '#/definitions/sqlcategory.Category'
       summary: Get category by name
       tags:
       - category
@@ -229,7 +229,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/item.Item'
+              $ref: '#/definitions/sqlitem.Item'
             type: array
       summary: Get many items
       tags:
@@ -243,14 +243,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/item.CreateParams'
+          $ref: '#/definitions/sqlitem.CreateParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/item.Item'
+            $ref: '#/definitions/sqlitem.Item'
       summary: Create item
       tags:
       - item
@@ -264,9 +264,7 @@ paths:
         type: integer
       responses:
         "200":
-          description: Item ID
-          schema:
-            type: string
+          description: OK
       summary: Delete item by ID
       tags:
       - item
@@ -283,7 +281,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/item.Item'
+            $ref: '#/definitions/sqlitem.Item'
       summary: Get item by ID
       tags:
       - item
@@ -301,14 +299,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/item.UpdateParams'
+          $ref: '#/definitions/sqlitem.UpdateParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/item.Item'
+            $ref: '#/definitions/sqlitem.Item'
       summary: Update item by ID
       tags:
       - item
@@ -338,9 +336,7 @@ paths:
         type: integer
       responses:
         "200":
-          description: Item ID
-          schema:
-            type: string
+          description: OK
       summary: Increment item views by ID
       tags:
       - item
@@ -361,7 +357,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/item.Item'
+            $ref: '#/definitions/sqlitem.Item'
       summary: Generate presigned URL for s3 operation
       tags:
       - other
@@ -375,14 +371,14 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/user.CreateParams'
+          $ref: '#/definitions/sqluser.CreateParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_dooleyonline_backend_sql_user.User'
+            $ref: '#/definitions/sqluser.User'
       summary: Create user
       tags:
       - user

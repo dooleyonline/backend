@@ -18,7 +18,7 @@ import (
 //	@Produce	json
 //	@Param		q			query	string	false	"Search query"
 //	@param		category	query	string	false	"Category filter"
-//	@Success	200			{array}	item.Item
+//	@Success	200			{array}	sqlitem.Item
 //	@Router		/item [get]
 func GetMany(c echo.Context) error {
 	var (
@@ -60,7 +60,7 @@ func GetMany(c echo.Context) error {
 //	@Tags		item
 //	@Produce	json
 //	@Param		id	path		int	true	"Item ID"
-//	@Success	200	{object}	item.Item
+//	@Success	200	{object}	sqlitem.Item
 //	@Router		/item/{id} [get]
 func Get(c echo.Context) error {
 	var (
@@ -89,8 +89,8 @@ func Get(c echo.Context) error {
 //	@Tags		item
 //	@Accept		json
 //	@Produce	json
-//	@Param		item	body		item.CreateParams	true	"Item"
-//	@Success	200		{object}	item.Item
+//	@Param		item	body		sqlitem.CreateParams	true	"Item"
+//	@Success	200		{object}	sqlitem.Item
 //	@Router		/item [post]
 func Create(c echo.Context) error {
 	var (
@@ -119,9 +119,9 @@ func Create(c echo.Context) error {
 //	@Tags		item
 //	@Accept		json
 //	@Produce	json
-//	@Param		id		path		int					true	"Item ID"
-//	@Param		item	body		item.UpdateParams	true	"Item"
-//	@Success	200		{object}	item.Item
+//	@Param		id		path		int						true	"Item ID"
+//	@Param		item	body		sqlitem.UpdateParams	true	"Item"
+//	@Success	200		{object}	sqlitem.Item
 //	@Router		/item/{id} [put]
 func Update(c echo.Context) error {
 	var (
@@ -180,8 +180,8 @@ func Sell(c echo.Context) error {
 //
 //	@Summary	Increment item views by ID
 //	@Tags		item
-//	@Param		id	path		int		true	"Item ID"
-//	@Success	200	{string}	string	"Item ID"
+//	@Param		id	path	int	true	"Item ID"
+//	@Success	200
 //	@Router		/item/{id}/view [post]
 func IncrementView(c echo.Context) error {
 	var (
@@ -207,8 +207,8 @@ func IncrementView(c echo.Context) error {
 //
 //	@Summary	Delete item by ID
 //	@Tags		item
-//	@Param		id	path		int		true	"Item ID"
-//	@Success	200	{string}	string	"Item ID"
+//	@Param		id	path	int	true	"Item ID"
+//	@Success	200
 //	@Router		/item/{id} [delete]
 func Delete(c echo.Context) error {
 	var (

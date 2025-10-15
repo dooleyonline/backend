@@ -11,7 +11,7 @@ sql:
       - "sql/item/schema.sql"
     gen:
       go:
-        package: "item"
+        package: "sqlitem"
         out: "sql/item"
         sql_package: "pgx/v5"
         emit_json_tags: true
@@ -22,7 +22,7 @@ sql:
     schema: "sql/category/schema.sql"
     gen:
       go:
-        package: "category"
+        package: "sqlcategory"
         out: "sql/category"
         sql_package: "pgx/v5"
         emit_json_tags: true
@@ -33,7 +33,7 @@ sql:
     schema: "sql/user/schema.sql"
     gen:
       go:
-        package: "user"
+        package: "sqluser"
         out: "sql/user"
         sql_package: "pgx/v5"
         emit_json_tags: true

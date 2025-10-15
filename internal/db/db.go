@@ -5,17 +5,17 @@ import (
 	"fmt"
 
 	"github.com/dooleyonline/backend/internal/config"
-	"github.com/dooleyonline/backend/sql/category"
-	"github.com/dooleyonline/backend/sql/item"
-	"github.com/dooleyonline/backend/sql/user"
+	sqlcategory "github.com/dooleyonline/backend/sql/category"
+	sqlitem "github.com/dooleyonline/backend/sql/item"
+	sqluser "github.com/dooleyonline/backend/sql/user"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type DB struct {
-	Item     *item.Queries
-	Category *category.Queries
-	User     *user.Queries
+	Item     *sqlitem.Queries
+	Category *sqlcategory.Queries
+	User     *sqluser.Queries
 	Pool     *pgxpool.Pool
 }
 
@@ -25,9 +25,9 @@ func New(ctx context.Context, cfg *config.Config) (*DB, error) {
 		return nil, fmt.Errorf("failed to connect to db: %w", err)
 	}
 
-	item := item.New(pool)
-	category := category.New(pool)
-	user := user.New(pool)
+	item := sqlitem.New(pool)
+	category := sqlcategory.New(pool)
+	user := sqluser.New(pool)
 
 	return &DB{
 		Item:     item,

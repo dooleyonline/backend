@@ -14,14 +14,31 @@ type loginParams struct {
 	Password string `json:"password"`
 }
 
+// Get godoc
+//
+//	@Summary	Get auth status
+//	@Tags		auth
+//	@Produce	json
+//	@Success	200	{object}	sqluser.User	"User"
+//	@Router		/auth [get]
+func Get(c echo.Context) error {
+	var (
+		req  = c.Request()
+		user = c.(shared.Context).User
+	)
+	defer req.Body.Close()
+
+	return c.JSON(http.StatusOK, user)
+}
+
 // Login godoc
 //
 //	@Summary	Log in
 //	@Tags		auth
 //	@Accept		json
 //	@Produce	json
-//	@Param		user	body		loginParams	true	"Login Params"
-//	@Success	200		{string}	string		"Result"
+//	@Param		user	body		loginParams		true	"Login Params"
+//	@Success	200		{object}	sqluser.User	"User"
 //	@Router		/auth/login [post]
 func Login(c echo.Context) error {
 	var (
@@ -76,9 +93,8 @@ func Login(c echo.Context) error {
 //	@Router		/auth/logout [post]
 func Logout(c echo.Context) error {
 	var (
-		req  = c.Request()
-		cfg  = c.(shared.Context).Cfg
-		user = c.(shared.Context).User
+		req = c.Request()
+		cfg = c.(shared.Context).Cfg
 	)
 	defer req.Body.Close()
 
@@ -94,5 +110,5 @@ func Logout(c echo.Context) error {
 
 	c.SetCookie(cookie)
 
-	return c.JSON(http.StatusOK, user)
+	return c.NoContent(http.StatusOK)
 }

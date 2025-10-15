@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.30.0
 
-package user
+package sqluser
 
 type User struct {
 	Email    string `json:"email"`

@@ -65,9 +65,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Result",
+                        "description": "User",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/sqluser.User"
                         }
                     }
                 }
@@ -110,7 +110,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/category.Category"
+                                "$ref": "#/definitions/sqlcategory.Category"
                             }
                         }
                     }
@@ -139,7 +139,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/category.Category"
+                            "$ref": "#/definitions/sqlcategory.Category"
                         }
                     }
                 }
@@ -174,7 +174,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/item.Item"
+                                "$ref": "#/definitions/sqlitem.Item"
                             }
                         }
                     }
@@ -198,7 +198,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/item.CreateParams"
+                            "$ref": "#/definitions/sqlitem.CreateParams"
                         }
                     }
                 ],
@@ -206,7 +206,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/item.Item"
+                            "$ref": "#/definitions/sqlitem.Item"
                         }
                     }
                 }
@@ -234,7 +234,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/item.Item"
+                            "$ref": "#/definitions/sqlitem.Item"
                         }
                     }
                 }
@@ -264,7 +264,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/item.UpdateParams"
+                            "$ref": "#/definitions/sqlitem.UpdateParams"
                         }
                     }
                 ],
@@ -272,7 +272,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/item.Item"
+                            "$ref": "#/definitions/sqlitem.Item"
                         }
                     }
                 }
@@ -293,10 +293,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Item ID",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "description": "OK"
                     }
                 }
             }
@@ -343,10 +340,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Item ID",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "description": "OK"
                     }
                 }
             }
@@ -378,7 +372,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/item.Item"
+                            "$ref": "#/definitions/sqlitem.Item"
                         }
                     }
                 }
@@ -403,7 +397,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.CreateParams"
+                            "$ref": "#/definitions/sqluser.CreateParams"
                         }
                     }
                 ],
@@ -411,7 +405,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_dooleyonline_backend_sql_user.User"
+                            "$ref": "#/definitions/sqluser.User"
                         }
                     }
                 }
@@ -430,7 +424,7 @@ const docTemplate = `{
                 }
             }
         },
-        "category.Category": {
+        "sqlcategory.Category": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -447,18 +441,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_dooleyonline_backend_sql_user.User": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "item.CreateParams": {
+        "sqlitem.CreateParams": {
             "type": "object",
             "properties": {
                 "category": {
@@ -490,7 +473,7 @@ const docTemplate = `{
                 }
             }
         },
-        "item.Item": {
+        "sqlitem.Item": {
             "type": "object",
             "properties": {
                 "category": {
@@ -537,7 +520,7 @@ const docTemplate = `{
                 }
             }
         },
-        "item.UpdateParams": {
+        "sqlitem.UpdateParams": {
             "type": "object",
             "properties": {
                 "category": {
@@ -575,6 +558,28 @@ const docTemplate = `{
                 }
             }
         },
+        "sqluser.CreateParams": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "sqluser.User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "storage.PresignParams": {
             "type": "object",
             "properties": {
@@ -588,17 +593,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "method": {
-                    "type": "string"
-                }
-            }
-        },
-        "user.CreateParams": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
                     "type": "string"
                 }
             }
