@@ -11,6 +11,7 @@ type Config struct {
 	ServerAddr          string
 	DatabaseUrl         string
 	StorageUrl          string
+	PublicUrl           string
 	StorageRegion       string
 	StorageAccessId     string
 	StorageAccessSecret string
@@ -25,6 +26,7 @@ const (
 	envPort                = "PORT"
 	envDatabaseUrl         = "DATABASE_URL"
 	envStorageUrl          = "STORAGE_URL"
+	envPublicUrl           = "PUBLIC_URL"
 	envStorageRegion       = "STORAGE_REGION"
 	envStorageAccessId     = "STORAGE_ACCESS_ID"
 	envStorageAccessSecret = "STORAGE_ACCESS_SECRET"
@@ -50,6 +52,11 @@ func New() (*Config, error) {
 	storageUrl, ok := os.LookupEnv(envStorageUrl)
 	if !ok {
 		return nil, fmt.Errorf("environment variable %s is required", envStorageUrl)
+	}
+
+	publicUrl, ok := os.LookupEnv(envPublicUrl)
+	if !ok {
+		return nil, fmt.Errorf("environment variable %s is required", envPublicUrl)
 	}
 
 	storageRegion, ok := os.LookupEnv(envStorageRegion)
@@ -84,6 +91,7 @@ func New() (*Config, error) {
 		AuthTokenName:   "dooleyonline_jwt",
 		AuthTokenExp:    time.Hour * 240,
 		AuthTokenSecret: authTokenSecret,
+		PublicUrl:           publicUrl,
 	}
 
 	return cfg, nil
