@@ -150,6 +150,18 @@ paths:
           schema:
             type: string
       summary: Greeting
+  /auth:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User
+          schema:
+            $ref: '#/definitions/sqluser.User'
+      summary: Get auth status
+      tags:
+      - auth
   /auth/login:
     post:
       consumes:
@@ -367,7 +379,22 @@ paths:
       summary: Generate presigned URL for s3 operation
       tags:
       - other
-  /user/create:
+  /user:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/sqluser.User'
+            type: array
+      summary: Get many users
+      tags:
+      - user
     post:
       consumes:
       - application/json

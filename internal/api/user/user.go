@@ -9,6 +9,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GetMany godoc
+//
+//	@Summary	Get many users
+//	@Tags		user
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{array}	sqluser.User
+//	@Router		/user [get]
 func GetMany(c echo.Context) error {
 	var (
 		req = c.Request()
@@ -33,7 +41,7 @@ func GetMany(c echo.Context) error {
 //	@Produce	json
 //	@Param		user	body		sqluser.CreateParams	true	"User"
 //	@Success	200		{object}	sqluser.User
-//	@Router		/user/create [post]
+//	@Router		/user [post]
 func Create(c echo.Context) error {
 	var (
 		req = c.Request()
