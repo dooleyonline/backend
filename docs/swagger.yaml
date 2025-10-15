@@ -27,6 +27,8 @@ definitions:
         type: boolean
       name:
         type: string
+      placeholder:
+        type: string
       price:
         type: number
       subcategory:
@@ -51,6 +53,8 @@ definitions:
       is_negotiable:
         type: boolean
       name:
+        type: string
+      placeholder:
         type: string
       posted_at:
         type: string
@@ -80,6 +84,8 @@ definitions:
       is_negotiable:
         type: boolean
       name:
+        type: string
+      placeholder:
         type: string
       price:
         type: number

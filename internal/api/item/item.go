@@ -28,29 +28,35 @@ func GetMany(c echo.Context) error {
 	)
 	defer req.Body.Close()
 
+	var (
+		items []sqlitem.Item
+		err   error
+	)
+
 	query := c.QueryParam("q")
-	if query != "" {
-		items, err := db.Item.Search(ctx, query)
-		if err != nil {
-			return fmt.Errorf("failed to search items: %w", err)
-		}
-		return c.JSON(http.StatusOK, items)
-	}
-
 	category := c.QueryParam("category")
-	if category != "" {
-		items, err := db.Item.GetByCategory(ctx, category)
-		if err != nil {
-			return fmt.Errorf("failed to get items by category: %w", err)
+
+	switch {
+	case query != "" && category != "":
+		params := sqlitem.SearchByCategoryParams{
+			Category:  category,
+			ToTsquery: query,
 		}
-		return c.JSON(http.StatusOK, items)
+		items, err = db.Item.SearchByCategory(ctx, params)
+	case query != "":
+		items, err = db.Item.Search(ctx, query)
+	case category != "":
+		items, err = db.Item.GetByCategory(ctx, category)
+	default:
+		items, err = db.Item.GetAll(ctx)
 	}
 
-	items, err := db.Item.GetAll(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get all items: %w", err)
+		return fmt.Errorf("failed to get items: %w", err)
 	}
-
+	if items == nil {
+		items = []sqlitem.Item{}
+	}
 	return c.JSON(http.StatusOK, items)
 }
 
@@ -97,6 +103,7 @@ func Create(c echo.Context) error {
 		req = c.Request()
 		ctx = req.Context()
 		db  = c.(shared.Context).DB
+		cfg = c.(shared.Context).Cfg
 	)
 	defer req.Body.Close()
 
@@ -104,6 +111,12 @@ func Create(c echo.Context) error {
 	if err := c.Bind(&params); err != nil {
 		return fmt.Errorf("failed to bind params: %w", err)
 	}
+
+	placeholder, err := GeneratePlaceholder(cfg, params.Images[0])
+	if err != nil {
+		return fmt.Errorf("failed to generate placeholders: %w", err)
+	}
+	params.Placeholder = placeholder
 
 	item, err := db.Item.Create(ctx, params)
 	if err != nil {
@@ -128,6 +141,7 @@ func Update(c echo.Context) error {
 		req = c.Request()
 		ctx = req.Context()
 		db  = c.(shared.Context).DB
+		cfg = c.(shared.Context).Cfg
 	)
 	defer req.Body.Close()
 
@@ -138,6 +152,12 @@ func Update(c echo.Context) error {
 	if err := echo.PathParamsBinder(c).Int64("id", &params.ID).BindError(); err != nil {
 		return fmt.Errorf("failed to bind id: %w", err)
 	}
+
+	placeholder, err := GeneratePlaceholder(cfg, params.Images[0])
+	if err != nil {
+		return fmt.Errorf("failed to generate placeholders: %w", err)
+	}
+	params.Placeholder = placeholder
 
 	item, err := db.Item.Update(ctx, params)
 	if err != nil {

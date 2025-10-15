@@ -372,6 +372,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "placeholder": {
+                    "type": "string"
+                },
                 "price": {
                     "type": "number"
                 },
@@ -408,6 +411,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "placeholder": {
                     "type": "string"
                 },
                 "posted_at": {
@@ -452,6 +458,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "placeholder": {
                     "type": "string"
                 },
                 "price": {

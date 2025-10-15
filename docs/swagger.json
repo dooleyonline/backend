@@ -366,6 +366,9 @@
                 "name": {
                     "type": "string"
                 },
+                "placeholder": {
+                    "type": "string"
+                },
                 "price": {
                     "type": "number"
                 },
@@ -402,6 +405,9 @@
                     "type": "boolean"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "placeholder": {
                     "type": "string"
                 },
                 "posted_at": {
@@ -446,6 +452,9 @@
                     "type": "boolean"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "placeholder": {
                     "type": "string"
                 },
                 "price": {
