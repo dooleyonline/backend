@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
-	"github.com/dooleyonline/backend/internal/storage"
 	"github.com/labstack/echo/v4"
 
 	sqlitem "github.com/dooleyonline/backend/sql/item"
@@ -104,7 +103,7 @@ func Create(c echo.Context) error {
 		req = c.Request()
 		ctx = req.Context()
 		db  = c.(shared.Context).DB
-		cfg = c.(shared.Context).Cfg 
+		cfg = c.(shared.Context).Cfg
 	)
 	defer req.Body.Close()
 
@@ -113,11 +112,11 @@ func Create(c echo.Context) error {
 		return fmt.Errorf("failed to bind params: %w", err)
 	}
 
-	placeholders, err := storage.GeneratePlaceholders(cfg, params.Images)
+	placeholder, err := GeneratePlaceholder(cfg, params.Images[0])
 	if err != nil {
 		return fmt.Errorf("failed to generate placeholders: %w", err)
 	}
-	params.Placeholder = placeholders
+	params.Placeholder = placeholder
 
 	item, err := db.Item.Create(ctx, params)
 	if err != nil {
@@ -154,11 +153,11 @@ func Update(c echo.Context) error {
 		return fmt.Errorf("failed to bind id: %w", err)
 	}
 
-	placeholders, err := storage.GeneratePlaceholders(cfg, params.Images)
+	placeholder, err := GeneratePlaceholder(cfg, params.Images[0])
 	if err != nil {
 		return fmt.Errorf("failed to generate placeholders: %w", err)
 	}
-	params.Placeholder = placeholders
+	params.Placeholder = placeholder
 
 	item, err := db.Item.Update(ctx, params)
 	if err != nil {

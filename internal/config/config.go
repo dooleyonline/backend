@@ -68,7 +68,7 @@ func New() (*Config, error) {
 		StorageRegion:       storageRegion,
 		StorageAccessId:     storageAccessId,
 		StorageAccessSecret: storageAccessSecret,
-		PublicUrl:          publicUrl,
+		PublicUrl:           publicUrl,
 	}
 
 	return cfg, nil

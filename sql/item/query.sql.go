@@ -27,7 +27,7 @@ type CreateParams struct {
 	IsNegotiable bool     `json:"is_negotiable"`
 	Category     string   `json:"category"`
 	Subcategory  string   `json:"subcategory"`
-	Placeholder  []string `json:"placeholder"`
+	Placeholder  string   `json:"placeholder"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
@@ -347,7 +347,7 @@ type UpdateParams struct {
 	Category     string   `json:"category"`
 	Subcategory  string   `json:"subcategory"`
 	Views        int64    `json:"views"`
-	Placeholder  []string `json:"placeholder"`
+	Placeholder  string   `json:"placeholder"`
 }
 
 func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {

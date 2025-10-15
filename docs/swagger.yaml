@@ -28,9 +28,7 @@ definitions:
       name:
         type: string
       placeholder:
-        items:
-          type: string
-        type: array
+        type: string
       price:
         type: number
       subcategory:
@@ -57,9 +55,7 @@ definitions:
       name:
         type: string
       placeholder:
-        items:
-          type: string
-        type: array
+        type: string
       posted_at:
         type: string
       price:
@@ -90,9 +86,7 @@ definitions:
       name:
         type: string
       placeholder:
-        items:
-          type: string
-        type: array
+        type: string
       price:
         type: number
       subcategory:

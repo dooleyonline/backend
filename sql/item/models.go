@@ -22,5 +22,5 @@ type Item struct {
 	Category     string     `json:"category"`
 	Subcategory  string     `json:"subcategory"`
 	Fts          string     `json:"fts"`
-	Placeholder  []string   `json:"placeholder"`
+	Placeholder  string     `json:"placeholder"`
 }

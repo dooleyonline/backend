@@ -1,4 +1,4 @@
-package storage
+package itemapi
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
-func generatePlaceholder(cfg *config.Config, img string) (string, error) {
+func GeneratePlaceholder(cfg *config.Config, img string) (string, error) {
 	publicURL := fmt.Sprintf("%s/%s/%s", cfg.PublicUrl, "image", img)
 
 	res, err := http.Get(publicURL)
@@ -38,16 +38,4 @@ func generatePlaceholder(cfg *config.Config, img string) (string, error) {
 
 	b64 := base64.StdEncoding.EncodeToString(buf.Bytes())
 	return fmt.Sprintf("data:image/png;base64,%s", b64), nil
-}
-
-func GeneratePlaceholders(cfg *config.Config, images []string) ([]string, error) {
-	placeholders := make([]string, len(images))
-	for i, img := range images {
-		p, err := generatePlaceholder(cfg, img)
-		if err != nil {
-			return nil, fmt.Errorf("failed to generate placeholder for %s: %w", img, err)
-		}
-		placeholders[i] = p
-	}
-	return placeholders, nil
 }

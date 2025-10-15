@@ -367,10 +367,7 @@
                     "type": "string"
                 },
                 "placeholder": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "price": {
                     "type": "number"
@@ -411,10 +408,7 @@
                     "type": "string"
                 },
                 "placeholder": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "posted_at": {
                     "type": "string"
@@ -461,10 +455,7 @@
                     "type": "string"
                 },
                 "placeholder": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "price": {
                     "type": "number"
