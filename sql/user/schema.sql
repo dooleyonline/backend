@@ -1,5 +1,5 @@
-CREATE TABLE "user" (
-  email text NOT NULL DEFAULT ''::text,
-  password text NOT NULL DEFAULT ''::text,
-  CONSTRAINT User_pkey PRIMARY KEY (email)
+CREATE TABLE public.user (
+email text NOT NULL DEFAULT ''::text UNIQUE,
+password text NOT NULL DEFAULT ''::text,
+CONSTRAINT user_pkey PRIMARY KEY (email)
 );

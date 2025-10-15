@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  authapi.loginParams:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   category.Category:
     properties:
       icon:
@@ -10,6 +17,13 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  github_com_dooleyonline_backend_sql_user.User:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
     type: object
   item.CreateParams:
     properties:
@@ -99,6 +113,13 @@ definitions:
       method:
         type: string
     type: object
+  user.CreateParams:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -123,6 +144,41 @@ paths:
           schema:
             type: string
       summary: Greeting
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login Params
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/authapi.loginParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Result
+          schema:
+            type: string
+      summary: Log in
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Result
+          schema:
+            type: string
+      summary: Log out
+      tags:
+      - auth
   /category:
     get:
       produces:
@@ -309,4 +365,25 @@ paths:
       summary: Generate presigned URL for s3 operation
       tags:
       - other
+  /user/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_dooleyonline_backend_sql_user.User'
+      summary: Create user
+      tags:
+      - user
 swagger: "2.0"

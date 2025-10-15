@@ -9,6 +9,7 @@ import (
 	categoryapi "github.com/dooleyonline/backend/internal/api/category"
 	itemapi "github.com/dooleyonline/backend/internal/api/item"
 	storageapi "github.com/dooleyonline/backend/internal/api/storage"
+	userapi "github.com/dooleyonline/backend/internal/api/user"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	"github.com/labstack/echo/v4"
@@ -40,10 +41,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.Use(errorMiddleware())
 	e.Use(contextMiddleware(cfg, db))
 	e.Use(corsMiddleware())
-
 	e.Use(authMiddleware(cfg))
-
-	// TODO: auth middleware
 
 	e.GET("/", hello)
 
@@ -63,11 +61,15 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.GET("/category", categoryapi.GetAll)
 	e.GET("/category/:name", categoryapi.Get)
 
-	// auth routes
-	e.POST("/auth/signup", authapi.Create)
-	e.POST("/auth/login", authapi.Login1)
-	e.POST("/auth/logout", authapi.Logout1)
+	// user routes
+	e.GET("/user", userapi.GetMany)
+	e.POST("/user/create", userapi.Create)
 
+	// auth routes
+	e.POST("/auth/login", authapi.Login)
+	e.POST("/auth/logout", authapi.Logout)
+
+	// storage routes
 	e.POST("/storage/presign", storageapi.Presign)
 
 	return e, nil

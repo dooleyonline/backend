@@ -86,9 +86,7 @@ func authMiddleware(cfg *config.Config) echo.MiddlewareFunc {
 			// if err != nil {
 			// 	return echo.NewHTTPError(http.StatusForbidden, err)
 			// }
-			token, _ := c.Cookie("Token")
-
-			fmt.Println("Printing token:", token)
+			fmt.Println(c.Cookies())
 
 			return next(c)
 		}
@@ -104,7 +102,6 @@ func validateJWT(tokenString string, cfg *config.Config) (*jwt.Token, error) {
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 
 	if err != nil {
-		slog.Error("Invalid JWT: " + err.Error())
 		return nil, err
 	}
 	return token, nil

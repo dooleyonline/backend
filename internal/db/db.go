@@ -27,10 +27,12 @@ func New(ctx context.Context, cfg *config.Config) (*DB, error) {
 
 	item := item.New(pool)
 	category := category.New(pool)
+	user := user.New(pool)
 
 	return &DB{
 		Item:     item,
 		Category: category,
+		User:     user,
 		Pool:     pool,
 	}, nil
 }

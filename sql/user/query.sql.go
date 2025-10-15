@@ -45,15 +45,15 @@ func (q *Queries) Get(ctx context.Context, email string) (User, error) {
 	return i, err
 }
 
-const getAll = `-- name: GetAll :many
+const getMany = `-- name: GetMany :many
 SELECT
   email, password
 FROM
   "user"
 `
 
-func (q *Queries) GetAll(ctx context.Context) ([]User, error) {
-	rows, err := q.db.Query(ctx, getAll)
+func (q *Queries) GetMany(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getMany)
 	if err != nil {
 		return nil, err
 	}
