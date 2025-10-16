@@ -8,6 +8,8 @@ package sqlitem
 import (
 	"context"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const create = `-- name: Create :one
@@ -15,7 +17,7 @@ INSERT INTO
   item (name, description, images, price, condition, is_negotiable, category, subcategory, placeholder)
 VALUES
   ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes
+RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 `
 
 type CreateParams struct {
@@ -59,6 +61,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
 		&i.Fts,
 		&i.Placeholder,
 		&i.Likes,
+		&i.Seller,
 	)
 	return i, err
 }
@@ -91,7 +94,7 @@ func (q *Queries) Delete(ctx context.Context, id int64) error {
 
 const get = `-- name: Get :one
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
   item
 WHERE
@@ -117,13 +120,14 @@ func (q *Queries) Get(ctx context.Context, id int64) (Item, error) {
 		&i.Fts,
 		&i.Placeholder,
 		&i.Likes,
+		&i.Seller,
 	)
 	return i, err
 }
 
 const getAll = `-- name: GetAll :many
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
   item
 `
@@ -153,6 +157,7 @@ func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
 			&i.Fts,
 			&i.Placeholder,
 			&i.Likes,
+			&i.Seller,
 		); err != nil {
 			return nil, err
 		}
@@ -166,7 +171,7 @@ func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
 
 const getByCategory = `-- name: GetByCategory :many
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
   item
 WHERE
@@ -198,6 +203,55 @@ func (q *Queries) GetByCategory(ctx context.Context, category string) ([]Item, e
 			&i.Fts,
 			&i.Placeholder,
 			&i.Likes,
+			&i.Seller,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getBySeller = `-- name: GetBySeller :many
+SELECT
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
+FROM
+  "item"
+WHERE
+  seller = $1::uuid
+ORDER BY
+  posted_at DESC
+`
+
+func (q *Queries) GetBySeller(ctx context.Context, sellerID pgtype.UUID) ([]Item, error) {
+	rows, err := q.db.Query(ctx, getBySeller, sellerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Item
+	for rows.Next() {
+		var i Item
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Images,
+			&i.Price,
+			&i.Condition,
+			&i.IsNegotiable,
+			&i.PostedAt,
+			&i.SoldAt,
+			&i.Views,
+			&i.Category,
+			&i.Subcategory,
+			&i.Fts,
+			&i.Placeholder,
+			&i.Likes,
+			&i.Seller,
 		); err != nil {
 			return nil, err
 		}
@@ -239,7 +293,7 @@ func (q *Queries) IncrementView(ctx context.Context, id int64) error {
 
 const search = `-- name: Search :many
 SELECT
- id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes
+ id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
   item
 WHERE
@@ -271,6 +325,7 @@ func (q *Queries) Search(ctx context.Context, toTsquery string) ([]Item, error) 
 			&i.Fts,
 			&i.Placeholder,
 			&i.Likes,
+			&i.Seller,
 		); err != nil {
 			return nil, err
 		}
@@ -284,7 +339,7 @@ func (q *Queries) Search(ctx context.Context, toTsquery string) ([]Item, error) 
 
 const searchByCategory = `-- name: SearchByCategory :many
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
   item
 WHERE
@@ -321,6 +376,7 @@ func (q *Queries) SearchByCategory(ctx context.Context, arg SearchByCategoryPara
 			&i.Fts,
 			&i.Placeholder,
 			&i.Likes,
+			&i.Seller,
 		); err != nil {
 			return nil, err
 		}
@@ -367,7 +423,7 @@ SET
   placeholder = $11
 WHERE
   id = $1
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes
+RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 `
 
 type UpdateParams struct {
@@ -415,6 +471,7 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
 		&i.Fts,
 		&i.Placeholder,
 		&i.Likes,
+		&i.Seller,
 	)
 	return i, err
 }

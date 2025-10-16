@@ -510,6 +510,36 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/items": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get items for the current user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/sqlitem.Item"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -618,6 +648,9 @@ const docTemplate = `{
                 "price": {
                     "type": "number"
                 },
+                "seller": {
+                    "type": "string"
+                },
                 "sold_at": {
                     "type": "string"
                 },
@@ -685,6 +718,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_name": {
                     "type": "string"
                 },
                 "liked_items": {

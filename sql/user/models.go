@@ -4,8 +4,15 @@
 
 package sqluser
 
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
 type User struct {
-	Email      string  `json:"email"`
-	Password   string  `json:"password"`
-	LikedItems []int64 `json:"liked_items"`
+	Email      string      `json:"email"`
+	Password   string      `json:"password"`
+	LikedItems []int64     `json:"liked_items"`
+	FirstName  string      `json:"first_name"`
+	LastName   string      `json:"last_name"`
+	ID         pgtype.UUID `json:"id"`
 }

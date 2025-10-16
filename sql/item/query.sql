@@ -98,3 +98,13 @@ FROM
   item
 WHERE
   category = $1 AND fts @@ to_tsquery($2); 
+
+-- name: GetBySeller :many
+SELECT
+  *
+FROM
+  "item"
+WHERE
+  seller = @seller_ID::uuid
+ORDER BY
+  posted_at DESC;

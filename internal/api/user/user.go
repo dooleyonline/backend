@@ -69,3 +69,29 @@ func Create(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, user)
 }
+
+// GetItems godoc
+//
+//	@Summary	Get items for the current user
+//	@Tags		user
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{array}	sqlitem.Item
+//	@Router		/user/items [get]
+//	@Security	ApiKeyAuth
+func GetItems(c echo.Context) error {
+	var (
+		req  = c.Request()
+		ctx  = req.Context()
+		db   = c.(shared.Context).DB
+		user = c.(shared.Context).User
+	)
+	defer req.Body.Close()
+
+	items, err := db.Item.GetBySeller(ctx, user.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get items: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, items)
+}

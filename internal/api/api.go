@@ -67,6 +67,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	// user routes
 	e.GET("/user", userapi.GetMany)
 	e.POST("/user", userapi.Create)
+	e.GET("/user/items", userapi.GetItems)
 
 	// auth routes
 	e.GET("/auth", authapi.Get)
@@ -98,6 +99,7 @@ var protectedRoutes = routesConfig{
 	"/item/:id/sell":   {http.MethodPost},
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
+	"/user/items":      {http.MethodGet},
 	"/auth":            {http.MethodGet},
 	"/auth/logout":     {http.MethodPost},
 }
