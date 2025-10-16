@@ -38,7 +38,7 @@ INSERT INTO
   "user" (email, password)
 VALUES
   ($1, $2)
-RETURNING email, password, liked_items
+RETURNING email, password, liked_items, first_name, last_name, id
 `
 
 type CreateParams struct {
@@ -49,7 +49,14 @@ type CreateParams struct {
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (User, error) {
 	row := q.db.QueryRow(ctx, create, arg.Email, arg.Password)
 	var i User
-	err := row.Scan(&i.Email, &i.Password, &i.LikedItems)
+	err := row.Scan(
+		&i.Email,
+		&i.Password,
+		&i.LikedItems,
+		&i.FirstName,
+		&i.LastName,
+		&i.ID,
+	)
 	return i, err
 }
 
@@ -77,7 +84,7 @@ func (q *Queries) DeleteLikedItem(ctx context.Context, arg DeleteLikedItemParams
 
 const get = `-- name: Get :one
 SELECT
-  email, password, liked_items
+  email, password, liked_items, first_name, last_name, id
 FROM
   "user"
 WHERE
@@ -87,7 +94,14 @@ WHERE
 func (q *Queries) Get(ctx context.Context, email string) (User, error) {
 	row := q.db.QueryRow(ctx, get, email)
 	var i User
-	err := row.Scan(&i.Email, &i.Password, &i.LikedItems)
+	err := row.Scan(
+		&i.Email,
+		&i.Password,
+		&i.LikedItems,
+		&i.FirstName,
+		&i.LastName,
+		&i.ID,
+	)
 	return i, err
 }
 
@@ -109,7 +123,7 @@ func (q *Queries) GetLikedItems(ctx context.Context, email string) ([]int64, err
 
 const getMany = `-- name: GetMany :many
 SELECT
-  email, password, liked_items
+  email, password, liked_items, first_name, last_name, id
 FROM
   "user"
 `
@@ -123,7 +137,14 @@ func (q *Queries) GetMany(ctx context.Context) ([]User, error) {
 	var items []User
 	for rows.Next() {
 		var i User
-		if err := rows.Scan(&i.Email, &i.Password, &i.LikedItems); err != nil {
+		if err := rows.Scan(
+			&i.Email,
+			&i.Password,
+			&i.LikedItems,
+			&i.FirstName,
+			&i.LastName,
+			&i.ID,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
