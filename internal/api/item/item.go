@@ -272,12 +272,6 @@ func Like(c echo.Context) error {
 		return fmt.Errorf("failed to bind item id: %w", err)
 	}
 
-	for _, item := range user.LikedItems {
-		if item == itemId {
-			return c.JSON(http.StatusOK, user.LikedItems)
-		}
-	}
-
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)

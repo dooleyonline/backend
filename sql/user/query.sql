@@ -43,4 +43,6 @@ SET
   liked_items = array_append(liked_items, @item_ID::bigint)
 WHERE
   email = @email
+AND NOT
+  liked_items @> ARRAY[@item_ID::bigint]
 RETURNING liked_items;
