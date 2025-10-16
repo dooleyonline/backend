@@ -88,7 +88,7 @@ func contextMiddleware(cfg *config.Config, db *db.DB) echo.MiddlewareFunc {
 func corsMiddleware() echo.MiddlewareFunc {
 	return middleware.CORSWithConfig(
 		middleware.CORSConfig{
-			AllowOrigins:     []string{"http://localhost:3000", "https://dooleyonline.net"},
+			AllowOrigins:     []string{"*", "http://localhost:3000", "https://dooleyonline.net"},
 			AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderSetCookie},
 			AllowCredentials: true,
 		},
