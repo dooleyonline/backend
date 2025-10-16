@@ -23,4 +23,5 @@ type Item struct {
 	Subcategory  string     `json:"subcategory"`
 	Fts          string     `json:"fts"`
 	Placeholder  string     `json:"placeholder"`
+	Likes        int64      `json:"likes"`
 }

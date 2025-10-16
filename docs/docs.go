@@ -317,6 +317,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/item/{id}/like": {
+            "post": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Like an item",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated liked items",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/item/{id}/sell": {
             "post": {
                 "tags": [
@@ -337,6 +366,35 @@ const docTemplate = `{
                         "description": "Item ID",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/item/{id}/unlike": {
+            "post": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Unlike an item",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated liked items",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
                         }
                     }
                 }
@@ -545,6 +603,9 @@ const docTemplate = `{
                 "is_negotiable": {
                     "type": "boolean"
                 },
+                "likes": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -625,6 +686,12 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string"
+                },
+                "liked_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "password": {
                     "type": "string"

@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	sqlitem "github.com/dooleyonline/backend/sql/item"
+	sqluser "github.com/dooleyonline/backend/sql/user"
 )
 
 // GetMany godoc
@@ -248,4 +249,76 @@ func Delete(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
+}
+
+// Like godoc
+//
+//	@Summary	Like an item
+//	@Tags		item
+//	@Param		id	path	int		true	"Item ID"
+//	@Success	200	{array}	int64	"Updated liked items"
+//	@Router		/item/{id}/like [post]
+func Like(c echo.Context) error {
+	var (
+		req  = c.Request()
+		ctx  = req.Context()
+		db   = c.(shared.Context).DB
+		user = c.(shared.Context).User
+	)
+	defer req.Body.Close()
+
+	var itemId int64
+	if err := echo.PathParamsBinder(c).Int64("id", &itemId).BindError(); err != nil {
+		return fmt.Errorf("failed to bind item id: %w", err)
+	}
+
+	likedItems, err := db.User.AddLikedItem(ctx, sqluser.AddLikedItemParams{
+		ItemID: itemId,
+		Email:  user.Email,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to like item: %w", err)
+	}
+
+	if err := db.Item.IncrementLike(ctx, itemId); err != nil {
+		return fmt.Errorf("failed to increment item like: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, likedItems)
+}
+
+// Unlike godoc
+//
+//	@Summary	Unlike an item
+//	@Tags		item
+//	@Param		id	path	int		true	"Item ID"
+//	@Success	200	{array}	int64	"Updated liked items"
+//	@Router		/item/{id}/unlike [post]
+func Unlike(c echo.Context) error {
+	var (
+		req  = c.Request()
+		ctx  = req.Context()
+		db   = c.(shared.Context).DB
+		user = c.(shared.Context).User
+	)
+	defer req.Body.Close()
+
+	var itemId int64
+	if err := echo.PathParamsBinder(c).Int64("id", &itemId).BindError(); err != nil {
+		return fmt.Errorf("failed to bind item id: %w", err)
+	}
+
+	likedItems, err := db.User.DeleteLikedItem(ctx, sqluser.DeleteLikedItemParams{
+		ItemID: itemId,
+		Email:  user.Email,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to unlike item: %w", err)
+	}
+
+	if err := db.Item.DecrementLike(ctx, itemId); err != nil {
+		return fmt.Errorf("failed to decrement item like: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, likedItems)
 }

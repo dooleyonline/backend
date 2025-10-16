@@ -53,6 +53,22 @@ SET
 WHERE
   id = $1;
 
+-- name: IncrementLike :exec
+UPDATE
+  item
+SET
+  likes = likes + 1
+WHERE
+  id = $1; 
+
+-- name: DecrementLike :exec
+UPDATE
+  item
+SET
+  likes = GREATEST(likes - 1, 0)
+WHERE
+  id = $1;
+
 -- name: Delete :exec
 DELETE FROM
   item
