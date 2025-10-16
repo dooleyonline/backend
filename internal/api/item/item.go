@@ -272,7 +272,22 @@ func Like(c echo.Context) error {
 		return fmt.Errorf("failed to bind item id: %w", err)
 	}
 
-	likedItems, err := db.User.AddLikedItem(ctx, sqluser.AddLikedItemParams{
+	for _, item := range user.LikedItems {
+		if item == itemId {
+			return c.JSON(http.StatusOK, user.LikedItems)
+		}
+	}
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	userQueries := sqluser.New(tx)
+	itemQueries := sqlitem.New(tx)
+
+	likedItems, err := userQueries.AddLikedItem(ctx, sqluser.AddLikedItemParams{
 		ItemID: itemId,
 		Email:  user.Email,
 	})
@@ -280,8 +295,12 @@ func Like(c echo.Context) error {
 		return fmt.Errorf("failed to like item: %w", err)
 	}
 
-	if err := db.Item.IncrementLike(ctx, itemId); err != nil {
+	if err := itemQueries.IncrementLike(ctx, itemId); err != nil {
 		return fmt.Errorf("failed to increment item like: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return c.JSON(http.StatusOK, likedItems)
@@ -308,7 +327,16 @@ func Unlike(c echo.Context) error {
 		return fmt.Errorf("failed to bind item id: %w", err)
 	}
 
-	likedItems, err := db.User.DeleteLikedItem(ctx, sqluser.DeleteLikedItemParams{
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	userQueries := sqluser.New(tx)
+	itemQueries := sqlitem.New(tx)
+
+	likedItems, err := userQueries.DeleteLikedItem(ctx, sqluser.DeleteLikedItemParams{
 		ItemID: itemId,
 		Email:  user.Email,
 	})
@@ -316,8 +344,12 @@ func Unlike(c echo.Context) error {
 		return fmt.Errorf("failed to unlike item: %w", err)
 	}
 
-	if err := db.Item.DecrementLike(ctx, itemId); err != nil {
+	if err := itemQueries.DecrementLike(ctx, itemId); err != nil {
 		return fmt.Errorf("failed to decrement item like: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return c.JSON(http.StatusOK, likedItems)
