@@ -278,10 +278,10 @@ func Like(c echo.Context) error {
 	}
 	defer tx.Rollback(ctx)
 
-	userQueries := sqluser.New(tx)
-	itemQueries := sqlitem.New(tx)
+	userTx := db.User.WithTx(tx)
+	itemTx := db.Item.WithTx(tx)
 
-	likedItems, err := userQueries.AddLikedItem(ctx, sqluser.AddLikedItemParams{
+	likedItems, err := userTx.AddLikedItem(ctx, sqluser.AddLikedItemParams{
 		ItemID: itemId,
 		Email:  user.Email,
 	})
@@ -289,7 +289,7 @@ func Like(c echo.Context) error {
 		return fmt.Errorf("failed to like item: %w", err)
 	}
 
-	if err := itemQueries.IncrementLike(ctx, itemId); err != nil {
+	if err := itemTx.IncrementLike(ctx, itemId); err != nil {
 		return fmt.Errorf("failed to increment item like: %w", err)
 	}
 
@@ -327,10 +327,10 @@ func Unlike(c echo.Context) error {
 	}
 	defer tx.Rollback(ctx)
 
-	userQueries := sqluser.New(tx)
-	itemQueries := sqlitem.New(tx)
+	userTx := db.User.WithTx(tx)
+	itemTx := db.Item.WithTx(tx)
 
-	likedItems, err := userQueries.DeleteLikedItem(ctx, sqluser.DeleteLikedItemParams{
+	likedItems, err := userTx.DeleteLikedItem(ctx, sqluser.DeleteLikedItemParams{
 		ItemID: itemId,
 		Email:  user.Email,
 	})
@@ -338,7 +338,7 @@ func Unlike(c echo.Context) error {
 		return fmt.Errorf("failed to unlike item: %w", err)
 	}
 
-	if err := itemQueries.DecrementLike(ctx, itemId); err != nil {
+	if err := itemTx.DecrementLike(ctx, itemId); err != nil {
 		return fmt.Errorf("failed to decrement item like: %w", err)
 	}
 
