@@ -317,6 +317,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/item/{id}/like": {
+            "post": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Like an item",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated liked items",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/item/{id}/sell": {
             "post": {
                 "tags": [
@@ -337,6 +366,35 @@ const docTemplate = `{
                         "description": "Item ID",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/item/{id}/unlike": {
+            "post": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Unlike an item",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated liked items",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
                         }
                     }
                 }
@@ -397,7 +455,30 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/create": {
+        "/user": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get many users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/sqluser.User"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "consumes": [
                     "application/json"
@@ -425,6 +506,36 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/sqluser.User"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/items": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get items for the current user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/sqlitem.Item"
+                            }
                         }
                     }
                 }
@@ -522,6 +633,9 @@ const docTemplate = `{
                 "is_negotiable": {
                     "type": "boolean"
                 },
+                "likes": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -533,6 +647,9 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "seller": {
+                    "type": "string"
                 },
                 "sold_at": {
                     "type": "string"
@@ -602,6 +719,21 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "liked_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "password": {
                     "type": "string"

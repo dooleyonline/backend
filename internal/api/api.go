@@ -57,6 +57,8 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.DELETE("/item/:id", itemapi.Delete)
 	e.POST("/item/:id/view", itemapi.IncrementView)
 	e.POST("/item/:id/sell", itemapi.Sell)
+	e.POST("/item/:id/like", itemapi.Like)
+	e.POST("/item/:id/unlike", itemapi.Unlike)
 
 	// category
 	e.GET("/category", categoryapi.GetAll)
@@ -65,6 +67,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	// user routes
 	e.GET("/user", userapi.GetMany)
 	e.POST("/user", userapi.Create)
+	e.GET("/user/items", userapi.GetItems)
 
 	// auth routes
 	e.GET("/auth", authapi.Get)
@@ -91,11 +94,14 @@ type routesConfig map[string][]string
 
 // define routes to protect with auth middleware
 var protectedRoutes = routesConfig{
-	"/item":          {http.MethodPost},
-	"/item/:id":      {http.MethodPut, http.MethodDelete},
-	"/item/:id/sell": {http.MethodPost},
-	"/auth":          {http.MethodGet},
-	"/auth/logout":   {http.MethodPost},
+	"/item":            {http.MethodPost},
+	"/item/:id":        {http.MethodPut, http.MethodDelete},
+	"/item/:id/sell":   {http.MethodPost},
+	"/item/:id/like":   {http.MethodPost},
+	"/item/:id/unlike": {http.MethodPost},
+	"/user/items":      {http.MethodGet},
+	"/auth":            {http.MethodGet},
+	"/auth/logout":     {http.MethodPost},
 }
 
 // hello godoc

@@ -53,6 +53,22 @@ SET
 WHERE
   id = $1;
 
+-- name: IncrementLike :exec
+UPDATE
+  item
+SET
+  likes = likes + 1
+WHERE
+  id = $1; 
+
+-- name: DecrementLike :exec
+UPDATE
+  item
+SET
+  likes = GREATEST(likes - 1, 0)
+WHERE
+  id = $1;
+
 -- name: Delete :exec
 DELETE FROM
   item
@@ -82,3 +98,13 @@ FROM
   item
 WHERE
   category = $1 AND fts @@ to_tsquery($2); 
+
+-- name: GetBySeller :many
+SELECT
+  *
+FROM
+  "item"
+WHERE
+  seller = @seller_ID::uuid
+ORDER BY
+  posted_at DESC;

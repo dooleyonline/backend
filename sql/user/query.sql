@@ -18,3 +18,31 @@ INSERT INTO
 VALUES
   ($1, $2)
 RETURNING *;
+
+-- name: GetLikedItems :one 
+SELECT
+  liked_items
+FROM 
+  "user"
+WHERE
+  email = $1;
+
+-- name: DeleteLikedItem :one
+UPDATE
+  "user"
+SET
+  liked_items = array_remove(liked_items, @item_ID::bigint)
+WHERE
+  email = @email
+  AND (liked_items @> ARRAY[@item_ID::bigint])
+RETURNING liked_items; 
+
+-- name: AddLikedItem :one 
+UPDATE
+  "user"
+SET
+  liked_items = array_append(liked_items, @item_ID::bigint)
+WHERE
+  email = @email
+  AND NOT liked_items @> ARRAY[@item_ID::bigint]
+RETURNING liked_items;

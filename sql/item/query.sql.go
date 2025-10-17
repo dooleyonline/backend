@@ -8,6 +8,8 @@ package sqlitem
 import (
 	"context"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const create = `-- name: Create :one
@@ -15,7 +17,7 @@ INSERT INTO
   item (name, description, images, price, condition, is_negotiable, category, subcategory, placeholder)
 VALUES
   ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder
+RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 `
 
 type CreateParams struct {
@@ -58,8 +60,24 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
 		&i.Subcategory,
 		&i.Fts,
 		&i.Placeholder,
+		&i.Likes,
+		&i.Seller,
 	)
 	return i, err
+}
+
+const decrementLike = `-- name: DecrementLike :exec
+UPDATE
+  item
+SET
+  likes = GREATEST(likes - 1, 0)
+WHERE
+  id = $1
+`
+
+func (q *Queries) DecrementLike(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, decrementLike, id)
+	return err
 }
 
 const delete = `-- name: Delete :exec
@@ -76,7 +94,7 @@ func (q *Queries) Delete(ctx context.Context, id int64) error {
 
 const get = `-- name: Get :one
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
   item
 WHERE
@@ -101,13 +119,15 @@ func (q *Queries) Get(ctx context.Context, id int64) (Item, error) {
 		&i.Subcategory,
 		&i.Fts,
 		&i.Placeholder,
+		&i.Likes,
+		&i.Seller,
 	)
 	return i, err
 }
 
 const getAll = `-- name: GetAll :many
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
   item
 `
@@ -136,6 +156,8 @@ func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
 			&i.Subcategory,
 			&i.Fts,
 			&i.Placeholder,
+			&i.Likes,
+			&i.Seller,
 		); err != nil {
 			return nil, err
 		}
@@ -149,7 +171,7 @@ func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
 
 const getByCategory = `-- name: GetByCategory :many
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
   item
 WHERE
@@ -180,6 +202,8 @@ func (q *Queries) GetByCategory(ctx context.Context, category string) ([]Item, e
 			&i.Subcategory,
 			&i.Fts,
 			&i.Placeholder,
+			&i.Likes,
+			&i.Seller,
 		); err != nil {
 			return nil, err
 		}
@@ -189,6 +213,68 @@ func (q *Queries) GetByCategory(ctx context.Context, category string) ([]Item, e
 		return nil, err
 	}
 	return items, nil
+}
+
+const getBySeller = `-- name: GetBySeller :many
+SELECT
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
+FROM
+  "item"
+WHERE
+  seller = $1::uuid
+ORDER BY
+  posted_at DESC
+`
+
+func (q *Queries) GetBySeller(ctx context.Context, sellerID pgtype.UUID) ([]Item, error) {
+	rows, err := q.db.Query(ctx, getBySeller, sellerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Item
+	for rows.Next() {
+		var i Item
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Images,
+			&i.Price,
+			&i.Condition,
+			&i.IsNegotiable,
+			&i.PostedAt,
+			&i.SoldAt,
+			&i.Views,
+			&i.Category,
+			&i.Subcategory,
+			&i.Fts,
+			&i.Placeholder,
+			&i.Likes,
+			&i.Seller,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const incrementLike = `-- name: IncrementLike :exec
+UPDATE
+  item
+SET
+  likes = likes + 1
+WHERE
+  id = $1
+`
+
+func (q *Queries) IncrementLike(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, incrementLike, id)
+	return err
 }
 
 const incrementView = `-- name: IncrementView :exec
@@ -207,7 +293,7 @@ func (q *Queries) IncrementView(ctx context.Context, id int64) error {
 
 const search = `-- name: Search :many
 SELECT
- id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder
+ id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
   item
 WHERE
@@ -238,6 +324,8 @@ func (q *Queries) Search(ctx context.Context, toTsquery string) ([]Item, error) 
 			&i.Subcategory,
 			&i.Fts,
 			&i.Placeholder,
+			&i.Likes,
+			&i.Seller,
 		); err != nil {
 			return nil, err
 		}
@@ -251,7 +339,7 @@ func (q *Queries) Search(ctx context.Context, toTsquery string) ([]Item, error) 
 
 const searchByCategory = `-- name: SearchByCategory :many
 SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
   item
 WHERE
@@ -287,6 +375,8 @@ func (q *Queries) SearchByCategory(ctx context.Context, arg SearchByCategoryPara
 			&i.Subcategory,
 			&i.Fts,
 			&i.Placeholder,
+			&i.Likes,
+			&i.Seller,
 		); err != nil {
 			return nil, err
 		}
@@ -333,7 +423,7 @@ SET
   placeholder = $11
 WHERE
   id = $1
-RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder
+RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 `
 
 type UpdateParams struct {
@@ -380,6 +470,8 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
 		&i.Subcategory,
 		&i.Fts,
 		&i.Placeholder,
+		&i.Likes,
+		&i.Seller,
 	)
 	return i, err
 }

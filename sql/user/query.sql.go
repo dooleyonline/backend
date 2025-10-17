@@ -9,12 +9,36 @@ import (
 	"context"
 )
 
+const addLikedItem = `-- name: AddLikedItem :one
+UPDATE
+  "user"
+SET
+  liked_items = array_append(liked_items, $1::bigint)
+WHERE
+  email = $2
+AND NOT
+  liked_items @> ARRAY[$1::bigint]
+RETURNING liked_items
+`
+
+type AddLikedItemParams struct {
+	ItemID int64  `json:"item_id"`
+	Email  string `json:"email"`
+}
+
+func (q *Queries) AddLikedItem(ctx context.Context, arg AddLikedItemParams) ([]int64, error) {
+	row := q.db.QueryRow(ctx, addLikedItem, arg.ItemID, arg.Email)
+	var liked_items []int64
+	err := row.Scan(&liked_items)
+	return liked_items, err
+}
+
 const create = `-- name: Create :one
 INSERT INTO
   "user" (email, password)
 VALUES
   ($1, $2)
-RETURNING email, password
+RETURNING email, password, liked_items, first_name, last_name, id
 `
 
 type CreateParams struct {
@@ -25,13 +49,42 @@ type CreateParams struct {
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (User, error) {
 	row := q.db.QueryRow(ctx, create, arg.Email, arg.Password)
 	var i User
-	err := row.Scan(&i.Email, &i.Password)
+	err := row.Scan(
+		&i.Email,
+		&i.Password,
+		&i.LikedItems,
+		&i.FirstName,
+		&i.LastName,
+		&i.ID,
+	)
 	return i, err
+}
+
+const deleteLikedItem = `-- name: DeleteLikedItem :one
+UPDATE
+  "user"
+SET
+  liked_items = array_remove(liked_items, $1::bigint)
+WHERE
+  email = $2
+RETURNING liked_items
+`
+
+type DeleteLikedItemParams struct {
+	ItemID int64  `json:"item_id"`
+	Email  string `json:"email"`
+}
+
+func (q *Queries) DeleteLikedItem(ctx context.Context, arg DeleteLikedItemParams) ([]int64, error) {
+	row := q.db.QueryRow(ctx, deleteLikedItem, arg.ItemID, arg.Email)
+	var liked_items []int64
+	err := row.Scan(&liked_items)
+	return liked_items, err
 }
 
 const get = `-- name: Get :one
 SELECT
-  email, password
+  email, password, liked_items, first_name, last_name, id
 FROM
   "user"
 WHERE
@@ -41,13 +94,36 @@ WHERE
 func (q *Queries) Get(ctx context.Context, email string) (User, error) {
 	row := q.db.QueryRow(ctx, get, email)
 	var i User
-	err := row.Scan(&i.Email, &i.Password)
+	err := row.Scan(
+		&i.Email,
+		&i.Password,
+		&i.LikedItems,
+		&i.FirstName,
+		&i.LastName,
+		&i.ID,
+	)
 	return i, err
+}
+
+const getLikedItems = `-- name: GetLikedItems :one
+SELECT
+  liked_items
+FROM 
+  "user"
+WHERE
+  email = $1
+`
+
+func (q *Queries) GetLikedItems(ctx context.Context, email string) ([]int64, error) {
+	row := q.db.QueryRow(ctx, getLikedItems, email)
+	var liked_items []int64
+	err := row.Scan(&liked_items)
+	return liked_items, err
 }
 
 const getMany = `-- name: GetMany :many
 SELECT
-  email, password
+  email, password, liked_items, first_name, last_name, id
 FROM
   "user"
 `
@@ -61,7 +137,14 @@ func (q *Queries) GetMany(ctx context.Context) ([]User, error) {
 	var items []User
 	for rows.Next() {
 		var i User
-		if err := rows.Scan(&i.Email, &i.Password); err != nil {
+		if err := rows.Scan(
+			&i.Email,
+			&i.Password,
+			&i.LikedItems,
+			&i.FirstName,
+			&i.LastName,
+			&i.ID,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

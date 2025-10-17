@@ -12,7 +12,10 @@ CREATE TABLE public.item (
   category text NOT NULL,
   subcategory text NOT NULL,
   fts tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, ((description || ' '::text) || name))) STORED,
-  placeholder text NOT NULL,
-  CONSTRAINT item_pkey PRIMARY KEY (id),
-  CONSTRAINT item_category_fkey FOREIGN KEY (category) REFERENCES category(name)
+  placeholder text NOT NULL default ''::text,
+  likes bigint NOT NULL DEFAULT '0'::bigint,
+  seller uuid not null,
+  constraint item_pkey primary key (id),
+  constraint item_category_fkey foreign KEY (category) references category (name) on update RESTRICT on delete RESTRICT,
+  constraint item_seller_fkey foreign KEY (seller) references "user" (id) on update CASCADE on delete CASCADE
 );
