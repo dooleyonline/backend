@@ -34,7 +34,6 @@ var (
 	NumItems     = int64(10)
 	ImagePattern = `sample/([0-9]|[12][0-9]|30)\.webp`
 	ConditionMax = 5.0
-	CategoryEnum = []string{"Clothing", "Collectibles & Art"}
 )
 
 func main() {
@@ -115,7 +114,7 @@ func main() {
 
 	var items []sqlitem.Item
 	if err := json.Unmarshal([]byte(data), &items); err != nil {
-		slog.Error("failed to unmarshal items: %w", slog.Any("error", err))
+		slog.Error("failed to unmarshal items", slog.Any("error", err))
 		return
 	}
 
@@ -162,6 +161,10 @@ func getCategories() ([]string, error) {
 	}
 	defer res.Body.Close()
 
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("request did not respond with 200")
+	}
+
 	var categories []sqlcategory.Category
 	if err := json.NewDecoder(res.Body).Decode(&categories); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal body: %w", err)
@@ -200,6 +203,7 @@ func createItem(ctx context.Context, item sqlitem.Item) error {
 	if err != nil {
 		return fmt.Errorf("failed to perform request: %w", err)
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("request did not respond with 200")
