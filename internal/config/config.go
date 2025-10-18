@@ -7,8 +7,10 @@ import (
 )
 
 type Config struct {
-	IsProd      bool
-	ServerAddr  string
+	IsProd     bool
+	Url        string
+	ServerAddr string
+
 	DatabaseUrl string
 
 	StorageUrl          string
@@ -40,6 +42,15 @@ func New() (*Config, error) {
 	env, ok := os.LookupEnv(envEnv)
 	if !ok {
 		return nil, fmt.Errorf("environment variable %s is required", envEnv)
+	}
+
+	isProd := env == "prod"
+
+	var url string
+	if isProd {
+		url = "https://api.dooleyonline.net"
+	} else {
+		url = "http://localhost:8080"
 	}
 
 	port, ok := os.LookupEnv(envPort)
@@ -83,9 +94,12 @@ func New() (*Config, error) {
 	}
 
 	cfg := &Config{
-		IsProd:              env == "prod",
-		ServerAddr:          ":" + port,
-		DatabaseUrl:         databaseUrl,
+		IsProd:     env == "prod",
+		Url:        url,
+		ServerAddr: ":" + port,
+
+		DatabaseUrl: databaseUrl,
+
 		StorageS3Url:        storageS3Url,
 		StorageRegion:       storageRegion,
 		StorageAccessId:     storageAccessId,
