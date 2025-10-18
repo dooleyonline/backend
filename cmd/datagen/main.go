@@ -29,7 +29,9 @@ const (
 
 	Prompt = `Generate a list of items to post on an online secondhand marketplace.
 	Make sure the images follow this pattern: sample/<any integer between 0 and 30>.webp.`
+)
 
+var (
 	NumItems = int64(10)
 )
 
