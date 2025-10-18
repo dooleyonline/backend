@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -107,19 +108,20 @@ func main() {
 	slog.Info("making POST requests...")
 
 	var wg sync.WaitGroup
-	success := 0
+	var success atomic.Int64
 	for _, item := range items {
 		wg.Go(func() {
 			if err := createItem(ctx, cfg, client, cred, item); err == nil {
-				success++
+				success.Add(1)
 			}
 		})
 	}
 
 	wg.Wait()
+	time.Sleep(time.Second)
 	stop()
 
-	slog.Info("requests completed", slog.Int("generated", len(items)), slog.Int("success", success))
+	slog.Info("requests completed", slog.Int("generated", len(items)), slog.Int("success", int(success.Load())))
 }
 
 func init() {
