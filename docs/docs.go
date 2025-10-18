@@ -601,6 +601,9 @@ const docTemplate = `{
                 "price": {
                     "type": "number"
                 },
+                "seller": {
+                    "type": "string"
+                },
                 "subcategory": {
                     "type": "string"
                 }
