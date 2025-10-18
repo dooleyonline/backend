@@ -44,15 +44,6 @@ func New() (*Config, error) {
 		return nil, fmt.Errorf("environment variable %s is required", envEnv)
 	}
 
-	isProd := env == "prod"
-
-	var url string
-	if isProd {
-		url = "https://api.dooleyonline.net"
-	} else {
-		url = "http://localhost:8080"
-	}
-
 	port, ok := os.LookupEnv(envPort)
 	if !ok {
 		return nil, fmt.Errorf("environment variable %s is required", envPort)
@@ -95,7 +86,7 @@ func New() (*Config, error) {
 
 	cfg := &Config{
 		IsProd:     env == "prod",
-		Url:        url,
+		Url:        "https://api.dooleyonline.net",
 		ServerAddr: ":" + port,
 
 		DatabaseUrl: databaseUrl,
