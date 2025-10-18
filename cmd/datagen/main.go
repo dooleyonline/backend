@@ -29,12 +29,8 @@ const (
 
 	Prompt = `Generate a list of items to post on an online secondhand marketplace.
 	Make sure the images follow this pattern: sample/<any integer between 0 and 30>.webp.`
-)
 
-var (
-	NumItems     = int64(10)
-	ImagePattern = `sample/([0-9]|[12][0-9]|30)\.webp`
-	ConditionMax = 5.0
+	NumItems = int64(10)
 )
 
 func main() {
@@ -236,6 +232,11 @@ func createItem(ctx context.Context, cfg *config.Config, client *http.Client, cr
 
 	return nil
 }
+
+var (
+	ImagePattern = `sample/([0-9]|[12][0-9]|30)\.webp`
+	ConditionMax = 5.0
+)
 
 func geminiConfig(categories []string) *genai.GenerateContentConfig {
 	return &genai.GenerateContentConfig{
