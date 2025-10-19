@@ -14,9 +14,9 @@ WHERE
 
 -- name: Create :one
 INSERT INTO
-  "user" (email, password)
+  "user" (email, password, first_name, last_name)
 VALUES
-  ($1, $2)
+  ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: GetLikedItems :one 
