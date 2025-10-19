@@ -162,6 +162,7 @@ func login(ctx context.Context, cfg *config.Config, client *http.Client, email, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request: %w", err)
 	}
+	defer res.Body.Close()
 
 	for _, c := range res.Cookies() {
 		if c.Name == cfg.AuthTokenName {
@@ -185,7 +186,7 @@ func getCategories(cfg *config.Config, client *http.Client) ([]string, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request did not respond with 200")
+		return nil, fmt.Errorf("unexpected status: %s", res.Status)
 	}
 
 	var categories []sqlcategory.Category
