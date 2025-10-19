@@ -34,19 +34,26 @@ func (q *Queries) AddLikedItem(ctx context.Context, arg AddLikedItemParams) ([]i
 
 const create = `-- name: Create :one
 INSERT INTO
-  "user" (email, password)
+  "user" (email, password, first_name, last_name)
 VALUES
-  ($1, $2)
+  ($1, $2, $3, $4)
 RETURNING email, password, liked_items, first_name, last_name, id
 `
 
 type CreateParams struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (User, error) {
-	row := q.db.QueryRow(ctx, create, arg.Email, arg.Password)
+	row := q.db.QueryRow(ctx, create,
+		arg.Email,
+		arg.Password,
+		arg.FirstName,
+		arg.LastName,
+	)
 	var i User
 	err := row.Scan(
 		&i.Email,
