@@ -23,3 +23,8 @@ tasks:
     cmds:
       - sqlc generate
     silent: true
+
+  gendata:
+    cmds:
+      - go run ./cmd/datagen/main.go
+    silent: true

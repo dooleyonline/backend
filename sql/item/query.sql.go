@@ -8,15 +8,13 @@ package sqlitem
 import (
 	"context"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const create = `-- name: Create :one
 INSERT INTO
-  item (name, description, images, price, condition, is_negotiable, category, subcategory, placeholder)
+  item (name, description, images, price, condition, is_negotiable, category, subcategory, placeholder, seller)
 VALUES
-  ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 `
 
@@ -30,6 +28,7 @@ type CreateParams struct {
 	Category     string   `json:"category"`
 	Subcategory  string   `json:"subcategory"`
 	Placeholder  string   `json:"placeholder"`
+	Seller       string   `json:"seller"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
@@ -43,6 +42,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
 		arg.Category,
 		arg.Subcategory,
 		arg.Placeholder,
+		arg.Seller,
 	)
 	var i Item
 	err := row.Scan(
@@ -226,7 +226,7 @@ ORDER BY
   posted_at DESC
 `
 
-func (q *Queries) GetBySeller(ctx context.Context, sellerID pgtype.UUID) ([]Item, error) {
+func (q *Queries) GetBySeller(ctx context.Context, sellerID string) ([]Item, error) {
 	rows, err := q.db.Query(ctx, getBySeller, sellerID)
 	if err != nil {
 		return nil, err

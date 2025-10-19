@@ -16,8 +16,7 @@ SET
   liked_items = array_append(liked_items, $1::bigint)
 WHERE
   email = $2
-AND NOT
-  liked_items @> ARRAY[$1::bigint]
+  AND NOT liked_items @> ARRAY[$1::bigint]
 RETURNING liked_items
 `
 
@@ -67,6 +66,7 @@ SET
   liked_items = array_remove(liked_items, $1::bigint)
 WHERE
   email = $2
+  AND (liked_items @> ARRAY[$1::bigint])
 RETURNING liked_items
 `
 

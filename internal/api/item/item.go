@@ -101,10 +101,11 @@ func Get(c echo.Context) error {
 //	@Router		/item [post]
 func Create(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
-		db  = c.(shared.Context).DB
-		cfg = c.(shared.Context).Cfg
+		req  = c.Request()
+		ctx  = req.Context()
+		db   = c.(shared.Context).DB
+		cfg  = c.(shared.Context).Cfg
+		user = c.(shared.Context).User
 	)
 	defer req.Body.Close()
 
@@ -112,6 +113,8 @@ func Create(c echo.Context) error {
 	if err := c.Bind(&params); err != nil {
 		return fmt.Errorf("failed to bind params: %w", err)
 	}
+
+	params.Seller = user.ID
 
 	placeholder, err := GeneratePlaceholder(cfg, params.Images[0])
 	if err != nil {

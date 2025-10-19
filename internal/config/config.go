@@ -7,8 +7,10 @@ import (
 )
 
 type Config struct {
-	IsProd      bool
-	ServerAddr  string
+	IsProd     bool
+	Url        string
+	ServerAddr string
+
 	DatabaseUrl string
 
 	StorageUrl          string
@@ -83,9 +85,12 @@ func New() (*Config, error) {
 	}
 
 	cfg := &Config{
-		IsProd:              env == "prod",
-		ServerAddr:          ":" + port,
-		DatabaseUrl:         databaseUrl,
+		IsProd:     env == "prod",
+		Url:        "https://api.dooleyonline.net",
+		ServerAddr: ":" + port,
+
+		DatabaseUrl: databaseUrl,
+
 		StorageS3Url:        storageS3Url,
 		StorageRegion:       storageRegion,
 		StorageAccessId:     storageAccessId,
