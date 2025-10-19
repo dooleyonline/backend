@@ -17,7 +17,7 @@ create table public.item (
       ((description || ' '::text) || name)
     )
   ) STORED null,
-  placeholder text not null default '''''::text'::text,
+  placeholder text not null default ''::text,
   likes bigint not null default '0'::bigint,
   seller uuid not null,
   constraint item_pkey primary key (id)
