@@ -112,6 +112,29 @@ func (q *Queries) Get(ctx context.Context, email string) (User, error) {
 	return i, err
 }
 
+const getByID = `-- name: GetByID :one
+SELECT
+  email, password, liked_items, first_name, last_name, id
+FROM
+  "user"
+WHERE
+  id = $1
+`
+
+func (q *Queries) GetByID(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRow(ctx, getByID, id)
+	var i User
+	err := row.Scan(
+		&i.Email,
+		&i.Password,
+		&i.LikedItems,
+		&i.FirstName,
+		&i.LastName,
+		&i.ID,
+	)
+	return i, err
+}
+
 const getLikedItems = `-- name: GetLikedItems :one
 SELECT
   liked_items

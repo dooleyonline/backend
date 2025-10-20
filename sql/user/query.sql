@@ -46,3 +46,11 @@ WHERE
   email = @email
   AND NOT liked_items @> ARRAY[@item_ID::bigint]
 RETURNING liked_items;
+
+-- name: GetByID :one
+SELECT
+  *
+FROM
+  "user"
+WHERE
+  id = $1;

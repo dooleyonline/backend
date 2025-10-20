@@ -95,3 +95,57 @@ func GetItems(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, items)
 }
+
+// GetUserByID godoc
+//
+//	@Summary	Get user by ID
+//	@Tags		user
+//	@Produce	json
+//	@Param		id	path		string	true	"User ID (UUID)"
+//	@Success	200	{object}	sqluser.User
+//	@Router		/user/{id} [get]
+func GetUserByID(c echo.Context) error {
+	var (
+		req = c.Request()
+		ctx = req.Context()
+		db  = c.(shared.Context).DB
+	)
+	defer req.Body.Close()
+
+	id := c.Param("id")
+	if id == "" {
+		return fmt.Errorf("user id is required")
+	}
+
+	user, err := db.User.GetByID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, user)
+}
+
+// GetMe godoc
+//
+//	@Summary	Get current authenticated user
+//	@Tags		user
+//	@Produce	json
+//	@Success	200	{object}	sqluser.User
+//	@Router		/user/me [get]
+//	@Security	ApiKeyAuth
+func GetMe(c echo.Context) error {
+	var (
+		req  = c.Request()
+		ctx  = req.Context()
+		db   = c.(shared.Context).DB
+		user = c.(shared.Context).User
+	)
+	defer req.Body.Close()
+
+	me, err := db.User.GetByID(ctx, user.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, me)
+}

@@ -473,6 +473,24 @@ paths:
       summary: Create user
       tags:
       - user
+  /user/{id}:
+    get:
+      parameters:
+      - description: User ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sqluser.User'
+      summary: Get user by ID
+      tags:
+      - user
   /user/items:
     get:
       consumes:
@@ -489,6 +507,20 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get items for the current user
+      tags:
+      - user
+  /user/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sqluser.User'
+      security:
+      - ApiKeyAuth: []
+      summary: Get current authenticated user
       tags:
       - user
 swagger: "2.0"
