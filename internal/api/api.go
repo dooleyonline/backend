@@ -59,6 +59,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.POST("/item/:id/sell", itemapi.Sell)
 	e.POST("/item/:id/like", itemapi.Like)
 	e.POST("/item/:id/unlike", itemapi.Unlike)
+	e.POST("/item/bulk", itemapi.GetItemsByIDs)
 
 	// category
 	e.GET("/category", categoryapi.GetAll)

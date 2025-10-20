@@ -231,6 +231,45 @@
                 }
             }
         },
+        "/item/bulk": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Get items by IDs",
+                "parameters": [
+                    {
+                        "description": "Item IDs",
+                        "name": "item_IDs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/sqlitem.Item"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/item/{id}": {
             "get": {
                 "produces": [

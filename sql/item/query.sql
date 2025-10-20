@@ -108,3 +108,11 @@ WHERE
   seller = @seller_ID::uuid
 ORDER BY
   posted_at DESC;
+
+-- name: GetByIDs :many 
+SELECT
+  *
+FROM
+  "item"
+WHERE
+  id = ANY(@item_IDs::bigint[]);

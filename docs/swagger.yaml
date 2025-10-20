@@ -420,6 +420,31 @@ paths:
       summary: Increment item views by ID
       tags:
       - item
+  /item/bulk:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Item IDs
+        in: body
+        name: item_IDs
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/sqlitem.Item'
+            type: array
+      summary: Get items by IDs
+      tags:
+      - item
   /storage/presign:
     post:
       consumes:

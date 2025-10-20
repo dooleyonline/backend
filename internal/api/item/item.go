@@ -355,3 +355,33 @@ func Unlike(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, likedItems)
 }
+
+// GetItemsByIDs godoc
+//
+//	@Summary	Get items by IDs
+//	@Tags		item
+//	@Accept		json
+//	@Produce	json
+//	@Param		item_IDs	body	[]int64	true	"Item IDs"
+//	@Success	200			{array}	sqlitem.Item
+//	@Router		/item/bulk [post]
+func GetItemsByIDs(c echo.Context) error {
+	var (
+		req = c.Request()
+		ctx = req.Context()
+		db  = c.(shared.Context).DB
+	)
+	defer req.Body.Close()
+
+	var itemIDs []int64
+	if err := c.Bind(&itemIDs); err != nil {
+		return fmt.Errorf("failed to bind item ids: %w", err)
+	}
+
+	items, err := db.Item.GetByIDs(ctx, itemIDs)
+	if err != nil {
+		return fmt.Errorf("failed to get items: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, items)
+}
