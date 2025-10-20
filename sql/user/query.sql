@@ -49,6 +49,14 @@ RETURNING liked_items;
 
 -- name: GetByID :one
 SELECT
+  id, first_name, last_name
+FROM
+  "user"
+WHERE
+  id = $1;
+
+-- name: GetFullUserByID :one
+SELECT
   *
 FROM
   "user"

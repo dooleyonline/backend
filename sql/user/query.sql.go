@@ -114,6 +114,28 @@ func (q *Queries) Get(ctx context.Context, email string) (User, error) {
 
 const getByID = `-- name: GetByID :one
 SELECT
+  id, first_name, last_name
+FROM
+  "user"
+WHERE
+  id = $1
+`
+
+type GetByIDRow struct {
+	ID        string `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
+func (q *Queries) GetByID(ctx context.Context, id string) (GetByIDRow, error) {
+	row := q.db.QueryRow(ctx, getByID, id)
+	var i GetByIDRow
+	err := row.Scan(&i.ID, &i.FirstName, &i.LastName)
+	return i, err
+}
+
+const getFullUserByID = `-- name: GetFullUserByID :one
+SELECT
   email, password, liked_items, first_name, last_name, id
 FROM
   "user"
@@ -121,8 +143,8 @@ WHERE
   id = $1
 `
 
-func (q *Queries) GetByID(ctx context.Context, id string) (User, error) {
-	row := q.db.QueryRow(ctx, getByID, id)
+func (q *Queries) GetFullUserByID(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRow(ctx, getFullUserByID, id)
 	var i User
 	err := row.Scan(
 		&i.Email,

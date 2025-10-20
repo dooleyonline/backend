@@ -618,7 +618,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Get user by ID",
+                "summary": "Get seller by ID",
                 "parameters": [
                     {
                         "type": "string",

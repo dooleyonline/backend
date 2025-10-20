@@ -59,7 +59,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.POST("/item/:id/sell", itemapi.Sell)
 	e.POST("/item/:id/like", itemapi.Like)
 	e.POST("/item/:id/unlike", itemapi.Unlike)
-	e.POST("/item/bulk", itemapi.GetItemsByIDs)
+	e.POST("/item/bulk", itemapi.GetBulk)
 
 	// category
 	e.GET("/category", categoryapi.GetAll)
@@ -69,8 +69,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.GET("/user", userapi.GetMany)
 	e.POST("/user", userapi.Create)
 	e.GET("/user/me", userapi.GetMe)
-	e.GET("/user/items", userapi.GetItems)
-	e.GET("/user/:id", userapi.GetUserByID)
+	e.GET("/user/:id", userapi.GetSeller)
 
 	// auth routes
 	e.GET("/auth", authapi.Get)

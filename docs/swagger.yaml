@@ -517,7 +517,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/sqluser.User'
-      summary: Get user by ID
+      summary: Get seller by ID
       tags:
       - user
   /user/items:

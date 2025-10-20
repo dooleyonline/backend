@@ -356,16 +356,16 @@ func Unlike(c echo.Context) error {
 	return c.JSON(http.StatusOK, likedItems)
 }
 
-// GetItemsByIDs godoc
+// GetBulk godoc
 //
-//	@Summary	Get items by IDs
+//	@Summary	Get items in bulk by list of IDs
 //	@Tags		item
 //	@Accept		json
 //	@Produce	json
 //	@Param		item_IDs	body	[]int64	true	"Item IDs"
 //	@Success	200			{array}	sqlitem.Item
 //	@Router		/item/bulk [post]
-func GetItemsByIDs(c echo.Context) error {
+func GetBulk(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
