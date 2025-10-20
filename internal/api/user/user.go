@@ -91,7 +91,7 @@ func GetSeller(c echo.Context) error {
 		return fmt.Errorf("user id is required")
 	}
 
-	seller, err := db.User.GetByID(ctx, id)
+	seller, err := db.User.GetSellerByID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}

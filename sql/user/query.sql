@@ -47,7 +47,7 @@ WHERE
   AND NOT liked_items @> ARRAY[@item_ID::bigint]
 RETURNING liked_items;
 
--- name: GetByID :one
+-- name: GetSellerByID :one
 SELECT
   id, first_name, last_name
 FROM
@@ -57,7 +57,7 @@ WHERE
 
 -- name: GetFullUserByID :one
 SELECT
-  *
+  id, email, liked_items, first_name, last_name
 FROM
   "user"
 WHERE
