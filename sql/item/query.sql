@@ -81,7 +81,7 @@ SELECT
 FROM
   item
 WHERE
-  fts @@ to_tsquery($1);
+  fts @@ websearch_to_tsquery($1);
 
 -- name: GetByCategory :many
 SELECT

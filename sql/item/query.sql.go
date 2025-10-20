@@ -297,11 +297,11 @@ SELECT
 FROM
   item
 WHERE
-  fts @@ to_tsquery($1)
+  fts @@ websearch_to_tsquery($1)
 `
 
-func (q *Queries) Search(ctx context.Context, toTsquery string) ([]Item, error) {
-	rows, err := q.db.Query(ctx, search, toTsquery)
+func (q *Queries) Search(ctx context.Context, websearchToTsquery string) ([]Item, error) {
+	rows, err := q.db.Query(ctx, search, websearchToTsquery)
 	if err != nil {
 		return nil, err
 	}
