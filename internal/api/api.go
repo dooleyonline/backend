@@ -101,7 +101,6 @@ var protectedRoutes = routesConfig{
 	"/item/:id/sell":   {http.MethodPost},
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
-	"/user/items":      {http.MethodGet},
 	"/user/me":         {http.MethodGet},
 	"/auth":            {http.MethodGet},
 	"/auth/logout":     {http.MethodPost},
