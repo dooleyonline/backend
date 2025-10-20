@@ -70,16 +70,44 @@ func Create(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-// GetItems godoc
+// GetSeller godoc
 //
-//	@Summary	Get items for the current user
+//	@Summary	Get seller by ID
 //	@Tags		user
-//	@Accept		json
 //	@Produce	json
-//	@Success	200	{array}	sqlitem.Item
-//	@Router		/user/items [get]
+//	@Param		id	path		string	true	"User ID (UUID)"
+//	@Success	200	{object}	sqluser.User
+//	@Router		/user/{id} [get]
+func GetSeller(c echo.Context) error {
+	var (
+		req = c.Request()
+		ctx = req.Context()
+		db  = c.(shared.Context).DB
+	)
+	defer req.Body.Close()
+
+	id := c.Param("id")
+	if id == "" {
+		return fmt.Errorf("user id is required")
+	}
+
+	seller, err := db.User.GetSellerByID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, seller)
+}
+
+// GetMe godoc
+//
+//	@Summary	Get current authenticated user
+//	@Tags		user
+//	@Produce	json
+//	@Success	200	{object}	sqluser.User
+//	@Router		/user/me [get]
 //	@Security	ApiKeyAuth
-func GetItems(c echo.Context) error {
+func GetMe(c echo.Context) error {
 	var (
 		req  = c.Request()
 		ctx  = req.Context()
@@ -88,10 +116,10 @@ func GetItems(c echo.Context) error {
 	)
 	defer req.Body.Close()
 
-	items, err := db.Item.GetBySeller(ctx, user.ID)
+	me, err := db.User.GetFullUserByID(ctx, user.ID)
 	if err != nil {
-		return fmt.Errorf("failed to get items: %w", err)
+		return fmt.Errorf("failed to get user: %w", err)
 	}
 
-	return c.JSON(http.StatusOK, items)
+	return c.JSON(http.StatusOK, me)
 }

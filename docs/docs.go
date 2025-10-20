@@ -176,6 +176,12 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Seller filter",
+                        "name": "seller",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "Search query",
                         "name": "q",
                         "in": "query"
@@ -226,6 +232,45 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/sqlitem.Item"
+                        }
+                    }
+                }
+            }
+        },
+        "/item/bulk": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Get items in bulk by list of IDs",
+                "parameters": [
+                    {
+                        "description": "Item IDs",
+                        "name": "item_IDs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/sqlitem.Item"
+                            }
                         }
                     }
                 }
@@ -511,15 +556,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/items": {
+        "/user/me": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
-                ],
-                "consumes": [
-                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -527,15 +569,40 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Get items for the current user",
+                "summary": "Get current authenticated user",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/sqlitem.Item"
-                            }
+                            "$ref": "#/definitions/sqluser.User"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get seller by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sqluser.User"
                         }
                     }
                 }

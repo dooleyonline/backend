@@ -81,7 +81,7 @@ SELECT
 FROM
   item
 WHERE
-  fts @@ to_tsquery($1);
+  fts @@ websearch_to_tsquery($1);
 
 -- name: GetByCategory :many
 SELECT
@@ -108,3 +108,11 @@ WHERE
   seller = @seller_ID::uuid
 ORDER BY
   posted_at DESC;
+
+-- name: GetByIDs :many 
+SELECT
+  *
+FROM
+  "item"
+WHERE
+  id = ANY(@item_IDs::bigint[]);

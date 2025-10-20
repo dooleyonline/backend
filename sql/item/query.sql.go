@@ -215,6 +215,52 @@ func (q *Queries) GetByCategory(ctx context.Context, category string) ([]Item, e
 	return items, nil
 }
 
+const getByIDs = `-- name: GetByIDs :many
+SELECT
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
+FROM
+  "item"
+WHERE
+  id = ANY($1::bigint[])
+`
+
+func (q *Queries) GetByIDs(ctx context.Context, itemIds []int64) ([]Item, error) {
+	rows, err := q.db.Query(ctx, getByIDs, itemIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Item
+	for rows.Next() {
+		var i Item
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Images,
+			&i.Price,
+			&i.Condition,
+			&i.IsNegotiable,
+			&i.PostedAt,
+			&i.SoldAt,
+			&i.Views,
+			&i.Category,
+			&i.Subcategory,
+			&i.Fts,
+			&i.Placeholder,
+			&i.Likes,
+			&i.Seller,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getBySeller = `-- name: GetBySeller :many
 SELECT
   id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
@@ -297,11 +343,11 @@ SELECT
 FROM
   item
 WHERE
-  fts @@ to_tsquery($1)
+  fts @@ websearch_to_tsquery($1)
 `
 
-func (q *Queries) Search(ctx context.Context, toTsquery string) ([]Item, error) {
-	rows, err := q.db.Query(ctx, search, toTsquery)
+func (q *Queries) Search(ctx context.Context, websearchToTsquery string) ([]Item, error) {
+	rows, err := q.db.Query(ctx, search, websearchToTsquery)
 	if err != nil {
 		return nil, err
 	}
