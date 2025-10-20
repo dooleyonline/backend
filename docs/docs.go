@@ -248,7 +248,7 @@ const docTemplate = `{
                 "tags": [
                     "item"
                 ],
-                "summary": "Get items by IDs",
+                "summary": "Get items in bulk by list of IDs",
                 "parameters": [
                     {
                         "description": "Item IDs",
@@ -551,36 +551,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/sqluser.User"
-                        }
-                    }
-                }
-            }
-        },
-        "/user/items": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Get items for the current user",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/sqlitem.Item"
-                            }
                         }
                     }
                 }

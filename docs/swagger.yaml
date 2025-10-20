@@ -442,7 +442,7 @@ paths:
             items:
               $ref: '#/definitions/sqlitem.Item'
             type: array
-      summary: Get items by IDs
+      summary: Get items in bulk by list of IDs
       tags:
       - item
   /storage/presign:
@@ -518,24 +518,6 @@ paths:
           schema:
             $ref: '#/definitions/sqluser.User'
       summary: Get seller by ID
-      tags:
-      - user
-  /user/items:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/sqlitem.Item'
-            type: array
-      security:
-      - ApiKeyAuth: []
-      summary: Get items for the current user
       tags:
       - user
   /user/me:
