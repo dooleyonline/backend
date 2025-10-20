@@ -252,6 +252,10 @@ paths:
   /item:
     get:
       parameters:
+      - description: Seller filter
+        in: query
+        name: seller
+        type: string
       - description: Search query
         in: query
         name: q

@@ -176,6 +176,12 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Seller filter",
+                        "name": "seller",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "Search query",
                         "name": "q",
                         "in": "query"

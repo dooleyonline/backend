@@ -17,6 +17,7 @@ import (
 //	@Summary	Get many items
 //	@Tags		item
 //	@Produce	json
+//	@Param		seller		query	string	false	"Seller filter"
 //	@Param		q			query	string	false	"Search query"
 //	@param		category	query	string	false	"Category filter"
 //	@Success	200			{array}	sqlitem.Item
@@ -34,10 +35,13 @@ func GetMany(c echo.Context) error {
 		err   error
 	)
 
+	seller := c.QueryParam("seller")
 	query := c.QueryParam("q")
 	category := c.QueryParam("category")
 
 	switch {
+	case seller != "":
+		items, err = db.Item.GetBySeller(ctx, seller)
 	case query != "" && category != "":
 		params := sqlitem.SearchByCategoryParams{
 			Category:  category,
