@@ -12,7 +12,7 @@ import (
 	"github.com/dooleyonline/backend/internal/api/shared"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
-	sqluser "github.com/dooleyonline/backend/sql/user"
+	userdb "github.com/dooleyonline/backend/internal/db/user"
 	"github.com/golang-jwt/jwt/v5"
 	echoJWT "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -61,7 +61,7 @@ func errorMiddleware() echo.MiddlewareFunc {
 func contextMiddleware(cfg *config.Config, db *db.DB) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			var user *sqluser.User
+			var user *userdb.User
 			token, ok := c.Get("user").(*jwt.Token)
 			if ok {
 				claims, ok := token.Claims.(*shared.JWTClaims)

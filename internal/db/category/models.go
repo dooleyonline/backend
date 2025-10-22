@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.30.0
 
-package sqlcategory
+package categorydb
 
 type Category struct {
 	Name        string   `json:"name"`

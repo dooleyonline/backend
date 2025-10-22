@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: query.sql
 
-package sqluser
+package userdb
 
 import (
 	"context"
@@ -15,18 +15,18 @@ UPDATE
 SET
   liked_items = array_append(liked_items, $1::bigint)
 WHERE
-  email = $2
+  id = $2
   AND NOT liked_items @> ARRAY[$1::bigint]
 RETURNING liked_items
 `
 
 type AddLikedItemParams struct {
 	ItemID int64  `json:"item_id"`
-	Email  string `json:"email"`
+	ID     string `json:"id"`
 }
 
 func (q *Queries) AddLikedItem(ctx context.Context, arg AddLikedItemParams) ([]int64, error) {
-	row := q.db.QueryRow(ctx, addLikedItem, arg.ItemID, arg.Email)
+	row := q.db.QueryRow(ctx, addLikedItem, arg.ItemID, arg.ID)
 	var liked_items []int64
 	err := row.Scan(&liked_items)
 	return liked_items, err
@@ -72,18 +72,18 @@ UPDATE
 SET
   liked_items = array_remove(liked_items, $1::bigint)
 WHERE
-  email = $2
+  id = $2
   AND (liked_items @> ARRAY[$1::bigint])
 RETURNING liked_items
 `
 
 type DeleteLikedItemParams struct {
 	ItemID int64  `json:"item_id"`
-	Email  string `json:"email"`
+	ID     string `json:"id"`
 }
 
 func (q *Queries) DeleteLikedItem(ctx context.Context, arg DeleteLikedItemParams) ([]int64, error) {
-	row := q.db.QueryRow(ctx, deleteLikedItem, arg.ItemID, arg.Email)
+	row := q.db.QueryRow(ctx, deleteLikedItem, arg.ItemID, arg.ID)
 	var liked_items []int64
 	err := row.Scan(&liked_items)
 	return liked_items, err
@@ -95,11 +95,11 @@ SELECT
 FROM
   "user"
 WHERE
-  email = $1
+  id = $1
 `
 
-func (q *Queries) Get(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRow(ctx, get, email)
+func (q *Queries) Get(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRow(ctx, get, id)
 	var i User
 	err := row.Scan(
 		&i.Email,
@@ -148,11 +148,11 @@ SELECT
 FROM 
   "user"
 WHERE
-  email = $1
+  id = $1
 `
 
-func (q *Queries) GetLikedItems(ctx context.Context, email string) ([]int64, error) {
-	row := q.db.QueryRow(ctx, getLikedItems, email)
+func (q *Queries) GetLikedItems(ctx context.Context, id string) ([]int64, error) {
+	row := q.db.QueryRow(ctx, getLikedItems, id)
 	var liked_items []int64
 	err := row.Scan(&liked_items)
 	return liked_items, err
@@ -171,7 +171,7 @@ func (q *Queries) GetMany(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	items := []User{}
 	for rows.Next() {
 		var i User
 		if err := rows.Scan(

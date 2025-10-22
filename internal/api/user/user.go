@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
-	sqluser "github.com/dooleyonline/backend/sql/user"
+	"github.com/dooleyonline/backend/internal/db/user"
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,7 +15,7 @@ import (
 //	@Tags		user
 //	@Accept		json
 //	@Produce	json
-//	@Success	200	{array}	sqluser.User
+//	@Success	200	{array}	userdb.User
 //	@Router		/user [get]
 func GetMany(c echo.Context) error {
 	var (
@@ -39,8 +39,8 @@ func GetMany(c echo.Context) error {
 //	@Tags		user
 //	@Accept		json
 //	@Produce	json
-//	@Param		user	body		sqluser.CreateParams	true	"User"
-//	@Success	200		{object}	sqluser.User
+//	@Param		user	body		userdb.CreateParams	true	"User"
+//	@Success	200		{object}	userdb.User
 //	@Router		/user [post]
 func Create(c echo.Context) error {
 	var (
@@ -50,7 +50,7 @@ func Create(c echo.Context) error {
 	)
 	defer req.Body.Close()
 
-	var params sqluser.CreateParams
+	var params userdb.CreateParams
 	if err := c.Bind(&params); err != nil {
 		return fmt.Errorf("failed to bind params: %w", err)
 	}
@@ -76,7 +76,7 @@ func Create(c echo.Context) error {
 //	@Tags		user
 //	@Produce	json
 //	@Param		id	path		string	true	"User ID (UUID)"
-//	@Success	200	{object}	sqluser.User
+//	@Success	200	{object}	userdb.User
 //	@Router		/user/{id} [get]
 func GetSeller(c echo.Context) error {
 	var (
@@ -104,7 +104,7 @@ func GetSeller(c echo.Context) error {
 //	@Summary	Get current authenticated user
 //	@Tags		user
 //	@Produce	json
-//	@Success	200	{object}	sqluser.User
+//	@Success	200	{object}	userdb.User
 //	@Router		/user/me [get]
 //	@Security	ApiKeyAuth
 func GetMe(c echo.Context) error {

@@ -10,7 +10,7 @@ SELECT
 FROM
   "user"
 WHERE
-  email = $1;
+  id = $1;
 
 -- name: Create :one
 INSERT INTO
@@ -25,7 +25,7 @@ SELECT
 FROM 
   "user"
 WHERE
-  email = $1;
+  id = $1;
 
 -- name: DeleteLikedItem :one
 UPDATE
@@ -33,7 +33,7 @@ UPDATE
 SET
   liked_items = array_remove(liked_items, @item_ID::bigint)
 WHERE
-  email = @email
+  id = @id
   AND (liked_items @> ARRAY[@item_ID::bigint])
 RETURNING liked_items; 
 
@@ -43,7 +43,7 @@ UPDATE
 SET
   liked_items = array_append(liked_items, @item_ID::bigint)
 WHERE
-  email = @email
+  id = @id
   AND NOT liked_items @> ARRAY[@item_ID::bigint]
 RETURNING liked_items;
 

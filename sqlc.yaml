@@ -6,37 +6,39 @@ sql:
   - engine: "postgresql"
     database:
       managed: true
-    queries: "sql/item/query.sql"
-    schema: "sql/item/schema.sql"
+    queries: "sqlc/item/query.sql"
+    schema: "sqlc/item/schema.sql"
     gen:
       go:
-        package: "sqlitem"
-        out: "sql/item"
+        package: "itemdb"
+        out: "internal/db/item"
         sql_package: "pgx/v5"
         emit_json_tags: true
+        emit_empty_slices: true
   - engine: "postgresql"
     database:
       managed: true
-    queries: "sql/category/query.sql"
-    schema: "sql/category/schema.sql"
+    queries: "sqlc/category/query.sql"
+    schema: "sqlc/category/schema.sql"
     gen:
       go:
-        package: "sqlcategory"
-        out: "sql/category"
+        package: "categorydb"
+        out: "internal/db/category"
         sql_package: "pgx/v5"
         emit_json_tags: true
+        emit_empty_slices: true
   - engine: "postgresql"
     database:
       managed: true
-    queries: "sql/user/query.sql"
-    schema: "sql/user/schema.sql"
+    queries: "sqlc/user/query.sql"
+    schema: "sqlc/user/schema.sql"
     gen:
       go:
-        package: "sqluser"
-        out: "sql/user"
+        package: "userdb"
+        out: "internal/db/user"
         sql_package: "pgx/v5"
         emit_json_tags: true
-
+        emit_empty_slices: true
 overrides:
   go:
     overrides:
