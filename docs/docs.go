@@ -53,7 +53,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User",
                         "schema": {
-                            "$ref": "#/definitions/sqluser.User"
+                            "$ref": "#/definitions/userdb.User"
                         }
                     }
                 }
@@ -86,7 +86,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User",
                         "schema": {
-                            "$ref": "#/definitions/sqluser.User"
+                            "$ref": "#/definitions/userdb.User"
                         }
                     }
                 }
@@ -129,7 +129,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/sqlcategory.Category"
+                                "$ref": "#/definitions/categorydb.Category"
                             }
                         }
                     }
@@ -158,7 +158,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sqlcategory.Category"
+                            "$ref": "#/definitions/categorydb.Category"
                         }
                     }
                 }
@@ -199,7 +199,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/sqlitem.Item"
+                                "$ref": "#/definitions/itemdb.Item"
                             }
                         }
                     }
@@ -223,15 +223,15 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sqlitem.CreateParams"
+                            "$ref": "#/definitions/itemsvc.CreateUpdateInput"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/sqlitem.Item"
+                            "$ref": "#/definitions/itemdb.Item"
                         }
                     }
                 }
@@ -269,7 +269,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/sqlitem.Item"
+                                "$ref": "#/definitions/itemdb.Item"
                             }
                         }
                     }
@@ -298,7 +298,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sqlitem.Item"
+                            "$ref": "#/definitions/itemdb.Item"
                         }
                     }
                 }
@@ -328,7 +328,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sqlitem.UpdateParams"
+                            "$ref": "#/definitions/itemsvc.CreateUpdateInput"
                         }
                     }
                 ],
@@ -336,7 +336,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sqlitem.Item"
+                            "$ref": "#/definitions/itemdb.Item"
                         }
                     }
                 }
@@ -356,8 +356,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -407,11 +407,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Item ID",
-                        "schema": {
-                            "type": "string"
-                        }
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -461,8 +458,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -486,7 +483,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/storage.PresignParams"
+                            "$ref": "#/definitions/storage.PresignRequest"
                         }
                     }
                 ],
@@ -494,7 +491,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sqlitem.Item"
+                            "$ref": "#/definitions/itemdb.Item"
                         }
                     }
                 }
@@ -518,7 +515,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/sqluser.User"
+                                "$ref": "#/definitions/usersvc.UserSummary"
                             }
                         }
                     }
@@ -542,15 +539,15 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sqluser.CreateParams"
+                            "$ref": "#/definitions/usersvc.CreateInput"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/sqluser.User"
+                            "$ref": "#/definitions/usersvc.UserSummary"
                         }
                     }
                 }
@@ -574,7 +571,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sqluser.User"
+                            "$ref": "#/definitions/usersvc.Me"
                         }
                     }
                 }
@@ -602,7 +599,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sqluser.User"
+                            "$ref": "#/definitions/usersvc.Seller"
                         }
                     }
                 }
@@ -621,7 +618,7 @@ const docTemplate = `{
                 }
             }
         },
-        "sqlcategory.Category": {
+        "categorydb.Category": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -638,45 +635,7 @@ const docTemplate = `{
                 }
             }
         },
-        "sqlitem.CreateParams": {
-            "type": "object",
-            "properties": {
-                "category": {
-                    "type": "string"
-                },
-                "condition": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "images": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "is_negotiable": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "placeholder": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "seller": {
-                    "type": "string"
-                },
-                "subcategory": {
-                    "type": "string"
-                }
-            }
-        },
-        "sqlitem.Item": {
+        "itemdb.Item": {
             "type": "object",
             "properties": {
                 "category": {
@@ -732,7 +691,7 @@ const docTemplate = `{
                 }
             }
         },
-        "sqlitem.UpdateParams": {
+        "itemsvc.CreateUpdateInput": {
             "type": "object",
             "properties": {
                 "category": {
@@ -743,9 +702,6 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "images": {
                     "type": "array",
@@ -759,38 +715,32 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "placeholder": {
-                    "type": "string"
-                },
                 "price": {
                     "type": "number"
                 },
                 "subcategory": {
                     "type": "string"
-                },
-                "views": {
-                    "type": "integer"
                 }
             }
         },
-        "sqluser.CreateParams": {
+        "storage.PresignRequest": {
             "type": "object",
             "properties": {
-                "email": {
+                "bucket": {
                     "type": "string"
                 },
-                "first_name": {
+                "contentType": {
                     "type": "string"
                 },
-                "last_name": {
+                "key": {
                     "type": "string"
                 },
-                "password": {
+                "method": {
                     "type": "string"
                 }
             }
         },
-        "sqluser.User": {
+        "userdb.User": {
             "type": "object",
             "properties": {
                 "email": {
@@ -816,19 +766,74 @@ const docTemplate = `{
                 }
             }
         },
-        "storage.PresignParams": {
+        "usersvc.CreateInput": {
             "type": "object",
             "properties": {
-                "bucket": {
+                "email": {
                     "type": "string"
                 },
-                "contentType": {
+                "firstName": {
                     "type": "string"
                 },
-                "key": {
+                "lastName": {
                     "type": "string"
                 },
-                "method": {
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "usersvc.Me": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "likedItems": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                }
+            }
+        },
+        "usersvc.Seller": {
+            "type": "object",
+            "properties": {
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                }
+            }
+        },
+        "usersvc.UserSummary": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_name": {
                     "type": "string"
                 }
             }

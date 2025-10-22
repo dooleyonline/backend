@@ -16,7 +16,6 @@ func New(svc *categorysvc.Service) *Handler {
 	return &Handler{svc}
 }
 
-
 // GetAll godoc
 //
 //	@Summary	Get all categories

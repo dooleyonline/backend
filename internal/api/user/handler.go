@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type Handler struct{
+type Handler struct {
 	svc *usersvc.Service
 }
 
@@ -47,7 +47,7 @@ func (h *Handler) GetMany(c echo.Context) error {
 //	@Accept		json
 //	@Produce	json
 //	@Param		user	body		usersvc.CreateInput	true	"User"
-//	@Success	201		{object}	usersvc.User
+//	@Success	201		{object}	usersvc.UserSummary
 //	@Router		/user [post]
 func (h *Handler) Create(c echo.Context) error {
 	var (

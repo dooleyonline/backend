@@ -39,7 +39,7 @@ import (
 // @BasePath	/
 func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*echo.Echo, error) {
 	item := itemhandler.New(itemsvc.New(cfg, db))
-	category := categoryhandler.New(categorysvc.New(cfg, db))
+	category := categoryhandler.New(categorysvc.New(db))
 	user := userhandler.New(usersvc.New(db))
 	storage := storagehandler.New(storage.NewClient(cfg))
 

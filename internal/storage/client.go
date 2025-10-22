@@ -16,7 +16,7 @@ import (
 )
 
 type Client struct {
-	cfg *config.Config
+	cfg    *config.Config
 	signer *v4.Signer
 }
 
@@ -27,7 +27,6 @@ func NewClient(cfg *config.Config) *Client {
 	return &Client{cfg, signer}
 }
 
-
 func (c *Client) Presign(ctx context.Context, sreq *PresignRequest) (string, http.Header, error) {
 	url := c.buildURL(sreq.Bucket, sreq.Key)
 	req, err := http.NewRequestWithContext(ctx, sreq.Method, url, nil)
@@ -36,7 +35,7 @@ func (c *Client) Presign(ctx context.Context, sreq *PresignRequest) (string, htt
 	}
 	req.Header.Set("Content-Type", sreq.ContentType)
 
-	return c.signer.PresignHTTP(ctx, 
+	return c.signer.PresignHTTP(ctx,
 		c.credentials(),
 		req,
 		hashPayload(""),

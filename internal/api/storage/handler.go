@@ -38,18 +38,18 @@ func (h *Handler) Presign(c echo.Context) error {
 	}
 
 	var (
-		url string
+		url    string
 		header http.Header
-		err error
+		err    error
 	)
 
 	switch input.Method {
-	case http.MethodPut: 
+	case http.MethodPut:
 		if input.Bucket == "" || input.Key == "" || input.ContentType == "" {
 			return fmt.Errorf("invalid presign parameters")
 		}
 		url, header, err = h.sc.Presign(ctx, &input)
-	default: 
+	default:
 		return fmt.Errorf("invalid storage request")
 	}
 
@@ -58,7 +58,7 @@ func (h *Handler) Presign(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, storagec.PresignResponse{
-		URL: 	url, 
+		URL:    url,
 		Header: header,
 	})
 }

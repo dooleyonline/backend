@@ -7,7 +7,7 @@ definitions:
       password:
         type: string
     type: object
-  sqlcategory.Category:
+  categorydb.Category:
     properties:
       icon:
         type: string
@@ -18,32 +18,7 @@ definitions:
           type: string
         type: array
     type: object
-  sqlitem.CreateParams:
-    properties:
-      category:
-        type: string
-      condition:
-        type: integer
-      description:
-        type: string
-      images:
-        items:
-          type: string
-        type: array
-      is_negotiable:
-        type: boolean
-      name:
-        type: string
-      placeholder:
-        type: string
-      price:
-        type: number
-      seller:
-        type: string
-      subcategory:
-        type: string
-    type: object
-  sqlitem.Item:
+  itemdb.Item:
     properties:
       category:
         type: string
@@ -80,7 +55,7 @@ definitions:
       views:
         type: integer
     type: object
-  sqlitem.UpdateParams:
+  itemsvc.CreateUpdateInput:
     properties:
       category:
         type: string
@@ -88,8 +63,6 @@ definitions:
         type: integer
       description:
         type: string
-      id:
-        type: integer
       images:
         items:
           type: string
@@ -98,27 +71,23 @@ definitions:
         type: boolean
       name:
         type: string
-      placeholder:
-        type: string
       price:
         type: number
       subcategory:
         type: string
-      views:
-        type: integer
     type: object
-  sqluser.CreateParams:
+  storage.PresignRequest:
     properties:
-      email:
+      bucket:
         type: string
-      first_name:
+      contentType:
         type: string
-      last_name:
+      key:
         type: string
-      password:
+      method:
         type: string
     type: object
-  sqluser.User:
+  userdb.User:
     properties:
       email:
         type: string
@@ -135,15 +104,51 @@ definitions:
       password:
         type: string
     type: object
-  storage.PresignParams:
+  usersvc.CreateInput:
     properties:
-      bucket:
+      email:
         type: string
-      contentType:
+      firstName:
         type: string
-      key:
+      lastName:
         type: string
-      method:
+      password:
+        type: string
+    type: object
+  usersvc.Me:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      likedItems:
+        items:
+          format: int64
+          type: integer
+        type: array
+    type: object
+  usersvc.Seller:
+    properties:
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+    type: object
+  usersvc.UserSummary:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
         type: string
     type: object
 host: localhost:8080
@@ -178,7 +183,7 @@ paths:
         "200":
           description: User
           schema:
-            $ref: '#/definitions/sqluser.User'
+            $ref: '#/definitions/userdb.User'
       summary: Get auth status
       tags:
       - auth
@@ -199,7 +204,7 @@ paths:
         "200":
           description: User
           schema:
-            $ref: '#/definitions/sqluser.User'
+            $ref: '#/definitions/userdb.User'
       summary: Log in
       tags:
       - auth
@@ -226,7 +231,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/sqlcategory.Category'
+              $ref: '#/definitions/categorydb.Category'
             type: array
       summary: Get all categories
       tags:
@@ -245,7 +250,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sqlcategory.Category'
+            $ref: '#/definitions/categorydb.Category'
       summary: Get category by name
       tags:
       - category
@@ -271,7 +276,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/sqlitem.Item'
+              $ref: '#/definitions/itemdb.Item'
             type: array
       summary: Get many items
       tags:
@@ -285,14 +290,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/sqlitem.CreateParams'
+          $ref: '#/definitions/itemsvc.CreateUpdateInput'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/sqlitem.Item'
+            $ref: '#/definitions/itemdb.Item'
       summary: Create item
       tags:
       - item
@@ -305,8 +310,8 @@ paths:
         required: true
         type: integer
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
       summary: Delete item by ID
       tags:
       - item
@@ -323,7 +328,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sqlitem.Item'
+            $ref: '#/definitions/itemdb.Item'
       summary: Get item by ID
       tags:
       - item
@@ -341,14 +346,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/sqlitem.UpdateParams'
+          $ref: '#/definitions/itemsvc.CreateUpdateInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sqlitem.Item'
+            $ref: '#/definitions/itemdb.Item'
       summary: Update item by ID
       tags:
       - item
@@ -380,10 +385,8 @@ paths:
         required: true
         type: integer
       responses:
-        "200":
-          description: Item ID
-          schema:
-            type: string
+        "204":
+          description: No Content
       summary: Update sold_at property by ID
       tags:
       - item
@@ -415,8 +418,8 @@ paths:
         required: true
         type: integer
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
       summary: Increment item views by ID
       tags:
       - item
@@ -440,7 +443,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/sqlitem.Item'
+              $ref: '#/definitions/itemdb.Item'
             type: array
       summary: Get items in bulk by list of IDs
       tags:
@@ -455,14 +458,14 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/storage.PresignParams'
+          $ref: '#/definitions/storage.PresignRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sqlitem.Item'
+            $ref: '#/definitions/itemdb.Item'
       summary: Generate presigned URL for s3 operation
       tags:
       - other
@@ -477,7 +480,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/sqluser.User'
+              $ref: '#/definitions/usersvc.UserSummary'
             type: array
       summary: Get many users
       tags:
@@ -491,14 +494,14 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/sqluser.CreateParams'
+          $ref: '#/definitions/usersvc.CreateInput'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/sqluser.User'
+            $ref: '#/definitions/usersvc.UserSummary'
       summary: Create user
       tags:
       - user
@@ -516,7 +519,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sqluser.User'
+            $ref: '#/definitions/usersvc.Seller'
       summary: Get seller by ID
       tags:
       - user
@@ -528,7 +531,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sqluser.User'
+            $ref: '#/definitions/usersvc.Me'
       security:
       - ApiKeyAuth: []
       summary: Get current authenticated user

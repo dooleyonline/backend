@@ -1,7 +1,7 @@
 package usersvc
 
 type CreateInput struct {
-	Email     string 
+	Email     string
 	Password  string
 	FirstName string
 	LastName  string
@@ -15,15 +15,15 @@ type UserSummary struct {
 }
 
 type Me struct {
-	ID        string
-	Email     string
-	FirstName string
-	LastName  string
+	ID         string
+	Email      string
+	FirstName  string
+	LastName   string
 	LikedItems []int64
 }
 
 type Seller struct {
-	ID string
+	ID        string
 	FirstName string
-	LastName string
+	LastName  string
 }

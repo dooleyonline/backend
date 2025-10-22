@@ -80,10 +80,10 @@ func (s *Service) GetMe(ctx context.Context, id string) (Me, error) {
 	}
 
 	return Me{
-		ID:        full.ID,
-		Email:     full.Email,
-		FirstName: full.FirstName,
-		LastName:  full.LastName,
+		ID:         full.ID,
+		Email:      full.Email,
+		FirstName:  full.FirstName,
+		LastName:   full.LastName,
 		LikedItems: full.LikedItems,
 	}, nil
 }

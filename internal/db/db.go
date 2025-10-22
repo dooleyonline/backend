@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/dooleyonline/backend/internal/config"
-	"github.com/dooleyonline/backend/internal/db/category"
-	"github.com/dooleyonline/backend/internal/db/item"
-	"github.com/dooleyonline/backend/internal/db/user"
+	categorydb "github.com/dooleyonline/backend/internal/db/category"
+	itemdb "github.com/dooleyonline/backend/internal/db/item"
+	userdb "github.com/dooleyonline/backend/internal/db/user"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

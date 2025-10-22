@@ -11,17 +11,14 @@ import (
 	userdb "github.com/dooleyonline/backend/internal/db/user"
 )
 
-
 type Service struct {
 	cfg *config.Config
 	db  *db.DB
 }
 
-
 func New(cfg *config.Config, db *db.DB) *Service {
 	return &Service{cfg, db}
 }
-
 
 func (s *Service) GetMany(ctx context.Context, params GetManyFilters) ([]itemdb.Item, error) {
 	switch {
@@ -42,11 +39,9 @@ func (s *Service) GetMany(ctx context.Context, params GetManyFilters) ([]itemdb.
 	}
 }
 
-
 func (s *Service) Get(ctx context.Context, id int64) (itemdb.Item, error) {
 	return s.db.Item.Get(ctx, id)
 }
-
 
 func (s *Service) Create(ctx context.Context, id string, p CreateUpdateInput) (itemdb.Item, error) {
 	// Validate images array
@@ -75,7 +70,6 @@ func (s *Service) Create(ctx context.Context, id string, p CreateUpdateInput) (i
 	return s.db.Item.Create(ctx, dbparams)
 }
 
-
 func (s *Service) Update(ctx context.Context, id int64, p CreateUpdateInput) (itemdb.Item, error) {
 	placeholder, err := generatePlaceholder(s.cfg, p.Images[0])
 	if err != nil {
@@ -98,11 +92,9 @@ func (s *Service) Update(ctx context.Context, id int64, p CreateUpdateInput) (it
 	return s.db.Item.Update(ctx, dbparams)
 }
 
-
 func (s *Service) Delete(ctx context.Context, id int64) error {
 	return s.db.Item.Delete(ctx, id)
 }
-
 
 func (s *Service) Sell(ctx context.Context, id int64) error {
 	now := time.Now()
@@ -112,11 +104,9 @@ func (s *Service) Sell(ctx context.Context, id int64) error {
 	})
 }
 
-
 func (s *Service) IncrementView(ctx context.Context, id int64) error {
 	return s.db.Item.IncrementView(ctx, id)
 }
-
 
 func (s *Service) Like(ctx context.Context, itemId int64, userId string) ([]int64, error) {
 	tx, err := s.db.Pool.Begin(ctx)
@@ -174,7 +164,6 @@ func (s *Service) Unlike(ctx context.Context, itemId int64, userId string) ([]in
 	}
 	return likedItems, nil
 }
-
 
 func (s *Service) GetBulk(ctx context.Context, ids []int64) ([]itemdb.Item, error) {
 	return s.db.Item.GetByIDs(ctx, ids)

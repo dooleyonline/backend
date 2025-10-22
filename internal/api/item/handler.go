@@ -114,7 +114,7 @@ func (h *Handler) Create(c echo.Context) error {
 //	@Tags		item
 //	@Accept		json
 //	@Produce	json
-//	@Param		id		path		int						true	"Item ID"
+//	@Param		id		path		int							true	"Item ID"
 //	@Param		item	body		itemsvc.CreateUpdateInput	true	"Item"
 //	@Success	200		{object}	itemdb.Item
 //	@Router		/item/{id} [put]
@@ -172,7 +172,7 @@ func (h *Handler) Delete(c echo.Context) error {
 //
 //	@Summary	Update sold_at property by ID
 //	@Tags		item
-//	@Param		id	path		int		true	"Item ID"
+//	@Param		id	path	int	true	"Item ID"
 //	@Success	204
 //	@Router		/item/{id}/sell [post]
 func (h *Handler) Sell(c echo.Context) error {
@@ -283,7 +283,7 @@ func (h *Handler) Unlike(c echo.Context) error {
 //	@Accept		json
 //	@Produce	json
 //	@Param		item_IDs	body	[]int64	true	"Item IDs"
-//	@Success	200			{array}	itemsvc.Item
+//	@Success	200			{array}	itemdb.Item
 //	@Router		/item/bulk [post]
 func (h *Handler) GetBulk(c echo.Context) error {
 	var (

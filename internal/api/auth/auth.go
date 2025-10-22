@@ -20,7 +20,7 @@ type loginParams struct {
 //	@Summary	Get auth status
 //	@Tags		auth
 //	@Produce	json
-//	@Success	200	{object}	sqluser.User	"User"
+//	@Success	200	{object}	userdb.User	"User"
 //	@Router		/auth [get]
 func Get(c echo.Context) error {
 	var (
@@ -38,8 +38,8 @@ func Get(c echo.Context) error {
 //	@Tags		auth
 //	@Accept		json
 //	@Produce	json
-//	@Param		user	body		loginParams		true	"Login Params"
-//	@Success	200		{object}	sqluser.User	"User"
+//	@Param		user	body		loginParams	true	"Login Params"
+//	@Success	200		{object}	userdb.User	"User"
 //	@Router		/auth/login [post]
 func Login(c echo.Context) error {
 	var (
