@@ -13,7 +13,7 @@ type Handler struct {
 }
 
 func New(sc *storagec.Client) *Handler {
-	return &Handler{sc: sc}
+	return &Handler{sc}
 }
 
 // Presign godoc

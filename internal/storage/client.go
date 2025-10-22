@@ -24,7 +24,7 @@ func NewClient(cfg *config.Config) *Client {
 	signer := v4.NewSigner(func(signer *v4.SignerOptions) {
 		signer.DisableHeaderHoisting = true
 	})
-	return &Client{cfg: cfg, signer: signer}
+	return &Client{cfg, signer}
 }
 
 
