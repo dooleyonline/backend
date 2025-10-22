@@ -17,14 +17,16 @@ func TestPresignUploadText(t *testing.T) {
 		t.Fatal("failed to initialize config:", err)
 	}
 
-	sreq := &PresignParams{
+	sreq := &PresignRequest{
 		Method:      http.MethodPut,
 		Bucket:      "image",
 		Key:         "test-plain.txt",
 		ContentType: "text/plain",
 	}
 
-	url, header, err := Presign(t.Context(), cfg, sreq)
+	storage := NewClient(cfg)
+
+	url, header, err := storage.Presign(t.Context(), sreq)
 	if err != nil {
 		t.Fatal("failed to presign:", err)
 	}
@@ -58,14 +60,15 @@ func TestPresignUploadImage(t *testing.T) {
 	}
 	defer payload.Close()
 
-	sreq := &PresignParams{
+	sreq := &PresignRequest{
 		Method:      http.MethodPut,
 		Bucket:      "image",
 		Key:         "test-image.png",
 		ContentType: "image/png",
 	}
 
-	url, header, err := Presign(t.Context(), cfg, sreq)
+	storage := NewClient(cfg)
+	url, header, err := storage.Presign(t.Context(), sreq)
 	if err != nil {
 		t.Fatal("failed to presign:", err)
 	}

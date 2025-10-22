@@ -9,12 +9,13 @@ import (
 	categoryhandler "github.com/dooleyonline/backend/internal/api/category"
 	itemhandler "github.com/dooleyonline/backend/internal/api/item"
 	"github.com/dooleyonline/backend/internal/api/shared"
-	storageapi "github.com/dooleyonline/backend/internal/api/storage"
+	storagehandler "github.com/dooleyonline/backend/internal/api/storage"
 	userapi "github.com/dooleyonline/backend/internal/api/user"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	categorysvc "github.com/dooleyonline/backend/internal/service/category"
 	itemsvc "github.com/dooleyonline/backend/internal/service/item"
+	storage "github.com/dooleyonline/backend/internal/storage"
 	"github.com/labstack/echo/v4"
 
 	_ "github.com/dooleyonline/backend/docs"
@@ -38,7 +39,8 @@ import (
 func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*echo.Echo, error) {
 	item := itemhandler.New(itemsvc.New(cfg, db))
 	category := categoryhandler.New(categorysvc.New(cfg, db))
-	
+	storage := storagehandler.New(storage.NewClient(cfg))
+
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
@@ -82,7 +84,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.POST("/auth/logout", authapi.Logout)
 
 	// storage routes
-	e.POST("/storage/presign", storageapi.Presign)
+	e.POST("/storage/presign", storage.Presign)
 	e.GET("/health", func(c echo.Context) error {
 		db := c.(shared.Context).DB
 		ctx := c.Request().Context()
