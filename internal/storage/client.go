@@ -30,7 +30,7 @@ func NewClient(cfg *config.Config) *Client {
 
 func (c *Client) Presign(ctx context.Context, sreq *PresignRequest) (string, http.Header, error) {
 	url := c.buildURL(sreq.Bucket, sreq.Key)
-	req, err := http.NewRequest(sreq.Method, url, nil)
+	req, err := http.NewRequestWithContext(ctx, sreq.Method, url, nil)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to create request: %w", err)
 	}
