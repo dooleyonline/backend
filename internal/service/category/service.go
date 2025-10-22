@@ -3,19 +3,16 @@ package categorysvc
 import (
 	"context"
 
-	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	categorydb "github.com/dooleyonline/backend/internal/db/category"
 )
 
-
 type Service struct {
-	cfg *config.Config
 	db *db.DB
 }
 
-func New(cfg *config.Config, db *db.DB) *Service {
-	return &Service{cfg, db}
+func New(db *db.DB) *Service {
+	return &Service{db: db}
 }
 
 func (s *Service) GetAll(ctx context.Context) ([]categorydb.Category, error) {

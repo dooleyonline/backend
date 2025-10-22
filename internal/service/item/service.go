@@ -49,9 +49,14 @@ func (s *Service) Get(ctx context.Context, id int64) (itemdb.Item, error) {
 
 
 func (s *Service) Create(ctx context.Context, id string, p CreateUpdateInput) (itemdb.Item, error) {
+	// Validate images array
+	if len(p.Images) == 0 {
+		return itemdb.Item{}, fmt.Errorf("at least one image is required")
+	}
+
 	placeholder, err := generatePlaceholder(s.cfg, p.Images[0])
 	if err != nil {
-		return itemdb.Item{}, fmt.Errorf("failed to generate placeholders: %w", err)
+		return itemdb.Item{}, fmt.Errorf("failed to generate placeholder: %w", err)
 	}
 
 	dbparams := itemdb.CreateParams{
@@ -74,7 +79,7 @@ func (s *Service) Create(ctx context.Context, id string, p CreateUpdateInput) (i
 func (s *Service) Update(ctx context.Context, id int64, p CreateUpdateInput) (itemdb.Item, error) {
 	placeholder, err := generatePlaceholder(s.cfg, p.Images[0])
 	if err != nil {
-		return itemdb.Item{}, fmt.Errorf("failed to generate placeholders: %w", err)
+		return itemdb.Item{}, fmt.Errorf("failed to generate placeholder: %w", err)
 	}
 
 	dbparams := itemdb.UpdateParams{

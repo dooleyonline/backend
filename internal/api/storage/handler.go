@@ -23,7 +23,7 @@ func New(sc *storagec.Client) *Handler {
 //	@Accept		json
 //	@Produce	json
 //	@Param		item	body		storage.PresignRequest	true	"Presign params"
-//	@Success	200		{object}	sqlitem.Item
+//	@Success	200		{object}	itemdb.Item
 //	@Router		/storage/presign [post]
 func (h *Handler) Presign(c echo.Context) error {
 	var (

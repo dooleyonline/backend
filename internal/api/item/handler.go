@@ -25,7 +25,7 @@ func New(svc *itemsvc.Service) *Handler {
 //	@Param		seller		query	string	false	"Seller filter"
 //	@Param		q			query	string	false	"Search query"
 //	@param		category	query	string	false	"Category filter"
-//	@Success	200			{array}	itemsvc.Item
+//	@Success	200			{array}	itemdb.Item
 //	@Router		/item [get]
 func (h *Handler) GetMany(c echo.Context) error {
 	var (
@@ -56,7 +56,7 @@ func (h *Handler) GetMany(c echo.Context) error {
 //	@Tags		item
 //	@Produce	json
 //	@Param		id	path		int	true	"Item ID"
-//	@Success	200	{object}	itemsvc.Item
+//	@Success	200	{object}	itemdb.Item
 //	@Router		/item/{id} [get]
 func (h *Handler) Get(c echo.Context) error {
 	var (
@@ -85,7 +85,7 @@ func (h *Handler) Get(c echo.Context) error {
 //	@Accept		json
 //	@Produce	json
 //	@Param		item	body		itemsvc.CreateUpdateInput	true	"Item"
-//	@Success	200		{object}	itemsvc.Item
+//	@Success	201		{object}	itemdb.Item
 //	@Router		/item [post]
 func (h *Handler) Create(c echo.Context) error {
 	var (
@@ -105,7 +105,7 @@ func (h *Handler) Create(c echo.Context) error {
 		return fmt.Errorf("failed to create item: %w", err)
 	}
 
-	return c.JSON(http.StatusOK, item)
+	return c.JSON(http.StatusCreated, item)
 }
 
 // Update godoc
@@ -116,7 +116,7 @@ func (h *Handler) Create(c echo.Context) error {
 //	@Produce	json
 //	@Param		id		path		int						true	"Item ID"
 //	@Param		item	body		itemsvc.CreateUpdateInput	true	"Item"
-//	@Success	200		{object}	itemsvc.Item
+//	@Success	200		{object}	itemdb.Item
 //	@Router		/item/{id} [put]
 func (h *Handler) Update(c echo.Context) error {
 	var (
@@ -147,7 +147,7 @@ func (h *Handler) Update(c echo.Context) error {
 //	@Summary	Delete item by ID
 //	@Tags		item
 //	@Param		id	path	int	true	"Item ID"
-//	@Success	200
+//	@Success	204
 //	@Router		/item/{id} [delete]
 func (h *Handler) Delete(c echo.Context) error {
 	var (
@@ -162,10 +162,10 @@ func (h *Handler) Delete(c echo.Context) error {
 	}
 
 	if err := h.svc.Delete(ctx, itemId); err != nil {
-		return fmt.Errorf("failed to get item: %w", err)
+		return fmt.Errorf("failed to delete item: %w", err)
 	}
 
-	return c.NoContent(http.StatusOK)
+	return c.NoContent(http.StatusNoContent)
 }
 
 // Sell godoc
@@ -173,7 +173,7 @@ func (h *Handler) Delete(c echo.Context) error {
 //	@Summary	Update sold_at property by ID
 //	@Tags		item
 //	@Param		id	path		int		true	"Item ID"
-//	@Success	200	{string}	string	"Item ID"
+//	@Success	204
 //	@Router		/item/{id}/sell [post]
 func (h *Handler) Sell(c echo.Context) error {
 	var (
@@ -188,10 +188,10 @@ func (h *Handler) Sell(c echo.Context) error {
 	}
 
 	if err := h.svc.Sell(ctx, itemId); err != nil {
-		return fmt.Errorf("failed to update item: %w", err)
+		return fmt.Errorf("failed to sell item: %w", err)
 	}
 
-	return c.NoContent(http.StatusOK)
+	return c.NoContent(http.StatusNoContent)
 }
 
 // IncrementView godoc
@@ -199,7 +199,7 @@ func (h *Handler) Sell(c echo.Context) error {
 //	@Summary	Increment item views by ID
 //	@Tags		item
 //	@Param		id	path	int	true	"Item ID"
-//	@Success	200
+//	@Success	204
 //	@Router		/item/{id}/view [post]
 func (h *Handler) IncrementView(c echo.Context) error {
 	var (
@@ -217,7 +217,7 @@ func (h *Handler) IncrementView(c echo.Context) error {
 		return fmt.Errorf("failed to increment views: %w", err)
 	}
 
-	return c.NoContent(http.StatusOK)
+	return c.NoContent(http.StatusNoContent)
 }
 
 // Like godoc
