@@ -16,8 +16,8 @@ import (
 	"time"
 
 	"github.com/dooleyonline/backend/internal/config"
-	sqlcategory "github.com/dooleyonline/backend/sql/category"
-	sqlitem "github.com/dooleyonline/backend/sql/item"
+	categorydb "github.com/dooleyonline/backend/internal/db/category"
+	itemdb "github.com/dooleyonline/backend/internal/db/item"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
 	"google.golang.org/genai"
@@ -96,7 +96,7 @@ func main() {
 
 	data := content.Text()
 
-	var items []sqlitem.Item
+	var items []itemdb.Item
 	if err := json.Unmarshal([]byte(data), &items); err != nil {
 		slog.Error("failed to unmarshal items", slog.Any("error", err))
 		return
@@ -189,7 +189,7 @@ func getCategories(cfg *config.Config, client *http.Client) ([]string, error) {
 		return nil, fmt.Errorf("unexpected status: %s", res.Status)
 	}
 
-	var categories []sqlcategory.Category
+	var categories []categorydb.Category
 	if err := json.NewDecoder(res.Body).Decode(&categories); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal body: %w", err)
 	}
@@ -202,7 +202,7 @@ func getCategories(cfg *config.Config, client *http.Client) ([]string, error) {
 	return categoriesStr, nil
 }
 
-func createItem(ctx context.Context, cfg *config.Config, client *http.Client, cred *http.Cookie, item sqlitem.Item) error {
+func createItem(ctx context.Context, cfg *config.Config, client *http.Client, cred *http.Cookie, item itemdb.Item) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 
