@@ -10,6 +10,7 @@ import (
 	"slices"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
+	"github.com/dooleyonline/backend/internal/auth"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	userdb "github.com/dooleyonline/backend/internal/db/user"
@@ -64,7 +65,7 @@ func contextMiddleware(cfg *config.Config, db *db.DB) echo.MiddlewareFunc {
 			var user *userdb.User
 			token, ok := c.Get("user").(*jwt.Token)
 			if ok {
-				claims, ok := token.Claims.(*shared.JWTClaims)
+				claims, ok := token.Claims.(*auth.JWTClaims)
 				if ok {
 					data, err := db.User.Get(c.Request().Context(), claims.Email)
 					if err != nil {
@@ -120,7 +121,7 @@ func authMiddleware(cfg *config.Config, protectedRoutes routesConfig) echo.Middl
 		SigningKey: []byte(cfg.AuthTokenSecret),
 		ContextKey: "user",
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(shared.JWTClaims)
+			return new(auth.JWTClaims)
 		},
 		TokenLookupFuncs: []middleware.ValuesExtractor{tokenLookup},
 	}

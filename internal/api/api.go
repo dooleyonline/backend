@@ -10,11 +10,12 @@ import (
 	itemhandler "github.com/dooleyonline/backend/internal/api/item"
 	"github.com/dooleyonline/backend/internal/api/shared"
 	storagehandler "github.com/dooleyonline/backend/internal/api/storage"
-	userapi "github.com/dooleyonline/backend/internal/api/user"
+	userhandler "github.com/dooleyonline/backend/internal/api/user"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	categorysvc "github.com/dooleyonline/backend/internal/service/category"
 	itemsvc "github.com/dooleyonline/backend/internal/service/item"
+	usersvc "github.com/dooleyonline/backend/internal/service/user"
 	storage "github.com/dooleyonline/backend/internal/storage"
 	"github.com/labstack/echo/v4"
 
@@ -39,6 +40,7 @@ import (
 func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*echo.Echo, error) {
 	item := itemhandler.New(itemsvc.New(cfg, db))
 	category := categoryhandler.New(categorysvc.New(cfg, db))
+	user := userhandler.New(usersvc.New(db))
 	storage := storagehandler.New(storage.NewClient(cfg))
 
 	e := echo.New()
@@ -73,10 +75,10 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.GET("/category/:name", category.Get)
 
 	// user routes
-	e.GET("/user", userapi.GetMany)
-	e.POST("/user", userapi.Create)
-	e.GET("/user/me", userapi.GetMe)
-	e.GET("/user/:id", userapi.GetSeller)
+	e.GET("/user", user.GetMany)
+	e.POST("/user", user.Create)
+	e.GET("/user/me", user.GetMe)
+	e.GET("/user/:id", user.GetSeller)
 
 	// auth routes
 	e.GET("/auth", authapi.Get)

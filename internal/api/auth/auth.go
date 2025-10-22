@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
+	"github.com/dooleyonline/backend/internal/auth"
 	"github.com/labstack/echo/v4"
 )
 
@@ -59,11 +60,11 @@ func Login(c echo.Context) error {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 
-	if verified := shared.VerifyPassword(params.Password, user.Password); !verified {
+	if verified := auth.VerifyPassword(params.Password, user.Password); !verified {
 		return c.NoContent(http.StatusUnauthorized)
 	}
 
-	token, err := shared.CreateJWT(cfg, params.Email)
+	token, err := auth.CreateJWT(cfg, params.Email)
 	if err != nil {
 		return fmt.Errorf("failed to create token: %w", err)
 	}

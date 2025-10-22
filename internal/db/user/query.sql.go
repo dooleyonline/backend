@@ -160,27 +160,32 @@ func (q *Queries) GetLikedItems(ctx context.Context, id string) ([]int64, error)
 
 const getMany = `-- name: GetMany :many
 SELECT
-  email, password, liked_items, first_name, last_name, id
+  id, email, first_name, last_name
 FROM
   "user"
 `
 
-func (q *Queries) GetMany(ctx context.Context) ([]User, error) {
+type GetManyRow struct {
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
+func (q *Queries) GetMany(ctx context.Context) ([]GetManyRow, error) {
 	rows, err := q.db.Query(ctx, getMany)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []User{}
+	items := []GetManyRow{}
 	for rows.Next() {
-		var i User
+		var i GetManyRow
 		if err := rows.Scan(
+			&i.ID,
 			&i.Email,
-			&i.Password,
-			&i.LikedItems,
 			&i.FirstName,
 			&i.LastName,
-			&i.ID,
 		); err != nil {
 			return nil, err
 		}
