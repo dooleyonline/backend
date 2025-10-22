@@ -6,13 +6,15 @@ import (
 	"net/http"
 
 	authapi "github.com/dooleyonline/backend/internal/api/auth"
-	categoryapi "github.com/dooleyonline/backend/internal/api/category"
-	itemapi "github.com/dooleyonline/backend/internal/api/item"
+	categoryhandler "github.com/dooleyonline/backend/internal/api/category"
+	itemhandler "github.com/dooleyonline/backend/internal/api/item"
 	"github.com/dooleyonline/backend/internal/api/shared"
 	storageapi "github.com/dooleyonline/backend/internal/api/storage"
 	userapi "github.com/dooleyonline/backend/internal/api/user"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
+	categorysvc "github.com/dooleyonline/backend/internal/service/category"
+	itemsvc "github.com/dooleyonline/backend/internal/service/item"
 	"github.com/labstack/echo/v4"
 
 	_ "github.com/dooleyonline/backend/docs"
@@ -34,6 +36,9 @@ import (
 // @host		localhost:8080
 // @BasePath	/
 func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*echo.Echo, error) {
+	item := itemhandler.New(itemsvc.New(cfg, db))
+	category := categoryhandler.New(categorysvc.New(cfg, db))
+	
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
@@ -50,20 +55,20 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// item routes
-	e.GET("/item", itemapi.GetMany)
-	e.POST("/item", itemapi.Create)
-	e.GET("/item/:id", itemapi.Get)
-	e.PUT("/item/:id", itemapi.Update)
-	e.DELETE("/item/:id", itemapi.Delete)
-	e.POST("/item/:id/view", itemapi.IncrementView)
-	e.POST("/item/:id/sell", itemapi.Sell)
-	e.POST("/item/:id/like", itemapi.Like)
-	e.POST("/item/:id/unlike", itemapi.Unlike)
-	e.POST("/item/bulk", itemapi.GetBulk)
+	e.GET("/item", item.GetMany)
+	e.POST("/item", item.Create)
+	e.GET("/item/:id", item.Get)
+	e.PUT("/item/:id", item.Update)
+	e.DELETE("/item/:id", item.Delete)
+	e.POST("/item/:id/view", item.IncrementView)
+	e.POST("/item/:id/sell", item.Sell)
+	e.POST("/item/:id/like", item.Like)
+	e.POST("/item/:id/unlike", item.Unlike)
+	e.POST("/item/bulk", item.GetBulk)
 
 	// category
-	e.GET("/category", categoryapi.GetAll)
-	e.GET("/category/:name", categoryapi.Get)
+	e.GET("/category", category.GetAll)
+	e.GET("/category/:name", category.Get)
 
 	// user routes
 	e.GET("/user", userapi.GetMany)

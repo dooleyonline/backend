@@ -1,12 +1,21 @@
-package categoryapi
+package categoryhandler
 
 import (
 	"fmt"
 	"net/http"
 
-	"github.com/dooleyonline/backend/internal/api/shared"
+	categorysvc "github.com/dooleyonline/backend/internal/service/category"
 	"github.com/labstack/echo/v4"
 )
+
+type Handler struct {
+	svc *categorysvc.Service
+}
+
+func New(svc *categorysvc.Service) *Handler {
+	return &Handler{svc}
+}
+
 
 // GetAll godoc
 //
@@ -15,15 +24,14 @@ import (
 //	@Produce	json
 //	@Success	200	{array}	categorydb.Category
 //	@Router		/category [get]
-func GetAll(c echo.Context) error {
+func (h *Handler) GetAll(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
-		db  = c.(shared.Context).DB
 	)
 	defer req.Body.Close()
 
-	categories, err := db.Category.GetAll(ctx)
+	categories, err := h.svc.GetAll(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get all categories: %w", err)
 	}
@@ -39,11 +47,10 @@ func GetAll(c echo.Context) error {
 //	@Param		name	path		string	true	"Category name"
 //	@Success	200		{object}	categorydb.Category
 //	@Router		/category/{name} [get]
-func Get(c echo.Context) error {
+func (h *Handler) Get(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
-		db  = c.(shared.Context).DB
 	)
 	defer req.Body.Close()
 
@@ -52,7 +59,7 @@ func Get(c echo.Context) error {
 		return fmt.Errorf("failed to bind name: %w", err)
 	}
 
-	category, err := db.Category.Get(ctx, name)
+	category, err := h.svc.Get(ctx, name)
 	if err != nil {
 		return fmt.Errorf("failed to get category: %w", err)
 	}
