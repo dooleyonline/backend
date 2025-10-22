@@ -1,4 +1,4 @@
-package itemapi
+package itemsvc
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
-func GeneratePlaceholder(cfg *config.Config, img string) (string, error) {
+func generatePlaceholder(cfg *config.Config, img string) (string, error) {
 	publicURL := fmt.Sprintf("%s/%s/%s", cfg.StorageUrl, "image", img)
 
 	res, err := http.Get(publicURL)
