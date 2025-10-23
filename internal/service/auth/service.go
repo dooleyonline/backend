@@ -40,6 +40,7 @@ func (s *Service) Login(ctx context.Context, params LoginParams) (LoginResponse,
 			Email:     user.Email,
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
+			LikedItems: user.LikedItems,
 		},
 		Token: token,
 	}, nil
