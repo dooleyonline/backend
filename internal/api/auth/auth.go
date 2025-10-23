@@ -5,31 +5,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dooleyonline/backend/internal/api/shared"
-	"github.com/dooleyonline/backend/internal/auth"
+	authsvc "github.com/dooleyonline/backend/internal/service/auth"
 	"github.com/labstack/echo/v4"
 )
 
-type loginParams struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+type Handler struct{
+	svc *authsvc.Service
 }
 
-// Get godoc
-//
-//	@Summary	Get auth status
-//	@Tags		auth
-//	@Produce	json
-//	@Success	200	{object}	userdb.User	"User"
-//	@Router		/auth [get]
-func Get(c echo.Context) error {
-	var (
-		req  = c.Request()
-		user = c.(shared.Context).User
-	)
-	defer req.Body.Close()
-
-	return c.JSON(http.StatusOK, user)
+func New(svc *authsvc.Service) *Handler {
+	return &Handler{svc}
 }
 
 // Login godoc
@@ -41,47 +26,34 @@ func Get(c echo.Context) error {
 //	@Param		user	body		loginParams	true	"Login Params"
 //	@Success	200		{object}	userdb.User	"User"
 //	@Router		/auth/login [post]
-func Login(c echo.Context) error {
+func (h *Handler) Login(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
-		db  = c.(shared.Context).DB
-		cfg = c.(shared.Context).Cfg
 	)
 	defer req.Body.Close()
 
-	var params loginParams
+	var params authsvc.LoginParams
 	if err := c.Bind(&params); err != nil {
 		return fmt.Errorf("failed to bind params: %w", err)
 	}
 
-	user, err := db.User.Get(ctx, params.Email)
+	resp, err := h.svc.Login(ctx, params)
 	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
+		return fmt.Errorf("failed to login: %w", err)
 	}
-
-	if verified := auth.VerifyPassword(params.Password, user.Password); !verified {
-		return c.NoContent(http.StatusUnauthorized)
-	}
-
-	token, err := auth.CreateJWT(cfg, params.Email)
-	if err != nil {
-		return fmt.Errorf("failed to create token: %w", err)
-	}
-
 	cookie := &http.Cookie{
-		Name:     cfg.AuthTokenName,
-		Value:    token,
-		Expires:  time.Now().Add(cfg.AuthTokenExp),
+		Name:     h.svc.Cfg.AuthTokenName,
+		Value:    resp.Token,
+		Expires:  time.Now().Add(h.svc.Cfg.AuthTokenExp),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   cfg.IsProd,
+		Secure:   h.svc.Cfg.IsProd,
 		SameSite: http.SameSiteLaxMode,
 	}
-
 	c.SetCookie(cookie)
 
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, resp.User)
 }
 
 // Logout godoc
@@ -92,23 +64,17 @@ func Login(c echo.Context) error {
 //	@Produce	json
 //	@Success	200	{string}	string	"Result"
 //	@Router		/auth/logout [post]
-func Logout(c echo.Context) error {
-	var (
-		req = c.Request()
-		cfg = c.(shared.Context).Cfg
-	)
-	defer req.Body.Close()
+func (h *Handler) Logout(c echo.Context) error {
 
 	cookie := &http.Cookie{
-		Name:     cfg.AuthTokenName,
-		Value:    "",
-		Path:     "/",
-		Expires:  time.Unix(0, 0),
+		Name:    h.svc.Cfg.AuthTokenName,
+		Value:   "",
+		Path:    "/",
+		Expires: time.Unix(0, 0),
 		HttpOnly: true,
-		Secure:   cfg.IsProd,
+		Secure:   h.svc.Cfg.IsProd,
 		SameSite: http.SameSiteLaxMode,
 	}
-
 	c.SetCookie(cookie)
 
 	return c.NoContent(http.StatusOK)

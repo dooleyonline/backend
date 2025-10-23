@@ -10,7 +10,7 @@ SELECT
 FROM
   "user"
 WHERE
-  id = $1;
+  email = $1;
 
 -- name: Create :one
 INSERT INTO

@@ -95,11 +95,11 @@ SELECT
 FROM
   "user"
 WHERE
-  id = $1
+  email = $1
 `
 
-func (q *Queries) Get(ctx context.Context, id string) (User, error) {
-	row := q.db.QueryRow(ctx, get, id)
+func (q *Queries) Get(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, get, email)
 	var i User
 	err := row.Scan(
 		&i.Email,

@@ -8,14 +8,11 @@ import (
 	authapi "github.com/dooleyonline/backend/internal/api/auth"
 	categoryhandler "github.com/dooleyonline/backend/internal/api/category"
 	itemhandler "github.com/dooleyonline/backend/internal/api/item"
-	"github.com/dooleyonline/backend/internal/api/shared"
 	storagehandler "github.com/dooleyonline/backend/internal/api/storage"
 	userhandler "github.com/dooleyonline/backend/internal/api/user"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
-	categorysvc "github.com/dooleyonline/backend/internal/service/category"
-	itemsvc "github.com/dooleyonline/backend/internal/service/item"
-	usersvc "github.com/dooleyonline/backend/internal/service/user"
+	"github.com/dooleyonline/backend/internal/service"
 	storage "github.com/dooleyonline/backend/internal/storage"
 	"github.com/labstack/echo/v4"
 
@@ -38,9 +35,12 @@ import (
 // @host		localhost:8080
 // @BasePath	/
 func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*echo.Echo, error) {
-	item := itemhandler.New(itemsvc.New(cfg, db))
-	category := categoryhandler.New(categorysvc.New(db))
-	user := userhandler.New(usersvc.New(db))
+	services := service.New(cfg, db)
+	item := itemhandler.New(services.Item)
+	auth := authapi.New(services.Auth)
+	category := categoryhandler.New(services.Category)
+	user := userhandler.New(services.User)
+
 	storage := storagehandler.New(storage.NewClient(cfg))
 
 	e := echo.New()
@@ -81,22 +81,11 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.GET("/user/:id", user.GetSeller)
 
 	// auth routes
-	e.GET("/auth", authapi.Get)
-	e.POST("/auth/login", authapi.Login)
-	e.POST("/auth/logout", authapi.Logout)
+	e.POST("/auth/login", auth.Login)
+	e.POST("/auth/logout", auth.Logout)
 
 	// storage routes
 	e.POST("/storage/presign", storage.Presign)
-	e.GET("/health", func(c echo.Context) error {
-		db := c.(shared.Context).DB
-		ctx := c.Request().Context()
-
-		if err := db.Pool.Ping(ctx); err != nil {
-			return c.JSON(500, map[string]string{"status": "unhealthy", "error": err.Error()})
-		}
-
-		return c.JSON(200, map[string]string{"status": "healthy"})
-	})
 
 	return e, nil
 }
