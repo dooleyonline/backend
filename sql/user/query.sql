@@ -46,3 +46,19 @@ WHERE
   email = @email
   AND NOT liked_items @> ARRAY[@item_ID::bigint]
 RETURNING liked_items;
+
+-- name: GetSellerByID :one
+SELECT
+  id, first_name, last_name
+FROM
+  "user"
+WHERE
+  id = $1;
+
+-- name: GetFullUserByID :one
+SELECT
+  id, email, liked_items, first_name, last_name
+FROM
+  "user"
+WHERE
+  id = $1;

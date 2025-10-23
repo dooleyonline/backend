@@ -17,6 +17,7 @@ import (
 //	@Summary	Get many items
 //	@Tags		item
 //	@Produce	json
+//	@Param		seller		query	string	false	"Seller filter"
 //	@Param		q			query	string	false	"Search query"
 //	@param		category	query	string	false	"Category filter"
 //	@Success	200			{array}	sqlitem.Item
@@ -34,10 +35,13 @@ func GetMany(c echo.Context) error {
 		err   error
 	)
 
+	seller := c.QueryParam("seller")
 	query := c.QueryParam("q")
 	category := c.QueryParam("category")
 
 	switch {
+	case seller != "":
+		items, err = db.Item.GetBySeller(ctx, seller)
 	case query != "" && category != "":
 		params := sqlitem.SearchByCategoryParams{
 			Category:  category,
@@ -350,4 +354,34 @@ func Unlike(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, likedItems)
+}
+
+// GetBulk godoc
+//
+//	@Summary	Get items in bulk by list of IDs
+//	@Tags		item
+//	@Accept		json
+//	@Produce	json
+//	@Param		item_IDs	body	[]int64	true	"Item IDs"
+//	@Success	200			{array}	sqlitem.Item
+//	@Router		/item/bulk [post]
+func GetBulk(c echo.Context) error {
+	var (
+		req = c.Request()
+		ctx = req.Context()
+		db  = c.(shared.Context).DB
+	)
+	defer req.Body.Close()
+
+	var itemIDs []int64
+	if err := c.Bind(&itemIDs); err != nil {
+		return fmt.Errorf("failed to bind item ids: %w", err)
+	}
+
+	items, err := db.Item.GetByIDs(ctx, itemIDs)
+	if err != nil {
+		return fmt.Errorf("failed to get items: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, items)
 }

@@ -112,6 +112,36 @@ func (q *Queries) Get(ctx context.Context, email string) (User, error) {
 	return i, err
 }
 
+const getFullUserByID = `-- name: GetFullUserByID :one
+SELECT
+  id, email, liked_items, first_name, last_name
+FROM
+  "user"
+WHERE
+  id = $1
+`
+
+type GetFullUserByIDRow struct {
+	ID         string  `json:"id"`
+	Email      string  `json:"email"`
+	LikedItems []int64 `json:"liked_items"`
+	FirstName  string  `json:"first_name"`
+	LastName   string  `json:"last_name"`
+}
+
+func (q *Queries) GetFullUserByID(ctx context.Context, id string) (GetFullUserByIDRow, error) {
+	row := q.db.QueryRow(ctx, getFullUserByID, id)
+	var i GetFullUserByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.LikedItems,
+		&i.FirstName,
+		&i.LastName,
+	)
+	return i, err
+}
+
 const getLikedItems = `-- name: GetLikedItems :one
 SELECT
   liked_items
@@ -160,4 +190,26 @@ func (q *Queries) GetMany(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getSellerByID = `-- name: GetSellerByID :one
+SELECT
+  id, first_name, last_name
+FROM
+  "user"
+WHERE
+  id = $1
+`
+
+type GetSellerByIDRow struct {
+	ID        string `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
+func (q *Queries) GetSellerByID(ctx context.Context, id string) (GetSellerByIDRow, error) {
+	row := q.db.QueryRow(ctx, getSellerByID, id)
+	var i GetSellerByIDRow
+	err := row.Scan(&i.ID, &i.FirstName, &i.LastName)
+	return i, err
 }

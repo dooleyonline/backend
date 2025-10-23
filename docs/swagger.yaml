@@ -252,6 +252,10 @@ paths:
   /item:
     get:
       parameters:
+      - description: Seller filter
+        in: query
+        name: seller
+        type: string
       - description: Search query
         in: query
         name: q
@@ -416,6 +420,31 @@ paths:
       summary: Increment item views by ID
       tags:
       - item
+  /item/bulk:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Item IDs
+        in: body
+        name: item_IDs
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/sqlitem.Item'
+            type: array
+      summary: Get items in bulk by list of IDs
+      tags:
+      - item
   /storage/presign:
     post:
       consumes:
@@ -473,22 +502,36 @@ paths:
       summary: Create user
       tags:
       - user
-  /user/items:
+  /user/{id}:
     get:
-      consumes:
-      - application/json
+      parameters:
+      - description: User ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/sqlitem.Item'
-            type: array
+            $ref: '#/definitions/sqluser.User'
+      summary: Get seller by ID
+      tags:
+      - user
+  /user/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sqluser.User'
       security:
       - ApiKeyAuth: []
-      summary: Get items for the current user
+      summary: Get current authenticated user
       tags:
       - user
 swagger: "2.0"

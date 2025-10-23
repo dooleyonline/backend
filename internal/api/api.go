@@ -59,6 +59,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.POST("/item/:id/sell", itemapi.Sell)
 	e.POST("/item/:id/like", itemapi.Like)
 	e.POST("/item/:id/unlike", itemapi.Unlike)
+	e.POST("/item/bulk", itemapi.GetBulk)
 
 	// category
 	e.GET("/category", categoryapi.GetAll)
@@ -67,7 +68,8 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	// user routes
 	e.GET("/user", userapi.GetMany)
 	e.POST("/user", userapi.Create)
-	e.GET("/user/items", userapi.GetItems)
+	e.GET("/user/me", userapi.GetMe)
+	e.GET("/user/:id", userapi.GetSeller)
 
 	// auth routes
 	e.GET("/auth", authapi.Get)
@@ -99,7 +101,7 @@ var protectedRoutes = routesConfig{
 	"/item/:id/sell":   {http.MethodPost},
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
-	"/user/items":      {http.MethodGet},
+	"/user/me":         {http.MethodGet},
 	"/auth":            {http.MethodGet},
 	"/auth/logout":     {http.MethodPost},
 }
