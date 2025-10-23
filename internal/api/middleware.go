@@ -12,8 +12,6 @@ import (
 	"github.com/dooleyonline/backend/internal/api/shared"
 	"github.com/dooleyonline/backend/internal/auth"
 	"github.com/dooleyonline/backend/internal/config"
-	"github.com/dooleyonline/backend/internal/db"
-	userdb "github.com/dooleyonline/backend/internal/db/user"
 	"github.com/golang-jwt/jwt/v5"
 	echoJWT "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -59,27 +57,21 @@ func errorMiddleware() echo.MiddlewareFunc {
 	}
 }
 
-func contextMiddleware(cfg *config.Config, db *db.DB) echo.MiddlewareFunc {
+func contextMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			var user *userdb.User
+			var userId string
 			token, ok := c.Get("user").(*jwt.Token)
 			if ok {
 				claims, ok := token.Claims.(*auth.JWTClaims)
 				if ok {
-					data, err := db.User.Get(c.Request().Context(), claims.Email)
-					if err != nil {
-						return fmt.Errorf("failed to get user: %w", err)
-					}
-					user = &data
+					userId = claims.ID
 				}
 			}
 
 			cc := shared.Context{
 				Context: c,
-				Cfg:     cfg,
-				DB:      db,
-				User:    user,
+				UserId:  userId,
 			}
 			return next(cc)
 		}

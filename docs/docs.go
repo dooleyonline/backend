@@ -67,7 +67,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User",
                         "schema": {
-                            "$ref": "#/definitions/userdb.User"
+                            "$ref": "#/definitions/usersvc.Me"
                         }
                     }
                 }
@@ -87,10 +87,7 @@ const docTemplate = `{
                 "summary": "Log out",
                 "responses": {
                     "200": {
-                        "description": "Result",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "description": "OK"
                     }
                 }
             }
@@ -721,32 +718,6 @@ const docTemplate = `{
                 }
             }
         },
-        "userdb.User": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
-                },
-                "liked_items": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
         "usersvc.CreateInput": {
             "type": "object",
             "properties": {
@@ -770,20 +741,19 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "firstName": {
+                "first_name": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "lastName": {
+                "last_name": {
                     "type": "string"
                 },
-                "likedItems": {
+                "liked_items": {
                     "type": "array",
                     "items": {
-                        "type": "integer",
-                        "format": "int64"
+                        "type": "integer"
                     }
                 }
             }
@@ -791,13 +761,16 @@ const docTemplate = `{
         "usersvc.Seller": {
             "type": "object",
             "properties": {
-                "firstName": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "lastName": {
+                "last_name": {
                     "type": "string"
                 }
             }

@@ -1,4 +1,4 @@
-package authapi
+package authhandler
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ func New(svc *authsvc.Service) *Handler {
 //	@Accept		json
 //	@Produce	json
 //	@Param		user	body		authsvc.LoginParams	true	"Login Params"
-//	@Success	200		{object}	userdb.User			"User"
+//	@Success	200		{object}	usersvc.Me			"User"
 //	@Router		/auth/login [post]
 func (h *Handler) Login(c echo.Context) error {
 	var (
@@ -42,13 +42,19 @@ func (h *Handler) Login(c echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to login: %w", err)
 	}
+
+	cookieDetails, err := h.svc.CookieDetails()
+	if err != nil {
+		return fmt.Errorf("failed to get cookie details: %w", err)
+	}
+
 	cookie := &http.Cookie{
-		Name:     h.svc.Cfg.AuthTokenName,
+		Name:     cookieDetails.AuthTokenName,
 		Value:    resp.Token,
-		Expires:  time.Now().Add(h.svc.Cfg.AuthTokenExp),
+		Expires:  time.Now().Add(cookieDetails.AuthTokenExp),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   h.svc.Cfg.IsProd,
+		Secure:   cookieDetails.Secure,
 		SameSite: http.SameSiteLaxMode,
 	}
 	c.SetCookie(cookie)
@@ -62,17 +68,21 @@ func (h *Handler) Login(c echo.Context) error {
 //	@Tags		auth
 //	@Accept		json
 //	@Produce	json
-//	@Success	200	{string}	string	"Result"
+//	@Success	200	"OK"
 //	@Router		/auth/logout [post]
 func (h *Handler) Logout(c echo.Context) error {
+	cookieDetails, err := h.svc.CookieDetails()
+	if err != nil {
+		return fmt.Errorf("failed to logout: %w", err)
+	}
 
 	cookie := &http.Cookie{
-		Name:     h.svc.Cfg.AuthTokenName,
+		Name:     cookieDetails.AuthTokenName,
 		Value:    "",
 		Path:     "/",
 		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
-		Secure:   h.svc.Cfg.IsProd,
+		Secure:   cookieDetails.Secure,
 		SameSite: http.SameSiteLaxMode,
 	}
 	c.SetCookie(cookie)

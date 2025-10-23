@@ -107,13 +107,13 @@ func (h *Handler) GetSeller(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (h *Handler) GetMe(c echo.Context) error {
 	var (
-		req  = c.Request()
-		ctx  = req.Context()
-		user = c.(shared.Context).User
+		req    = c.Request()
+		ctx    = req.Context()
+		userId = c.(shared.Context).UserId
 	)
 	defer req.Body.Close()
 
-	me, err := h.svc.GetMe(ctx, user.ID)
+	me, err := h.svc.GetMe(ctx, userId)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}

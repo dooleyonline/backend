@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	authapi "github.com/dooleyonline/backend/internal/api/auth"
+	authhandler "github.com/dooleyonline/backend/internal/api/auth"
 	categoryhandler "github.com/dooleyonline/backend/internal/api/category"
 	itemhandler "github.com/dooleyonline/backend/internal/api/item"
 	storagehandler "github.com/dooleyonline/backend/internal/api/storage"
@@ -37,7 +37,7 @@ import (
 func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*echo.Echo, error) {
 	services := service.New(cfg, db)
 	item := itemhandler.New(services.Item)
-	auth := authapi.New(services.Auth)
+	auth := authhandler.New(services.Auth)
 	category := categoryhandler.New(services.Category)
 	user := userhandler.New(services.User)
 
@@ -51,7 +51,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.Use(errorMiddleware())
 	e.Use(corsMiddleware())
 	e.Use(authMiddleware(cfg, protectedRoutes))
-	e.Use(contextMiddleware(cfg, db))
+	e.Use(contextMiddleware())
 
 	e.GET("/", hello)
 
@@ -100,7 +100,6 @@ var protectedRoutes = routesConfig{
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
 	"/user/me":         {http.MethodGet},
-	"/auth":            {http.MethodGet},
 	"/auth/logout":     {http.MethodPost},
 }
 

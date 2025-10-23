@@ -11,7 +11,7 @@ import (
 )
 
 type Service struct {
-	Cfg *config.Config
+	cfg *config.Config
 	db  *db.DB
 }
 
@@ -29,7 +29,7 @@ func (s *Service) Login(ctx context.Context, params LoginParams) (LoginResponse,
 		return LoginResponse{}, fmt.Errorf("invalid credentials")
 	}
 
-	token, err := auth.CreateJWT(s.Cfg, params.Email)
+	token, err := auth.CreateJWT(s.cfg, params.Email, user.ID)
 	if err != nil {
 		return LoginResponse{}, fmt.Errorf("failed to create token: %w", err)
 	}
@@ -42,5 +42,13 @@ func (s *Service) Login(ctx context.Context, params LoginParams) (LoginResponse,
 			LastName:  user.LastName,
 		},
 		Token: token,
+	}, nil
+}
+
+func (s *Service) CookieDetails() (CookieDetailsResponse, error) {
+	return CookieDetailsResponse{
+		AuthTokenName: s.cfg.AuthTokenName,
+		AuthTokenExp:  s.cfg.AuthTokenExp,
+		Secure:        s.cfg.IsProd,
 	}, nil
 }

@@ -89,9 +89,9 @@ func (h *Handler) Get(c echo.Context) error {
 //	@Router		/item [post]
 func (h *Handler) Create(c echo.Context) error {
 	var (
-		req  = c.Request()
-		ctx  = req.Context()
-		user = c.(shared.Context).User
+		req    = c.Request()
+		ctx    = req.Context()
+		userId = c.(shared.Context).UserId
 	)
 	defer req.Body.Close()
 
@@ -100,7 +100,7 @@ func (h *Handler) Create(c echo.Context) error {
 		return fmt.Errorf("failed to bind params: %w", err)
 	}
 
-	item, err := h.svc.Create(ctx, user.ID, params)
+	item, err := h.svc.Create(ctx, userId, params)
 	if err != nil {
 		return fmt.Errorf("failed to create item: %w", err)
 	}
@@ -229,9 +229,9 @@ func (h *Handler) IncrementView(c echo.Context) error {
 //	@Router		/item/{id}/like [post]
 func (h *Handler) Like(c echo.Context) error {
 	var (
-		req  = c.Request()
-		ctx  = req.Context()
-		user = c.(shared.Context).User
+		req    = c.Request()
+		ctx    = req.Context()
+		userId = c.(shared.Context).UserId
 	)
 	defer req.Body.Close()
 
@@ -240,7 +240,7 @@ func (h *Handler) Like(c echo.Context) error {
 		return fmt.Errorf("failed to bind item id: %w", err)
 	}
 
-	likedItems, err := h.svc.Like(ctx, itemId, user.ID)
+	likedItems, err := h.svc.Like(ctx, itemId, userId)
 	if err != nil {
 		return fmt.Errorf("failed to like item: %w", err)
 	}
@@ -257,9 +257,9 @@ func (h *Handler) Like(c echo.Context) error {
 //	@Router		/item/{id}/unlike [post]
 func (h *Handler) Unlike(c echo.Context) error {
 	var (
-		req  = c.Request()
-		ctx  = req.Context()
-		user = c.(shared.Context).User
+		req    = c.Request()
+		ctx    = req.Context()
+		userId = c.(shared.Context).UserId
 	)
 	defer req.Body.Close()
 
@@ -268,7 +268,7 @@ func (h *Handler) Unlike(c echo.Context) error {
 		return fmt.Errorf("failed to bind item id: %w", err)
 	}
 
-	likedItems, err := h.svc.Unlike(ctx, itemId, user.ID)
+	likedItems, err := h.svc.Unlike(ctx, itemId, userId)
 	if err != nil {
 		return fmt.Errorf("failed to unlike item: %w", err)
 	}
