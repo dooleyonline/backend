@@ -40,25 +40,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Get auth status",
-                "responses": {
-                    "200": {
-                        "description": "User",
-                        "schema": {
-                            "$ref": "#/definitions/userdb.User"
-                        }
-                    }
-                }
-            }
-        },
         "/auth/login": {
             "post": {
                 "consumes": [
@@ -78,7 +59,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/authapi.loginParams"
+                            "$ref": "#/definitions/authsvc.LoginParams"
                         }
                     }
                 ],
@@ -607,7 +588,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "authapi.loginParams": {
+        "authsvc.LoginParams": {
             "type": "object",
             "properties": {
                 "email": {

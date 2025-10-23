@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  authapi.loginParams:
+  authsvc.LoginParams:
     properties:
       email:
         type: string
@@ -175,18 +175,6 @@ paths:
           schema:
             type: string
       summary: Greeting
-  /auth:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User
-          schema:
-            $ref: '#/definitions/userdb.User'
-      summary: Get auth status
-      tags:
-      - auth
   /auth/login:
     post:
       consumes:
@@ -197,7 +185,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/authapi.loginParams'
+          $ref: '#/definitions/authsvc.LoginParams'
       produces:
       - application/json
       responses:

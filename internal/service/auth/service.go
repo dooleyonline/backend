@@ -35,8 +35,8 @@ func (s *Service) Login(ctx context.Context, params LoginParams) (LoginResponse,
 	}
 
 	return LoginResponse{
-		User:   usersvc.Me{
-			ID:       user.ID,
+		User: usersvc.Me{
+			ID:        user.ID,
 			Email:     user.Email,
 			FirstName: user.FirstName,
 			LastName:  user.LastName,

@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type Handler struct{
+type Handler struct {
 	svc *authsvc.Service
 }
 
@@ -23,8 +23,8 @@ func New(svc *authsvc.Service) *Handler {
 //	@Tags		auth
 //	@Accept		json
 //	@Produce	json
-//	@Param		user	body		loginParams	true	"Login Params"
-//	@Success	200		{object}	userdb.User	"User"
+//	@Param		user	body		authsvc.LoginParams	true	"Login Params"
+//	@Success	200		{object}	userdb.User			"User"
 //	@Router		/auth/login [post]
 func (h *Handler) Login(c echo.Context) error {
 	var (
@@ -67,10 +67,10 @@ func (h *Handler) Login(c echo.Context) error {
 func (h *Handler) Logout(c echo.Context) error {
 
 	cookie := &http.Cookie{
-		Name:    h.svc.Cfg.AuthTokenName,
-		Value:   "",
-		Path:    "/",
-		Expires: time.Unix(0, 0),
+		Name:     h.svc.Cfg.AuthTokenName,
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
 		Secure:   h.svc.Cfg.IsProd,
 		SameSite: http.SameSiteLaxMode,

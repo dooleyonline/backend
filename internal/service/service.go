@@ -10,17 +10,17 @@ import (
 )
 
 type Service struct {
-	Auth *authsvc.Service
+	Auth     *authsvc.Service
 	Category *categorysvc.Service
-	Item *itemsvc.Service
-	User *usersvc.Service
+	Item     *itemsvc.Service
+	User     *usersvc.Service
 }
 
 func New(cfg *config.Config, db *db.DB) *Service {
 	return &Service{
-		Auth: authsvc.New(cfg, db),
+		Auth:     authsvc.New(cfg, db),
 		Category: categorysvc.New(db),
-		Item: itemsvc.New(cfg, db),
-		User: usersvc.New(db),
+		Item:     itemsvc.New(cfg, db),
+		User:     usersvc.New(db),
 	}
 }

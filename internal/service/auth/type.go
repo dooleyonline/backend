@@ -10,6 +10,6 @@ type LoginParams struct {
 }
 
 type LoginResponse struct {
-	User   usersvc.Me   `json:"user"`
-	Token  string `json:"token"`
+	User  usersvc.Me `json:"user"`
+	Token string     `json:"token"`
 }
