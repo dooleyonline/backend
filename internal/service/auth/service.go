@@ -7,7 +7,7 @@ import (
 
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
-	userdb "github.com/dooleyonline/backend/internal/db/user"
+	"github.com/dooleyonline/backend/internal/model"
 )
 
 type Service struct {
@@ -25,23 +25,24 @@ type LoginParams struct {
 }
 
 type LoginResult struct {
-	User         userdb.User
+	User         *model.User
 	Token        string
 	CookieConfig CookieOptionsResult
 }
 
 func (s *Service) Login(ctx context.Context, params *LoginParams) (*LoginResult, error) {
-	user, err := s.db.User.Get(ctx, params.Email)
+	user, err := s.db.User.User.Get(ctx, params.Email)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
-	user.Password = ""
 
 	if verified := VerifyPassword(params.Password, user.Password); !verified {
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
-	token, err := CreateJWT(s.cfg, params.Email, user.ID)
+	user.Password = ""
+
+	token, err := s.CreateJWT(params.Email, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create token: %w", err)
 	}
@@ -52,7 +53,7 @@ func (s *Service) Login(ctx context.Context, params *LoginParams) (*LoginResult,
 	}
 
 	return &LoginResult{
-		User:         user,
+		User:         &user,
 		Token:        token,
 		CookieConfig: *res,
 	}, nil
@@ -72,12 +73,13 @@ func (s *Service) CookieOptions() (*CookieOptionsResult, error) {
 	}, nil
 }
 
-func (s *Service) GetMe(ctx context.Context, id string) (*userdb.User, error) {
-	user, err := s.db.User.GetByID(ctx, id)
+func (s *Service) GetMe(ctx context.Context, id string) (*model.User, error) {
+	user, err := s.db.User.User.GetByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
 	user.Password = ""
+
 	return &user, nil
 }

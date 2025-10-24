@@ -96,7 +96,7 @@ func (h *Handler) GetMe(c echo.Context) error {
 	var (
 		req    = c.Request()
 		ctx    = req.Context()
-		userId = c.(shared.Context).UserId
+		userId = c.(shared.Context).UserID
 	)
 
 	if userId == "" {
@@ -108,5 +108,5 @@ func (h *Handler) GetMe(c echo.Context) error {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }

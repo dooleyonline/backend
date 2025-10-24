@@ -5,7 +5,7 @@ dotenv:
 tasks:
   run:
     cmds:
-      - go run ./cmd/server/main.go
+      - go run ./cmd/server
     silent: true
 
   test:
@@ -26,5 +26,5 @@ tasks:
 
   datagen:
     cmds:
-      - go run ./cmd/datagen/main.go
+      - go run ./cmd/datagen
     silent: true

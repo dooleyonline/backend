@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: query.sql
 
-package categorydb
+package itemcategory
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 
 const create = `-- name: Create :one
 INSERT INTO
-  category (name, subcategory, icon)
+  item.category (name, subcategory, icon)
 VALUES
   ($1, $2, $3)
 RETURNING name, subcategory, icon
@@ -23,9 +23,9 @@ type CreateParams struct {
 	Icon        string   `json:"icon"`
 }
 
-func (q *Queries) Create(ctx context.Context, arg CreateParams) (Category, error) {
+func (q *Queries) Create(ctx context.Context, arg CreateParams) (ItemCategory, error) {
 	row := q.db.QueryRow(ctx, create, arg.Name, arg.Subcategory, arg.Icon)
-	var i Category
+	var i ItemCategory
 	err := row.Scan(&i.Name, &i.Subcategory, &i.Icon)
 	return i, err
 }
@@ -34,14 +34,14 @@ const get = `-- name: Get :one
 SELECT
   name, subcategory, icon
 FROM
-  category
+  item.category
 WHERE
   name = $1
 `
 
-func (q *Queries) Get(ctx context.Context, name string) (Category, error) {
+func (q *Queries) Get(ctx context.Context, name string) (ItemCategory, error) {
 	row := q.db.QueryRow(ctx, get, name)
-	var i Category
+	var i ItemCategory
 	err := row.Scan(&i.Name, &i.Subcategory, &i.Icon)
 	return i, err
 }
@@ -50,18 +50,18 @@ const getAll = `-- name: GetAll :many
 SELECT
   name, subcategory, icon
 FROM
-  category
+  item.category
 `
 
-func (q *Queries) GetAll(ctx context.Context) ([]Category, error) {
+func (q *Queries) GetAll(ctx context.Context) ([]ItemCategory, error) {
 	rows, err := q.db.Query(ctx, getAll)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Category{}
+	items := []ItemCategory{}
 	for rows.Next() {
-		var i Category
+		var i ItemCategory
 		if err := rows.Scan(&i.Name, &i.Subcategory, &i.Icon); err != nil {
 			return nil, err
 		}

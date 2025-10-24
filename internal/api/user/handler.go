@@ -34,7 +34,7 @@ func (h *Handler) GetMany(c echo.Context) error {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }
 
 // Create godoc

@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"log/slog"
 	"net/http"
 
 	authhandler "github.com/dooleyonline/backend/internal/api/auth"
@@ -32,8 +31,9 @@ import (
 
 // @host		localhost:8080
 // @BasePath	/
-func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*echo.Echo, error) {
+func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error) {
 	services := service.New(cfg, db)
+
 	item := itemhandler.New(services.Item)
 	auth := authhandler.New(services.Auth)
 	category := categoryhandler.New(services.Category)
@@ -43,11 +43,11 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.HideBanner = true
 	e.HidePort = true
 
-	e.Use(loggerMiddleware(lg))
+	e.Use(loggerMiddleware())
 	e.Use(errorMiddleware())
 	e.Use(corsMiddleware())
 	e.Use(authMiddleware(cfg, protectedRoutes))
-	e.Use(contextMiddleware())
+	e.Use(contextMiddleware(cfg))
 
 	e.GET("/", hello)
 

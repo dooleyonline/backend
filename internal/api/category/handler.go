@@ -33,7 +33,7 @@ func (h *Handler) GetAll(c echo.Context) error {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }
 
 // Get godoc
@@ -60,5 +60,5 @@ func (h *Handler) Get(c echo.Context) error {
 		return echo.ErrNotFound.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }

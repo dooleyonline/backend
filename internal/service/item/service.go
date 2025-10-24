@@ -7,8 +7,9 @@ import (
 
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
-	itemdb "github.com/dooleyonline/backend/internal/db/item"
-	userdb "github.com/dooleyonline/backend/internal/db/user"
+	itemitem "github.com/dooleyonline/backend/internal/db/item/item"
+	useruser "github.com/dooleyonline/backend/internal/db/user/user"
+	"github.com/dooleyonline/backend/internal/model"
 	"github.com/dooleyonline/backend/internal/storage"
 )
 
@@ -27,39 +28,39 @@ type GetManyParams struct {
 	Category string
 }
 
-func (s *Service) GetMany(ctx context.Context, params *GetManyParams) (*[]itemdb.Item, error) {
+func (s *Service) GetMany(ctx context.Context, params *GetManyParams) ([]model.Item, error) {
 	if params.Seller != "" && params.Query != "" && params.Category != "" {
 		return nil, fmt.Errorf("cannot filter by seller, query, and category simultaneously")
 	}
 
-	var items []itemdb.Item
+	var items []model.Item
 	var err error
 
 	switch {
 	case params.Seller != "":
-		items, err = s.db.Item.GetBySeller(ctx, params.Seller)
+		items, err = s.db.Item.Item.GetBySeller(ctx, params.Seller)
 	case params.Query != "" && params.Category != "":
-		searchParams := itemdb.SearchByCategoryParams{
+		searchParams := itemitem.SearchByCategoryParams{
 			Category:  params.Category,
 			ToTsquery: params.Query,
 		}
-		items, err = s.db.Item.SearchByCategory(ctx, searchParams)
+		items, err = s.db.Item.Item.SearchByCategory(ctx, searchParams)
 	case params.Query != "":
-		items, err = s.db.Item.Search(ctx, params.Query)
+		items, err = s.db.Item.Item.Search(ctx, params.Query)
 	case params.Category != "":
-		items, err = s.db.Item.GetByCategory(ctx, params.Category)
+		items, err = s.db.Item.Item.GetByCategory(ctx, params.Category)
 	default:
-		items, err = s.db.Item.GetAll(ctx)
+		items, err = s.db.Item.Item.GetAll(ctx)
 	}
 
 	if err != nil {
 		return nil, err
 	}
-	return &items, nil
+	return items, nil
 }
 
-func (s *Service) Get(ctx context.Context, id int64) (*itemdb.Item, error) {
-	item, err := s.db.Item.Get(ctx, id)
+func (s *Service) Get(ctx context.Context, id int64) (*model.Item, error) {
+	item, err := s.db.Item.Item.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -77,13 +78,13 @@ type MutationParams struct {
 	Subcategory  string   `json:"subcategory"`
 }
 
-func (s *Service) Create(ctx context.Context, sellerId string, p *MutationParams) (*itemdb.Item, error) {
+func (s *Service) Create(ctx context.Context, sellerId string, p *MutationParams) (*model.Item, error) {
 	placeholder, err := generatePlaceholder(s.cfg, p.Images[0])
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate placeholder: %w", err)
 	}
 
-	dbparams := itemdb.CreateParams{
+	dbparams := itemitem.CreateParams{
 		Name:         p.Name,
 		Description:  p.Description,
 		Images:       p.Images,
@@ -96,20 +97,20 @@ func (s *Service) Create(ctx context.Context, sellerId string, p *MutationParams
 		Placeholder:  placeholder,
 	}
 
-	item, err := s.db.Item.Create(ctx, dbparams)
+	item, err := s.db.Item.Item.Create(ctx, dbparams)
 	if err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (s *Service) Update(ctx context.Context, itemId int64, p *MutationParams) (*itemdb.Item, error) {
+func (s *Service) Update(ctx context.Context, itemId int64, p *MutationParams) (*model.Item, error) {
 	placeholder, err := generatePlaceholder(s.cfg, p.Images[0])
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate placeholder: %w", err)
 	}
 
-	dbparams := itemdb.UpdateParams{
+	dbparams := itemitem.UpdateParams{
 		ID:           itemId,
 		Name:         p.Name,
 		Description:  p.Description,
@@ -122,7 +123,7 @@ func (s *Service) Update(ctx context.Context, itemId int64, p *MutationParams) (
 		Placeholder:  placeholder,
 	}
 
-	item, err := s.db.Item.Update(ctx, dbparams)
+	item, err := s.db.Item.Item.Update(ctx, dbparams)
 	if err != nil {
 		return nil, err
 	}
@@ -130,19 +131,19 @@ func (s *Service) Update(ctx context.Context, itemId int64, p *MutationParams) (
 }
 
 func (s *Service) Delete(ctx context.Context, id int64) error {
-	return s.db.Item.Delete(ctx, id)
+	return s.db.Item.Item.Delete(ctx, id)
 }
 
 func (s *Service) Sell(ctx context.Context, id int64) error {
 	now := time.Now()
-	return s.db.Item.Sell(ctx, itemdb.SellParams{
+	return s.db.Item.Item.Sell(ctx, itemitem.SellParams{
 		ID:     id,
 		SoldAt: &now,
 	})
 }
 
 func (s *Service) IncrementView(ctx context.Context, id int64) error {
-	return s.db.Item.IncrementView(ctx, id)
+	return s.db.Item.Item.IncrementView(ctx, id)
 }
 
 func (s *Service) Like(ctx context.Context, itemId int64, userId string) error {
@@ -152,10 +153,10 @@ func (s *Service) Like(ctx context.Context, itemId int64, userId string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	userTx := s.db.User.WithTx(tx)
-	itemTx := s.db.Item.WithTx(tx)
+	userTx := s.db.User.User.WithTx(tx)
+	itemTx := s.db.Item.Item.WithTx(tx)
 
-	if err := userTx.AddLikedItem(ctx, userdb.AddLikedItemParams{
+	if err := userTx.AddLikedItem(ctx, useruser.AddLikedItemParams{
 		ItemID: itemId,
 		ID:     userId,
 	}); err != nil {
@@ -180,10 +181,10 @@ func (s *Service) Unlike(ctx context.Context, itemId int64, userId string) error
 	}
 	defer tx.Rollback(ctx)
 
-	userTx := s.db.User.WithTx(tx)
-	itemTx := s.db.Item.WithTx(tx)
+	userTx := s.db.User.User.WithTx(tx)
+	itemTx := s.db.Item.Item.WithTx(tx)
 
-	if err := userTx.DeleteLikedItem(ctx, userdb.DeleteLikedItemParams{
+	if err := userTx.DeleteLikedItem(ctx, useruser.DeleteLikedItemParams{
 		ItemID: itemId,
 		ID:     userId,
 	}); err != nil {
@@ -200,12 +201,12 @@ func (s *Service) Unlike(ctx context.Context, itemId int64, userId string) error
 	return nil
 }
 
-func (s *Service) GetBatch(ctx context.Context, ids *[]int64) (*[]itemdb.Item, error) {
-	items, err := s.db.Item.GetByIDs(ctx, *ids)
+func (s *Service) GetBatch(ctx context.Context, ids *[]int64) ([]model.Item, error) {
+	items, err := s.db.Item.Item.GetByIDs(ctx, *ids)
 	if err != nil {
 		return nil, err
 	}
-	return &items, nil
+	return items, nil
 }
 
 func (s *Service) GetUploadPresignURL(ctx context.Context, p *storage.PresignParams) (*storage.PresignResult, error) {

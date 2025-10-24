@@ -1,44 +1,53 @@
 version: "2"
+
 servers:
   - engine: "postgresql"
     uri: ${DATABASE_URL}
+
 sql:
   - engine: "postgresql"
     database:
       managed: true
-    queries: "sqlc/item/query.sql"
-    schema: "sqlc/item/schema.sql"
+    queries:
+      - "sqlc/item/item/query.sql"
+    schema:
+      - "sqlc/item/item/schema.sql"
     gen:
       go:
-        package: "itemdb"
-        out: "internal/db/item"
+        package: "itemitem"
+        out: "internal/db/item/item"
         sql_package: "pgx/v5"
         emit_json_tags: true
         emit_empty_slices: true
+
   - engine: "postgresql"
     database:
       managed: true
-    queries: "sqlc/category/query.sql"
-    schema: "sqlc/category/schema.sql"
+    queries: "sqlc/item/category/query.sql"
+    schema: "sqlc/item/category/schema.sql"
     gen:
       go:
-        package: "categorydb"
-        out: "internal/db/category"
+        package: "itemcategory"
+        out: "internal/db/item/category"
         sql_package: "pgx/v5"
         emit_json_tags: true
         emit_empty_slices: true
+
   - engine: "postgresql"
     database:
       managed: true
-    queries: "sqlc/user/query.sql"
-    schema: "sqlc/user/schema.sql"
+    queries:
+      - "sqlc/user/user/query.sql"
+    schema:
+      - "sqlc/user/user/schema.sql"
     gen:
       go:
-        package: "userdb"
-        out: "internal/db/user"
+        package: "useruser"
+        out: "internal/db/user/user"
         sql_package: "pgx/v5"
         emit_json_tags: true
         emit_empty_slices: true
+
 overrides:
   go:
     overrides:

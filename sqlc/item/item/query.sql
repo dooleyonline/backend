@@ -2,26 +2,26 @@
 SELECT
   *
 FROM
-  item;
+  item.item;
 
 -- name: Get :one
 SELECT
   *
 FROM
-  item
+  item.item
 WHERE
   id = $1;
 
 -- name: Create :one
 INSERT INTO
-  item (name, description, images, price, condition, is_negotiable, category, subcategory, placeholder, seller)
+  item.item (name, description, images, price, condition, is_negotiable, category, subcategory, placeholder, seller)
 VALUES
   ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING *;
 
 -- name: Update :one
 UPDATE
-  item
+  item.item
 SET
   name = $2,
   description = $3,
@@ -38,7 +38,7 @@ RETURNING *;
 
 -- name: Sell :exec
 UPDATE
-  item
+  item.item
 SET
   sold_at = $2
 WHERE
@@ -46,7 +46,7 @@ WHERE
 
 -- name: IncrementView :exec
 UPDATE
-  item
+  item.item
 SET
   views = views + 1
 WHERE
@@ -54,7 +54,7 @@ WHERE
 
 -- name: IncrementLike :exec
 UPDATE
-  item
+  item.item
 SET
   likes = likes + 1
 WHERE
@@ -62,7 +62,7 @@ WHERE
 
 -- name: DecrementLike :exec
 UPDATE
-  item
+  item.item
 SET
   likes = GREATEST(likes - 1, 0)
 WHERE
@@ -70,7 +70,7 @@ WHERE
 
 -- name: Delete :exec
 DELETE FROM
-  item
+  item.item
 WHERE
   id = $1;
 
@@ -78,7 +78,7 @@ WHERE
 SELECT
  *
 FROM
-  item
+  item.item
 WHERE
   fts @@ websearch_to_tsquery($1);
 
@@ -86,7 +86,7 @@ WHERE
 SELECT
   *
 FROM
-  item
+  item.item
 WHERE
   category = $1;
 
@@ -94,7 +94,7 @@ WHERE
 SELECT
   *
 FROM
-  item
+  item.item
 WHERE
   category = $1 AND fts @@ to_tsquery($2); 
 
@@ -102,7 +102,7 @@ WHERE
 SELECT
   *
 FROM
-  "item"
+  item.item
 WHERE
   seller = @seller_ID::uuid
 ORDER BY
@@ -112,6 +112,6 @@ ORDER BY
 SELECT
   *
 FROM
-  "item"
+  item.item
 WHERE
   id = ANY(@item_IDs::bigint[]);

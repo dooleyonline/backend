@@ -6,5 +6,5 @@ import (
 
 type Context struct {
 	echo.Context
-	UserId string
+	UserID string
 }
