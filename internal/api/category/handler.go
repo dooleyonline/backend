@@ -1,7 +1,6 @@
 package categoryhandler
 
 import (
-	"fmt"
 	"net/http"
 
 	categorysvc "github.com/dooleyonline/backend/internal/service/category"
@@ -28,14 +27,13 @@ func (h *Handler) GetAll(c echo.Context) error {
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
-	categories, err := h.svc.GetAll(ctx)
+	res, err := h.svc.GetAll(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get all categories: %w", err)
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, categories)
+	return c.JSON(http.StatusOK, *res)
 }
 
 // Get godoc
@@ -51,17 +49,16 @@ func (h *Handler) Get(c echo.Context) error {
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
 	var name string
 	if err := echo.PathParamsBinder(c).String("name", &name).BindError(); err != nil {
-		return fmt.Errorf("failed to bind name: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	category, err := h.svc.Get(ctx, name)
+	res, err := h.svc.Get(ctx, name)
 	if err != nil {
-		return fmt.Errorf("failed to get category: %w", err)
+		return echo.ErrNotFound.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, category)
+	return c.JSON(http.StatusOK, *res)
 }

@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const addLikedItem = `-- name: AddLikedItem :one
+const addLikedItem = `-- name: AddLikedItem :exec
 UPDATE
   "user"
 SET
@@ -17,7 +17,6 @@ SET
 WHERE
   id = $2
   AND NOT liked_items @> ARRAY[$1::bigint]
-RETURNING liked_items
 `
 
 type AddLikedItemParams struct {
@@ -25,11 +24,9 @@ type AddLikedItemParams struct {
 	ID     string `json:"id"`
 }
 
-func (q *Queries) AddLikedItem(ctx context.Context, arg AddLikedItemParams) ([]int64, error) {
-	row := q.db.QueryRow(ctx, addLikedItem, arg.ItemID, arg.ID)
-	var liked_items []int64
-	err := row.Scan(&liked_items)
-	return liked_items, err
+func (q *Queries) AddLikedItem(ctx context.Context, arg AddLikedItemParams) error {
+	_, err := q.db.Exec(ctx, addLikedItem, arg.ItemID, arg.ID)
+	return err
 }
 
 const create = `-- name: Create :one
@@ -66,7 +63,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (User, error) {
 	return i, err
 }
 
-const deleteLikedItem = `-- name: DeleteLikedItem :one
+const deleteLikedItem = `-- name: DeleteLikedItem :exec
 UPDATE
   "user"
 SET
@@ -74,7 +71,6 @@ SET
 WHERE
   id = $2
   AND (liked_items @> ARRAY[$1::bigint])
-RETURNING liked_items
 `
 
 type DeleteLikedItemParams struct {
@@ -82,11 +78,9 @@ type DeleteLikedItemParams struct {
 	ID     string `json:"id"`
 }
 
-func (q *Queries) DeleteLikedItem(ctx context.Context, arg DeleteLikedItemParams) ([]int64, error) {
-	row := q.db.QueryRow(ctx, deleteLikedItem, arg.ItemID, arg.ID)
-	var liked_items []int64
-	err := row.Scan(&liked_items)
-	return liked_items, err
+func (q *Queries) DeleteLikedItem(ctx context.Context, arg DeleteLikedItemParams) error {
+	_, err := q.db.Exec(ctx, deleteLikedItem, arg.ItemID, arg.ID)
+	return err
 }
 
 const get = `-- name: Get :one
@@ -112,32 +106,25 @@ func (q *Queries) Get(ctx context.Context, email string) (User, error) {
 	return i, err
 }
 
-const getFullUserByID = `-- name: GetFullUserByID :one
+const getByID = `-- name: GetByID :one
 SELECT
-  id, email, liked_items, first_name, last_name
+  email, password, liked_items, first_name, last_name, id
 FROM
   "user"
 WHERE
   id = $1
 `
 
-type GetFullUserByIDRow struct {
-	ID         string  `json:"id"`
-	Email      string  `json:"email"`
-	LikedItems []int64 `json:"liked_items"`
-	FirstName  string  `json:"first_name"`
-	LastName   string  `json:"last_name"`
-}
-
-func (q *Queries) GetFullUserByID(ctx context.Context, id string) (GetFullUserByIDRow, error) {
-	row := q.db.QueryRow(ctx, getFullUserByID, id)
-	var i GetFullUserByIDRow
+func (q *Queries) GetByID(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRow(ctx, getByID, id)
+	var i User
 	err := row.Scan(
-		&i.ID,
 		&i.Email,
+		&i.Password,
 		&i.LikedItems,
 		&i.FirstName,
 		&i.LastName,
+		&i.ID,
 	)
 	return i, err
 }
@@ -160,32 +147,27 @@ func (q *Queries) GetLikedItems(ctx context.Context, id string) ([]int64, error)
 
 const getMany = `-- name: GetMany :many
 SELECT
-  id, email, first_name, last_name
+  email, password, liked_items, first_name, last_name, id
 FROM
   "user"
 `
 
-type GetManyRow struct {
-	ID        string `json:"id"`
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-}
-
-func (q *Queries) GetMany(ctx context.Context) ([]GetManyRow, error) {
+func (q *Queries) GetMany(ctx context.Context) ([]User, error) {
 	rows, err := q.db.Query(ctx, getMany)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetManyRow{}
+	items := []User{}
 	for rows.Next() {
-		var i GetManyRow
+		var i User
 		if err := rows.Scan(
-			&i.ID,
 			&i.Email,
+			&i.Password,
+			&i.LikedItems,
 			&i.FirstName,
 			&i.LastName,
+			&i.ID,
 		); err != nil {
 			return nil, err
 		}
@@ -195,26 +177,4 @@ func (q *Queries) GetMany(ctx context.Context) ([]GetManyRow, error) {
 		return nil, err
 	}
 	return items, nil
-}
-
-const getSellerByID = `-- name: GetSellerByID :one
-SELECT
-  id, first_name, last_name
-FROM
-  "user"
-WHERE
-  id = $1
-`
-
-type GetSellerByIDRow struct {
-	ID        string `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-}
-
-func (q *Queries) GetSellerByID(ctx context.Context, id string) (GetSellerByIDRow, error) {
-	row := q.db.QueryRow(ctx, getSellerByID, id)
-	var i GetSellerByIDRow
-	err := row.Scan(&i.ID, &i.FirstName, &i.LastName)
-	return i, err
 }

@@ -67,7 +67,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User",
                         "schema": {
-                            "$ref": "#/definitions/usersvc.Me"
+                            "$ref": "#/definitions/userdb.User"
                         }
                     }
                 }
@@ -88,6 +88,28 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get current authenticated user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/userdb.User"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 }
             }
@@ -201,7 +223,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/itemsvc.CreateUpdateInput"
+                            "$ref": "#/definitions/itemsvc.MutationParams"
                         }
                     }
                 ],
@@ -215,7 +237,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/item/bulk": {
+        "/item/batch": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -249,6 +271,39 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/itemdb.Item"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/item/upload-url": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Generate presigned URL for item upload",
+                "parameters": [
+                    {
+                        "description": "Presign params",
+                        "name": "item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/storage.PresignParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/storage.PresignResult"
                         }
                     }
                 }
@@ -306,7 +361,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/itemsvc.CreateUpdateInput"
+                            "$ref": "#/definitions/itemsvc.MutationParams"
                         }
                     }
                 ],
@@ -356,15 +411,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Updated liked items",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "integer",
-                                "format": "int64"
-                            }
-                        }
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -407,15 +455,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Updated liked items",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "integer",
-                                "format": "int64"
-                            }
-                        }
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -442,39 +483,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/storage/presign": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "other"
-                ],
-                "summary": "Generate presigned URL for s3 operation",
-                "parameters": [
-                    {
-                        "description": "Presign params",
-                        "name": "item",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/storage.PresignRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/itemdb.Item"
-                        }
-                    }
-                }
-            }
-        },
         "/user": {
             "get": {
                 "consumes": [
@@ -493,7 +501,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/usersvc.UserSummary"
+                                "$ref": "#/definitions/userdb.User"
                             }
                         }
                     }
@@ -517,7 +525,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/usersvc.CreateInput"
+                            "$ref": "#/definitions/usersvc.CreateParams"
                         }
                     }
                 ],
@@ -525,31 +533,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/usersvc.UserSummary"
-                        }
-                    }
-                }
-            }
-        },
-        "/user/me": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Get current authenticated user",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/usersvc.Me"
+                            "$ref": "#/definitions/userdb.User"
                         }
                     }
                 }
@@ -577,7 +561,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/usersvc.Seller"
+                            "$ref": "#/definitions/userdb.User"
                         }
                     }
                 }
@@ -610,6 +594,15 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "http.Header": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
                 }
             }
         },
@@ -669,7 +662,7 @@ const docTemplate = `{
                 }
             }
         },
-        "itemsvc.CreateUpdateInput": {
+        "itemsvc.MutationParams": {
             "type": "object",
             "properties": {
                 "category": {
@@ -701,7 +694,7 @@ const docTemplate = `{
                 }
             }
         },
-        "storage.PresignRequest": {
+        "storage.PresignParams": {
             "type": "object",
             "properties": {
                 "bucket": {
@@ -718,24 +711,18 @@ const docTemplate = `{
                 }
             }
         },
-        "usersvc.CreateInput": {
+        "storage.PresignResult": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string"
+                "header": {
+                    "$ref": "#/definitions/http.Header"
                 },
-                "firstName": {
-                    "type": "string"
-                },
-                "lastName": {
-                    "type": "string"
-                },
-                "password": {
+                "url": {
                     "type": "string"
                 }
             }
         },
-        "usersvc.Me": {
+        "userdb.User": {
             "type": "object",
             "properties": {
                 "email": {
@@ -755,39 +742,25 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },
-        "usersvc.Seller": {
+        "usersvc.CreateParams": {
             "type": "object",
             "properties": {
                 "email": {
                     "type": "string"
                 },
-                "first_name": {
+                "firstName": {
                     "type": "string"
                 },
-                "id": {
+                "lastName": {
                     "type": "string"
                 },
-                "last_name": {
-                    "type": "string"
-                }
-            }
-        },
-        "usersvc.UserSummary": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "last_name": {
+                "password": {
                     "type": "string"
                 }
             }

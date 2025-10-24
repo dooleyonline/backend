@@ -1,11 +1,11 @@
 package itemhandler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
 	itemsvc "github.com/dooleyonline/backend/internal/service/item"
+	"github.com/dooleyonline/backend/internal/storage"
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,22 +32,26 @@ func (h *Handler) GetMany(c echo.Context) error {
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
-	seller := c.QueryParam("seller")
-	query := c.QueryParam("q")
-	category := c.QueryParam("category")
+	var (
+		seller   string
+		query    string
+		category string
+	)
+	if err := echo.QueryParamsBinder(c).String("seller", &seller).String("q", &query).String("category", &category).BindError(); err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
+	}
 
-	items, err := h.svc.GetMany(ctx, itemsvc.GetManyFilters{
+	res, err := h.svc.GetMany(ctx, &itemsvc.GetManyParams{
 		Seller:   seller,
 		Query:    query,
 		Category: category,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to get items: %w", err)
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, items)
+	return c.JSON(http.StatusOK, *res)
 }
 
 // Get godoc
@@ -63,19 +67,18 @@ func (h *Handler) Get(c echo.Context) error {
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
 	var itemId int64
 	if err := echo.PathParamsBinder(c).Int64("id", &itemId).BindError(); err != nil {
-		return fmt.Errorf("failed to bind id: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	item, err := h.svc.Get(ctx, itemId)
+	res, err := h.svc.Get(ctx, itemId)
 	if err != nil {
-		return fmt.Errorf("failed to get item: %w", err)
+		return echo.ErrNotFound.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, item)
+	return c.JSON(http.StatusOK, *res)
 }
 
 // Create godoc
@@ -84,7 +87,7 @@ func (h *Handler) Get(c echo.Context) error {
 //	@Tags		item
 //	@Accept		json
 //	@Produce	json
-//	@Param		item	body		itemsvc.CreateUpdateInput	true	"Item"
+//	@Param		item	body		itemsvc.MutationParams	true	"Item"
 //	@Success	201		{object}	itemdb.Item
 //	@Router		/item [post]
 func (h *Handler) Create(c echo.Context) error {
@@ -93,19 +96,18 @@ func (h *Handler) Create(c echo.Context) error {
 		ctx    = req.Context()
 		userId = c.(shared.Context).UserId
 	)
-	defer req.Body.Close()
 
-	var params itemsvc.CreateUpdateInput
+	var params itemsvc.MutationParams
 	if err := c.Bind(&params); err != nil {
-		return fmt.Errorf("failed to bind params: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	item, err := h.svc.Create(ctx, userId, params)
+	res, err := h.svc.Create(ctx, userId, &params)
 	if err != nil {
-		return fmt.Errorf("failed to create item: %w", err)
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusCreated, item)
+	return c.JSON(http.StatusCreated, *res)
 }
 
 // Update godoc
@@ -114,8 +116,8 @@ func (h *Handler) Create(c echo.Context) error {
 //	@Tags		item
 //	@Accept		json
 //	@Produce	json
-//	@Param		id		path		int							true	"Item ID"
-//	@Param		item	body		itemsvc.CreateUpdateInput	true	"Item"
+//	@Param		id		path		int						true	"Item ID"
+//	@Param		item	body		itemsvc.MutationParams	true	"Item"
 //	@Success	200		{object}	itemdb.Item
 //	@Router		/item/{id} [put]
 func (h *Handler) Update(c echo.Context) error {
@@ -123,23 +125,22 @@ func (h *Handler) Update(c echo.Context) error {
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
-	var params itemsvc.CreateUpdateInput
+	var params itemsvc.MutationParams
 	if err := c.Bind(&params); err != nil {
-		return fmt.Errorf("failed to bind params: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 	var itemId int64
 	if err := echo.PathParamsBinder(c).Int64("id", &itemId).BindError(); err != nil {
-		return fmt.Errorf("failed to bind id: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	item, err := h.svc.Update(ctx, itemId, params)
+	res, err := h.svc.Update(ctx, itemId, &params)
 	if err != nil {
-		return fmt.Errorf("failed to update item: %w", err)
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, item)
+	return c.JSON(http.StatusOK, *res)
 }
 
 // Delete godoc
@@ -154,15 +155,14 @@ func (h *Handler) Delete(c echo.Context) error {
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
 	var itemId int64
 	if err := echo.PathParamsBinder(c).Int64("id", &itemId).BindError(); err != nil {
-		return fmt.Errorf("failed to bind id: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
 	if err := h.svc.Delete(ctx, itemId); err != nil {
-		return fmt.Errorf("failed to delete item: %w", err)
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
 	return c.NoContent(http.StatusNoContent)
@@ -180,41 +180,39 @@ func (h *Handler) Sell(c echo.Context) error {
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
 	var itemId int64
 	if err := echo.PathParamsBinder(c).Int64("id", &itemId).BindError(); err != nil {
-		return fmt.Errorf("failed to bind id: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
 	if err := h.svc.Sell(ctx, itemId); err != nil {
-		return fmt.Errorf("failed to sell item: %w", err)
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
 	return c.NoContent(http.StatusNoContent)
 }
 
-// IncrementView godoc
+// View godoc
 //
 //	@Summary	Increment item views by ID
 //	@Tags		item
 //	@Param		id	path	int	true	"Item ID"
 //	@Success	204
 //	@Router		/item/{id}/view [post]
-func (h *Handler) IncrementView(c echo.Context) error {
+func (h *Handler) View(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
 	var itemId int64
 	if err := echo.PathParamsBinder(c).Int64("id", &itemId).BindError(); err != nil {
-		return fmt.Errorf("failed to bind id: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
 	if err := h.svc.IncrementView(ctx, itemId); err != nil {
-		return fmt.Errorf("failed to increment views: %w", err)
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
 	return c.NoContent(http.StatusNoContent)
@@ -224,8 +222,8 @@ func (h *Handler) IncrementView(c echo.Context) error {
 //
 //	@Summary	Like an item
 //	@Tags		item
-//	@Param		id	path	int		true	"Item ID"
-//	@Success	200	{array}	int64	"Updated liked items"
+//	@Param		id	path	int	true	"Item ID"
+//	@Success	204
 //	@Router		/item/{id}/like [post]
 func (h *Handler) Like(c echo.Context) error {
 	var (
@@ -233,27 +231,25 @@ func (h *Handler) Like(c echo.Context) error {
 		ctx    = req.Context()
 		userId = c.(shared.Context).UserId
 	)
-	defer req.Body.Close()
 
 	var itemId int64
 	if err := echo.PathParamsBinder(c).Int64("id", &itemId).BindError(); err != nil {
-		return fmt.Errorf("failed to bind item id: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	likedItems, err := h.svc.Like(ctx, itemId, userId)
-	if err != nil {
-		return fmt.Errorf("failed to like item: %w", err)
+	if err := h.svc.Like(ctx, itemId, userId); err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, likedItems)
+	return c.NoContent(http.StatusNoContent)
 }
 
 // Unlike godoc
 //
 //	@Summary	Unlike an item
 //	@Tags		item
-//	@Param		id	path	int		true	"Item ID"
-//	@Success	200	{array}	int64	"Updated liked items"
+//	@Param		id	path	int	true	"Item ID"
+//	@Success	204
 //	@Router		/item/{id}/unlike [post]
 func (h *Handler) Unlike(c echo.Context) error {
 	var (
@@ -261,19 +257,17 @@ func (h *Handler) Unlike(c echo.Context) error {
 		ctx    = req.Context()
 		userId = c.(shared.Context).UserId
 	)
-	defer req.Body.Close()
 
 	var itemId int64
 	if err := echo.PathParamsBinder(c).Int64("id", &itemId).BindError(); err != nil {
-		return fmt.Errorf("failed to bind item id: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	likedItems, err := h.svc.Unlike(ctx, itemId, userId)
-	if err != nil {
-		return fmt.Errorf("failed to unlike item: %w", err)
+	if err := h.svc.Unlike(ctx, itemId, userId); err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, likedItems)
+	return c.NoContent(http.StatusNoContent)
 }
 
 // GetBulk godoc
@@ -284,23 +278,58 @@ func (h *Handler) Unlike(c echo.Context) error {
 //	@Produce	json
 //	@Param		item_IDs	body	[]int64	true	"Item IDs"
 //	@Success	200			{array}	itemdb.Item
-//	@Router		/item/bulk [post]
-func (h *Handler) GetBulk(c echo.Context) error {
+//	@Router		/item/batch [post]
+func (h *Handler) GetBatch(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
 	var itemIDs []int64
 	if err := c.Bind(&itemIDs); err != nil {
-		return fmt.Errorf("failed to bind item ids: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	items, err := h.svc.GetBulk(ctx, itemIDs)
+	res, err := h.svc.GetBatch(ctx, &itemIDs)
 	if err != nil {
-		return fmt.Errorf("failed to get items: %w", err)
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, items)
+	return c.JSON(http.StatusOK, *res)
+}
+
+// GetUploadPresignURL godoc
+//
+//	@Summary	Generate presigned URL for item upload
+//	@Tags		item
+//	@Accept		json
+//	@Produce	json
+//	@Param		item	body		storage.PresignParams	true	"Presign params"
+//	@Success	200		{object}	storage.PresignResult
+//	@Router		/item/upload-url [post]
+func (h *Handler) GetUploadURL(c echo.Context) error {
+	var (
+		req = c.Request()
+		ctx = req.Context()
+	)
+
+	var input storage.PresignParams
+	if err := c.Bind(&input); err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	if input.Method != http.MethodPut {
+		return echo.ErrBadRequest
+	}
+
+	if input.Bucket == "" || input.Key == "" || input.ContentType == "" {
+		return echo.ErrBadRequest
+	}
+
+	res, err := h.svc.GetUploadPresignURL(ctx, &input)
+	if err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+
+	return c.JSON(http.StatusOK, *res)
 }

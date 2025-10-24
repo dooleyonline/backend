@@ -3,11 +3,11 @@ package authsvc
 import (
 	"context"
 	"fmt"
+	"time"
 
-	"github.com/dooleyonline/backend/internal/auth"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
-	usersvc "github.com/dooleyonline/backend/internal/service/user"
+	userdb "github.com/dooleyonline/backend/internal/db/user"
 )
 
 type Service struct {
@@ -19,37 +19,65 @@ func New(cfg *config.Config, db *db.DB) *Service {
 	return &Service{cfg, db}
 }
 
-func (s *Service) Login(ctx context.Context, params LoginParams) (LoginResponse, error) {
+type LoginParams struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginResult struct {
+	User         userdb.User
+	Token        string
+	CookieConfig CookieOptionsResult
+}
+
+func (s *Service) Login(ctx context.Context, params *LoginParams) (*LoginResult, error) {
 	user, err := s.db.User.Get(ctx, params.Email)
 	if err != nil {
-		return LoginResponse{}, fmt.Errorf("failed to get user: %w", err)
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+	user.Password = ""
+
+	if verified := VerifyPassword(params.Password, user.Password); !verified {
+		return nil, fmt.Errorf("invalid credentials")
 	}
 
-	if verified := auth.VerifyPassword(params.Password, user.Password); !verified {
-		return LoginResponse{}, fmt.Errorf("invalid credentials")
-	}
-
-	token, err := auth.CreateJWT(s.cfg, params.Email, user.ID)
+	token, err := CreateJWT(s.cfg, params.Email, user.ID)
 	if err != nil {
-		return LoginResponse{}, fmt.Errorf("failed to create token: %w", err)
+		return nil, fmt.Errorf("failed to create token: %w", err)
 	}
 
-	return LoginResponse{
-		User: usersvc.Me{
-			ID:        user.ID,
-			Email:     user.Email,
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			LikedItems: user.LikedItems,
-		},
-		Token: token,
+	res, err := s.CookieOptions()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get cookie options: %w", err)
+	}
+
+	return &LoginResult{
+		User:         user,
+		Token:        token,
+		CookieConfig: *res,
 	}, nil
 }
 
-func (s *Service) CookieDetails() (CookieDetailsResponse, error) {
-	return CookieDetailsResponse{
+type CookieOptionsResult struct {
+	AuthTokenName string        `json:"auth_token_name"`
+	AuthTokenExp  time.Duration `json:"auth_token_exp"` // in seconds
+	Secure        bool          `json:"secure"`
+}
+
+func (s *Service) CookieOptions() (*CookieOptionsResult, error) {
+	return &CookieOptionsResult{
 		AuthTokenName: s.cfg.AuthTokenName,
 		AuthTokenExp:  s.cfg.AuthTokenExp,
 		Secure:        s.cfg.IsProd,
 	}, nil
+}
+
+func (s *Service) GetMe(ctx context.Context, id string) (*userdb.User, error) {
+	user, err := s.db.User.GetByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	user.Password = ""
+	return &user, nil
 }

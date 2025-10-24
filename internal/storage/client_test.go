@@ -17,26 +17,26 @@ func TestPresignUploadText(t *testing.T) {
 		t.Fatal("failed to initialize config:", err)
 	}
 
-	sreq := &PresignRequest{
+	sreq := &PresignParams{
 		Method:      http.MethodPut,
 		Bucket:      "image",
 		Key:         "test-plain.txt",
 		ContentType: "text/plain",
 	}
 
-	storage := NewClient(cfg)
+	storage := New(cfg)
 
-	url, header, err := storage.Presign(t.Context(), sreq)
+	presign, err := storage.PresignUpload(t.Context(), sreq)
 	if err != nil {
 		t.Fatal("failed to presign:", err)
 	}
 
 	payload := "hello!"
-	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBufferString(payload))
+	req, err := http.NewRequest(http.MethodPut, presign.URL, bytes.NewBufferString(payload))
 	if err != nil {
 		t.Fatal("failed to create request:", err)
 	}
-	req.Header = header
+	req.Header = presign.Header
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -60,24 +60,24 @@ func TestPresignUploadImage(t *testing.T) {
 	}
 	defer payload.Close()
 
-	sreq := &PresignRequest{
+	sreq := &PresignParams{
 		Method:      http.MethodPut,
 		Bucket:      "image",
 		Key:         "test-image.png",
 		ContentType: "image/png",
 	}
 
-	storage := NewClient(cfg)
-	url, header, err := storage.Presign(t.Context(), sreq)
+	storage := New(cfg)
+	presign, err := storage.PresignUpload(t.Context(), sreq)
 	if err != nil {
 		t.Fatal("failed to presign:", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPut, url, payload)
+	req, err := http.NewRequest(http.MethodPut, presign.URL, payload)
 	if err != nil {
 		t.Fatal("failed to create request:", err)
 	}
-	req.Header = header
+	req.Header = presign.Header
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {

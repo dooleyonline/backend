@@ -1,10 +1,8 @@
 package user
 
 import (
-	"fmt"
 	"net/http"
 
-	"github.com/dooleyonline/backend/internal/api/shared"
 	usersvc "github.com/dooleyonline/backend/internal/service/user"
 	"github.com/labstack/echo/v4"
 )
@@ -23,21 +21,20 @@ func New(svc *usersvc.Service) *Handler {
 //	@Tags		user
 //	@Accept		json
 //	@Produce	json
-//	@Success	200	{array}	usersvc.UserSummary
+//	@Success	200	{array}	userdb.User
 //	@Router		/user [get]
 func (h *Handler) GetMany(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
-	users, err := h.svc.GetMany(ctx)
+	res, err := h.svc.GetMany(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get users: %w", err)
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, users)
+	return c.JSON(http.StatusOK, *res)
 }
 
 // Create godoc
@@ -46,27 +43,26 @@ func (h *Handler) GetMany(c echo.Context) error {
 //	@Tags		user
 //	@Accept		json
 //	@Produce	json
-//	@Param		user	body		usersvc.CreateInput	true	"User"
-//	@Success	201		{object}	usersvc.UserSummary
+//	@Param		user	body		usersvc.CreateParams	true	"User"
+//	@Success	201		{object}	userdb.User
 //	@Router		/user [post]
 func (h *Handler) Create(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
-	var params usersvc.CreateInput
+	var params usersvc.CreateParams
 	if err := c.Bind(&params); err != nil {
-		return fmt.Errorf("failed to bind params: %w", err)
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	user, err := h.svc.Create(ctx, params)
+	res, err := h.svc.Create(ctx, &params)
 	if err != nil {
-		return fmt.Errorf("failed to create user: %w", err)
+		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, *res)
 }
 
 // GetSeller godoc
@@ -75,48 +71,23 @@ func (h *Handler) Create(c echo.Context) error {
 //	@Tags		user
 //	@Produce	json
 //	@Param		id	path		string	true	"User ID (UUID)"
-//	@Success	200	{object}	usersvc.Seller
+//	@Success	200	{object}	userdb.User
 //	@Router		/user/{id} [get]
-func (h *Handler) GetSeller(c echo.Context) error {
+func (h *Handler) Get(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
 	)
-	defer req.Body.Close()
 
 	id := c.Param("id")
 	if id == "" {
-		return fmt.Errorf("user id is required")
+		return echo.ErrBadRequest
 	}
 
-	seller, err := h.svc.GetSellerByID(ctx, id)
+	res, err := h.svc.Get(ctx, id)
 	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
+		return echo.ErrNotFound.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, seller)
-}
-
-// GetMe godoc
-//
-//	@Summary	Get current authenticated user
-//	@Tags		user
-//	@Produce	json
-//	@Success	200	{object}	usersvc.Me
-//	@Router		/user/me [get]
-//	@Security	ApiKeyAuth
-func (h *Handler) GetMe(c echo.Context) error {
-	var (
-		req    = c.Request()
-		ctx    = req.Context()
-		userId = c.(shared.Context).UserId
-	)
-	defer req.Body.Close()
-
-	me, err := h.svc.GetMe(ctx, userId)
-	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
-	}
-
-	return c.JSON(http.StatusOK, me)
+	return c.JSON(http.StatusOK, *res)
 }

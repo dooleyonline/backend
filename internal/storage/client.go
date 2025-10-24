@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
-	"strings"
+	"net/url"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -15,45 +15,70 @@ import (
 	"github.com/dooleyonline/backend/internal/config"
 )
 
-type Client struct {
+type Storage struct {
 	cfg    *config.Config
 	signer *v4.Signer
 }
 
-func NewClient(cfg *config.Config) *Client {
+func New(cfg *config.Config) *Storage {
 	signer := v4.NewSigner(func(signer *v4.SignerOptions) {
 		signer.DisableHeaderHoisting = true
 	})
-	return &Client{cfg, signer}
+	return &Storage{cfg, signer}
 }
 
-func (c *Client) Presign(ctx context.Context, sreq *PresignRequest) (string, http.Header, error) {
-	url := c.buildURL(sreq.Bucket, sreq.Key)
-	req, err := http.NewRequestWithContext(ctx, sreq.Method, url, nil)
-	if err != nil {
-		return "", nil, fmt.Errorf("failed to create request: %w", err)
-	}
-	req.Header.Set("Content-Type", sreq.ContentType)
+type PresignParams struct {
+	Method      string
+	Bucket      string
+	Key         string
+	ContentType string
+}
 
-	return c.signer.PresignHTTP(ctx,
-		c.credentials(),
+type PresignResult struct {
+	URL    string      `json:"url"`
+	Header http.Header `json:"header"`
+}
+
+func (s *Storage) PresignUpload(ctx context.Context, p *PresignParams) (*PresignResult, error) {
+	url, err := s.buildURL(p.Bucket, p.Key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build url: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, p.Method, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", p.ContentType)
+
+	signedURI, signedHeader, err := s.signer.PresignHTTP(ctx,
+		s.credentials(),
 		req,
 		hashPayload(""),
 		"s3",
-		c.cfg.StorageRegion,
+		s.cfg.StorageRegion,
 		time.Now(),
 	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to presign request: %w", err)
+	}
+
+	res := &PresignResult{
+		URL:    signedURI,
+		Header: signedHeader,
+	}
+	return res, nil
 }
 
-func (c *Client) credentials() aws.Credentials {
+func (s *Storage) credentials() aws.Credentials {
 	return aws.Credentials{
-		AccessKeyID:     c.cfg.StorageAccessId,
-		SecretAccessKey: c.cfg.StorageAccessSecret,
+		AccessKeyID:     s.cfg.StorageAccessId,
+		SecretAccessKey: s.cfg.StorageAccessSecret,
 	}
 }
 
-func (c *Client) buildURL(bucket, key string) string {
-	return strings.Join([]string{c.cfg.StorageS3Url, bucket, key}, "/")
+func (s *Storage) buildURL(bucket, key string) (string, error) {
+	return url.JoinPath(s.cfg.StorageS3Url, bucket, key)
 }
 
 func hashPayload(payload string) string {

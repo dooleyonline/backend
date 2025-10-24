@@ -8,12 +8,10 @@ import (
 	authhandler "github.com/dooleyonline/backend/internal/api/auth"
 	categoryhandler "github.com/dooleyonline/backend/internal/api/category"
 	itemhandler "github.com/dooleyonline/backend/internal/api/item"
-	storagehandler "github.com/dooleyonline/backend/internal/api/storage"
 	userhandler "github.com/dooleyonline/backend/internal/api/user"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	"github.com/dooleyonline/backend/internal/service"
-	storage "github.com/dooleyonline/backend/internal/storage"
 	"github.com/labstack/echo/v4"
 
 	_ "github.com/dooleyonline/backend/docs"
@@ -41,8 +39,6 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	category := categoryhandler.New(services.Category)
 	user := userhandler.New(services.User)
 
-	storage := storagehandler.New(storage.NewClient(cfg))
-
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
@@ -64,11 +60,14 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.GET("/item/:id", item.Get)
 	e.PUT("/item/:id", item.Update)
 	e.DELETE("/item/:id", item.Delete)
-	e.POST("/item/:id/view", item.IncrementView)
+	e.POST("/item/:id/view", item.View)
 	e.POST("/item/:id/sell", item.Sell)
 	e.POST("/item/:id/like", item.Like)
 	e.POST("/item/:id/unlike", item.Unlike)
-	e.POST("/item/bulk", item.GetBulk)
+	e.POST("/item/batch", item.GetBatch)
+
+	// presign upload URL
+	e.POST("/item/upload-url", item.GetUploadURL)
 
 	// category
 	e.GET("/category", category.GetAll)
@@ -77,15 +76,12 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	// user routes
 	e.GET("/user", user.GetMany)
 	e.POST("/user", user.Create)
-	e.GET("/user/me", user.GetMe)
-	e.GET("/user/:id", user.GetSeller)
+	e.GET("/user/:id", user.Get)
 
 	// auth routes
 	e.POST("/auth/login", auth.Login)
 	e.POST("/auth/logout", auth.Logout)
-
-	// storage routes
-	e.POST("/storage/presign", storage.Presign)
+	e.GET("/auth/me", auth.GetMe)
 
 	return e, nil
 }
@@ -99,7 +95,6 @@ var protectedRoutes = routesConfig{
 	"/item/:id/sell":   {http.MethodPost},
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
-	"/user/me":         {http.MethodGet},
 	"/auth/logout":     {http.MethodPost},
 }
 

@@ -10,8 +10,8 @@ import (
 	"slices"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
-	"github.com/dooleyonline/backend/internal/auth"
 	"github.com/dooleyonline/backend/internal/config"
+	authsvc "github.com/dooleyonline/backend/internal/service/auth"
 	"github.com/golang-jwt/jwt/v5"
 	echoJWT "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -63,7 +63,7 @@ func contextMiddleware() echo.MiddlewareFunc {
 			var userId string
 			token, ok := c.Get("user").(*jwt.Token)
 			if ok {
-				claims, ok := token.Claims.(*auth.JWTClaims)
+				claims, ok := token.Claims.(*authsvc.JWTClaims)
 				if ok {
 					userId = claims.ID
 				}
@@ -113,7 +113,7 @@ func authMiddleware(cfg *config.Config, protectedRoutes routesConfig) echo.Middl
 		SigningKey: []byte(cfg.AuthTokenSecret),
 		ContextKey: "user",
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(auth.JWTClaims)
+			return new(authsvc.JWTClaims)
 		},
 		TokenLookupFuncs: []middleware.ValuesExtractor{tokenLookup},
 	}

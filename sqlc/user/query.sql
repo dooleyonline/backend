@@ -1,6 +1,6 @@
 -- name: GetMany :many
 SELECT
-  id, email, first_name, last_name
+  *
 FROM
   "user";
 
@@ -27,37 +27,27 @@ FROM
 WHERE
   id = $1;
 
--- name: DeleteLikedItem :one
+-- name: DeleteLikedItem :exec
 UPDATE
   "user"
 SET
   liked_items = array_remove(liked_items, @item_ID::bigint)
 WHERE
   id = @id
-  AND (liked_items @> ARRAY[@item_ID::bigint])
-RETURNING liked_items; 
+  AND (liked_items @> ARRAY[@item_ID::bigint]);
 
--- name: AddLikedItem :one 
+-- name: AddLikedItem :exec
 UPDATE
   "user"
 SET
   liked_items = array_append(liked_items, @item_ID::bigint)
 WHERE
   id = @id
-  AND NOT liked_items @> ARRAY[@item_ID::bigint]
-RETURNING liked_items;
+  AND NOT liked_items @> ARRAY[@item_ID::bigint];
 
--- name: GetSellerByID :one
+-- name: GetByID :one
 SELECT
-  id, first_name, last_name
-FROM
-  "user"
-WHERE
-  id = $1;
-
--- name: GetFullUserByID :one
-SELECT
-  id, email, liked_items, first_name, last_name
+  *
 FROM
   "user"
 WHERE

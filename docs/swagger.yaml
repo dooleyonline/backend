@@ -18,6 +18,12 @@ definitions:
           type: string
         type: array
     type: object
+  http.Header:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
   itemdb.Item:
     properties:
       category:
@@ -55,7 +61,7 @@ definitions:
       views:
         type: integer
     type: object
-  itemsvc.CreateUpdateInput:
+  itemsvc.MutationParams:
     properties:
       category:
         type: string
@@ -76,7 +82,7 @@ definitions:
       subcategory:
         type: string
     type: object
-  storage.PresignRequest:
+  storage.PresignParams:
     properties:
       bucket:
         type: string
@@ -87,18 +93,14 @@ definitions:
       method:
         type: string
     type: object
-  usersvc.CreateInput:
+  storage.PresignResult:
     properties:
-      email:
-        type: string
-      firstName:
-        type: string
-      lastName:
-        type: string
-      password:
+      header:
+        $ref: '#/definitions/http.Header'
+      url:
         type: string
     type: object
-  usersvc.Me:
+  userdb.User:
     properties:
       email:
         type: string
@@ -112,27 +114,18 @@ definitions:
         items:
           type: integer
         type: array
+      password:
+        type: string
     type: object
-  usersvc.Seller:
+  usersvc.CreateParams:
     properties:
       email:
         type: string
-      first_name:
+      firstName:
         type: string
-      id:
+      lastName:
         type: string
-      last_name:
-        type: string
-    type: object
-  usersvc.UserSummary:
-    properties:
-      email:
-        type: string
-      first_name:
-        type: string
-      id:
-        type: string
-      last_name:
+      password:
         type: string
     type: object
 host: localhost:8080
@@ -176,7 +169,7 @@ paths:
         "200":
           description: User
           schema:
-            $ref: '#/definitions/usersvc.Me'
+            $ref: '#/definitions/userdb.User'
       summary: Log in
       tags:
       - auth
@@ -190,6 +183,20 @@ paths:
         "200":
           description: OK
       summary: Log out
+      tags:
+      - auth
+  /auth/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userdb.User'
+        "401":
+          description: Unauthorized
+      summary: Get current authenticated user
       tags:
       - auth
   /category:
@@ -260,7 +267,7 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/itemsvc.CreateUpdateInput'
+          $ref: '#/definitions/itemsvc.MutationParams'
       produces:
       - application/json
       responses:
@@ -316,7 +323,7 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/itemsvc.CreateUpdateInput'
+          $ref: '#/definitions/itemsvc.MutationParams'
       produces:
       - application/json
       responses:
@@ -336,13 +343,8 @@ paths:
         required: true
         type: integer
       responses:
-        "200":
-          description: Updated liked items
-          schema:
-            items:
-              format: int64
-              type: integer
-            type: array
+        "204":
+          description: No Content
       summary: Like an item
       tags:
       - item
@@ -369,13 +371,8 @@ paths:
         required: true
         type: integer
       responses:
-        "200":
-          description: Updated liked items
-          schema:
-            items:
-              format: int64
-              type: integer
-            type: array
+        "204":
+          description: No Content
       summary: Unlike an item
       tags:
       - item
@@ -393,7 +390,7 @@ paths:
       summary: Increment item views by ID
       tags:
       - item
-  /item/bulk:
+  /item/batch:
     post:
       consumes:
       - application/json
@@ -418,7 +415,7 @@ paths:
       summary: Get items in bulk by list of IDs
       tags:
       - item
-  /storage/presign:
+  /item/upload-url:
     post:
       consumes:
       - application/json
@@ -428,17 +425,17 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/storage.PresignRequest'
+          $ref: '#/definitions/storage.PresignParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/itemdb.Item'
-      summary: Generate presigned URL for s3 operation
+            $ref: '#/definitions/storage.PresignResult'
+      summary: Generate presigned URL for item upload
       tags:
-      - other
+      - item
   /user:
     get:
       consumes:
@@ -450,7 +447,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/usersvc.UserSummary'
+              $ref: '#/definitions/userdb.User'
             type: array
       summary: Get many users
       tags:
@@ -464,14 +461,14 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/usersvc.CreateInput'
+          $ref: '#/definitions/usersvc.CreateParams'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/usersvc.UserSummary'
+            $ref: '#/definitions/userdb.User'
       summary: Create user
       tags:
       - user
@@ -489,22 +486,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/usersvc.Seller'
+            $ref: '#/definitions/userdb.User'
       summary: Get seller by ID
-      tags:
-      - user
-  /user/me:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/usersvc.Me'
-      security:
-      - ApiKeyAuth: []
-      summary: Get current authenticated user
       tags:
       - user
 swagger: "2.0"
