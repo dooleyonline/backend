@@ -47,8 +47,7 @@ func login(ctx context.Context, cfg *config.Config, client *http.Client, email, 
 
 	if res.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(res.Body)
-		fmt.Println(string(body))
-		return nil, fmt.Errorf("non-200 response")
+		return nil, fmt.Errorf("non-200 response: %s", string(body))
 	}
 
 	for _, c := range res.Cookies() {
