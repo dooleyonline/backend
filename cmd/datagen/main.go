@@ -28,7 +28,7 @@ const (
 	EnvPassword = "DATAGEN_PASSWORD"
 
 	Prompt = `Generate a list of items to post on an online secondhand marketplace.
-	Make sure the images follow this pattern: sample/<any integer between 0 and 30>.webp.`
+	Make sure the images follow this pattern: sample/<any integer between 0 and 10>.webp.`
 )
 
 var (
@@ -237,7 +237,7 @@ func createItem(ctx context.Context, cfg *config.Config, client *http.Client, cr
 }
 
 var (
-	ImagePattern = `sample/([0-9]|[12][0-9]|30)\.webp`
+	ImagePattern = `sample/([0-9]|10)\.webp`
 	ConditionMax = 5.0
 )
 
