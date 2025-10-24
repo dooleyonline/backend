@@ -1,4 +1,4 @@
-package shared
+package authsvc
 
 import (
 	"time"
@@ -9,13 +9,15 @@ import (
 
 type JWTClaims struct {
 	Email string `json:"email"`
+	ID    string `json:"id"`
 	jwt.RegisteredClaims
 }
 
-func CreateJWT(cfg *config.Config, email string) (string, error) {
+func CreateJWT(cfg *config.Config, email string, id string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		&JWTClaims{
 			Email: email,
+			ID:    id,
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(cfg.AuthTokenExp)),
 			},

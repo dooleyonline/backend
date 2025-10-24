@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.30.0
 
-package sqluser
+package categorydb
 
 import (
 	"context"

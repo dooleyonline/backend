@@ -5,14 +5,13 @@ import (
 	"log/slog"
 	"net/http"
 
-	authapi "github.com/dooleyonline/backend/internal/api/auth"
-	categoryapi "github.com/dooleyonline/backend/internal/api/category"
-	itemapi "github.com/dooleyonline/backend/internal/api/item"
-	"github.com/dooleyonline/backend/internal/api/shared"
-	storageapi "github.com/dooleyonline/backend/internal/api/storage"
-	userapi "github.com/dooleyonline/backend/internal/api/user"
+	authhandler "github.com/dooleyonline/backend/internal/api/auth"
+	categoryhandler "github.com/dooleyonline/backend/internal/api/category"
+	itemhandler "github.com/dooleyonline/backend/internal/api/item"
+	userhandler "github.com/dooleyonline/backend/internal/api/user"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
+	"github.com/dooleyonline/backend/internal/service"
 	"github.com/labstack/echo/v4"
 
 	_ "github.com/dooleyonline/backend/docs"
@@ -34,6 +33,12 @@ import (
 // @host		localhost:8080
 // @BasePath	/
 func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*echo.Echo, error) {
+	services := service.New(cfg, db)
+	item := itemhandler.New(services.Item)
+	auth := authhandler.New(services.Auth)
+	category := categoryhandler.New(services.Category)
+	user := userhandler.New(services.User)
+
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
@@ -42,7 +47,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.Use(errorMiddleware())
 	e.Use(corsMiddleware())
 	e.Use(authMiddleware(cfg, protectedRoutes))
-	e.Use(contextMiddleware(cfg, db))
+	e.Use(contextMiddleware())
 
 	e.GET("/", hello)
 
@@ -50,44 +55,33 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB, lg *slog.Logger) (*
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// item routes
-	e.GET("/item", itemapi.GetMany)
-	e.POST("/item", itemapi.Create)
-	e.GET("/item/:id", itemapi.Get)
-	e.PUT("/item/:id", itemapi.Update)
-	e.DELETE("/item/:id", itemapi.Delete)
-	e.POST("/item/:id/view", itemapi.IncrementView)
-	e.POST("/item/:id/sell", itemapi.Sell)
-	e.POST("/item/:id/like", itemapi.Like)
-	e.POST("/item/:id/unlike", itemapi.Unlike)
-	e.POST("/item/bulk", itemapi.GetBulk)
+	e.GET("/item", item.GetMany)
+	e.POST("/item", item.Create)
+	e.GET("/item/:id", item.Get)
+	e.PUT("/item/:id", item.Update)
+	e.DELETE("/item/:id", item.Delete)
+	e.POST("/item/:id/view", item.View)
+	e.POST("/item/:id/sell", item.Sell)
+	e.POST("/item/:id/like", item.Like)
+	e.POST("/item/:id/unlike", item.Unlike)
+	e.POST("/item/batch", item.GetBatch)
+
+	// presign upload URL
+	e.POST("/item/upload-url", item.GetUploadURL)
 
 	// category
-	e.GET("/category", categoryapi.GetAll)
-	e.GET("/category/:name", categoryapi.Get)
+	e.GET("/category", category.GetAll)
+	e.GET("/category/:name", category.Get)
 
 	// user routes
-	e.GET("/user", userapi.GetMany)
-	e.POST("/user", userapi.Create)
-	e.GET("/user/me", userapi.GetMe)
-	e.GET("/user/:id", userapi.GetSeller)
+	e.GET("/user", user.GetMany)
+	e.POST("/user", user.Create)
+	e.GET("/user/:id", user.Get)
 
 	// auth routes
-	e.GET("/auth", authapi.Get)
-	e.POST("/auth/login", authapi.Login)
-	e.POST("/auth/logout", authapi.Logout)
-
-	// storage routes
-	e.POST("/storage/presign", storageapi.Presign)
-	e.GET("/health", func(c echo.Context) error {
-		db := c.(shared.Context).DB
-		ctx := c.Request().Context()
-
-		if err := db.Pool.Ping(ctx); err != nil {
-			return c.JSON(500, map[string]string{"status": "unhealthy", "error": err.Error()})
-		}
-
-		return c.JSON(200, map[string]string{"status": "healthy"})
-	})
+	e.POST("/auth/login", auth.Login)
+	e.POST("/auth/logout", auth.Logout)
+	e.GET("/auth/me", auth.GetMe)
 
 	return e, nil
 }
@@ -101,8 +95,6 @@ var protectedRoutes = routesConfig{
 	"/item/:id/sell":   {http.MethodPost},
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
-	"/user/me":         {http.MethodGet},
-	"/auth":            {http.MethodGet},
 	"/auth/logout":     {http.MethodPost},
 }
 

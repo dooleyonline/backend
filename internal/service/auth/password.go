@@ -1,4 +1,4 @@
-package shared
+package authsvc
 
 import (
 	"golang.org/x/crypto/bcrypt"

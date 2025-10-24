@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: query.sql
 
-package sqlitem
+package itemdb
 
 import (
 	"context"
@@ -138,7 +138,7 @@ func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Item
+	items := []Item{}
 	for rows.Next() {
 		var i Item
 		if err := rows.Scan(
@@ -184,7 +184,7 @@ func (q *Queries) GetByCategory(ctx context.Context, category string) ([]Item, e
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Item
+	items := []Item{}
 	for rows.Next() {
 		var i Item
 		if err := rows.Scan(
@@ -230,7 +230,7 @@ func (q *Queries) GetByIDs(ctx context.Context, itemIds []int64) ([]Item, error)
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Item
+	items := []Item{}
 	for rows.Next() {
 		var i Item
 		if err := rows.Scan(
@@ -278,7 +278,7 @@ func (q *Queries) GetBySeller(ctx context.Context, sellerID string) ([]Item, err
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Item
+	items := []Item{}
 	for rows.Next() {
 		var i Item
 		if err := rows.Scan(
@@ -352,7 +352,7 @@ func (q *Queries) Search(ctx context.Context, websearchToTsquery string) ([]Item
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Item
+	items := []Item{}
 	for rows.Next() {
 		var i Item
 		if err := rows.Scan(
@@ -403,7 +403,7 @@ func (q *Queries) SearchByCategory(ctx context.Context, arg SearchByCategoryPara
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Item
+	items := []Item{}
 	for rows.Next() {
 		var i Item
 		if err := rows.Scan(
@@ -465,8 +465,7 @@ SET
   is_negotiable = $7,
   category = $8,
   subcategory = $9,
-  views = $10,
-  placeholder = $11
+  placeholder = $10
 WHERE
   id = $1
 RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
@@ -482,7 +481,6 @@ type UpdateParams struct {
 	IsNegotiable bool     `json:"is_negotiable"`
 	Category     string   `json:"category"`
 	Subcategory  string   `json:"subcategory"`
-	Views        int64    `json:"views"`
 	Placeholder  string   `json:"placeholder"`
 }
 
@@ -497,7 +495,6 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
 		arg.IsNegotiable,
 		arg.Category,
 		arg.Subcategory,
-		arg.Views,
 		arg.Placeholder,
 	)
 	var i Item

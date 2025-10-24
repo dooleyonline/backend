@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: query.sql
 
-package sqlcategory
+package categorydb
 
 import (
 	"context"
@@ -59,7 +59,7 @@ func (q *Queries) GetAll(ctx context.Context) ([]Category, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Category
+	items := []Category{}
 	for rows.Next() {
 		var i Category
 		if err := rows.Scan(&i.Name, &i.Subcategory, &i.Icon); err != nil {

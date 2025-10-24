@@ -31,8 +31,7 @@ SET
   is_negotiable = $7,
   category = $8,
   subcategory = $9,
-  views = $10,
-  placeholder = $11
+  placeholder = $10
 WHERE
   id = $1
 RETURNING *;

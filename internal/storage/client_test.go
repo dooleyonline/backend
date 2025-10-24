@@ -24,17 +24,19 @@ func TestPresignUploadText(t *testing.T) {
 		ContentType: "text/plain",
 	}
 
-	url, header, err := Presign(t.Context(), cfg, sreq)
+	storage := New(cfg)
+
+	presign, err := storage.PresignUpload(t.Context(), sreq)
 	if err != nil {
 		t.Fatal("failed to presign:", err)
 	}
 
 	payload := "hello!"
-	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBufferString(payload))
+	req, err := http.NewRequest(http.MethodPut, presign.URL, bytes.NewBufferString(payload))
 	if err != nil {
 		t.Fatal("failed to create request:", err)
 	}
-	req.Header = header
+	req.Header = presign.Header
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -65,16 +67,17 @@ func TestPresignUploadImage(t *testing.T) {
 		ContentType: "image/png",
 	}
 
-	url, header, err := Presign(t.Context(), cfg, sreq)
+	storage := New(cfg)
+	presign, err := storage.PresignUpload(t.Context(), sreq)
 	if err != nil {
 		t.Fatal("failed to presign:", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPut, url, payload)
+	req, err := http.NewRequest(http.MethodPut, presign.URL, payload)
 	if err != nil {
 		t.Fatal("failed to create request:", err)
 	}
-	req.Header = header
+	req.Header = presign.Header
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {

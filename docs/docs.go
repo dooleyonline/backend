@@ -40,25 +40,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Get auth status",
-                "responses": {
-                    "200": {
-                        "description": "User",
-                        "schema": {
-                            "$ref": "#/definitions/sqluser.User"
-                        }
-                    }
-                }
-            }
-        },
         "/auth/login": {
             "post": {
                 "consumes": [
@@ -78,7 +59,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/authapi.loginParams"
+                            "$ref": "#/definitions/authsvc.LoginParams"
                         }
                     }
                 ],
@@ -86,7 +67,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User",
                         "schema": {
-                            "$ref": "#/definitions/sqluser.User"
+                            "$ref": "#/definitions/userdb.User"
                         }
                     }
                 }
@@ -106,10 +87,29 @@ const docTemplate = `{
                 "summary": "Log out",
                 "responses": {
                     "200": {
-                        "description": "Result",
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get current authenticated user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/userdb.User"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 }
             }
@@ -129,7 +129,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/sqlcategory.Category"
+                                "$ref": "#/definitions/categorydb.Category"
                             }
                         }
                     }
@@ -158,7 +158,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sqlcategory.Category"
+                            "$ref": "#/definitions/categorydb.Category"
                         }
                     }
                 }
@@ -199,7 +199,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/sqlitem.Item"
+                                "$ref": "#/definitions/itemdb.Item"
                             }
                         }
                     }
@@ -223,21 +223,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sqlitem.CreateParams"
+                            "$ref": "#/definitions/itemsvc.MutationParams"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/sqlitem.Item"
+                            "$ref": "#/definitions/itemdb.Item"
                         }
                     }
                 }
             }
         },
-        "/item/bulk": {
+        "/item/batch": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -269,8 +269,41 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/sqlitem.Item"
+                                "$ref": "#/definitions/itemdb.Item"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/item/upload-url": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Generate presigned URL for item upload",
+                "parameters": [
+                    {
+                        "description": "Presign params",
+                        "name": "item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/storage.PresignParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/storage.PresignResult"
                         }
                     }
                 }
@@ -298,7 +331,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sqlitem.Item"
+                            "$ref": "#/definitions/itemdb.Item"
                         }
                     }
                 }
@@ -328,7 +361,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sqlitem.UpdateParams"
+                            "$ref": "#/definitions/itemsvc.MutationParams"
                         }
                     }
                 ],
@@ -336,7 +369,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sqlitem.Item"
+                            "$ref": "#/definitions/itemdb.Item"
                         }
                     }
                 }
@@ -356,8 +389,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -378,15 +411,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Updated liked items",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "integer",
-                                "format": "int64"
-                            }
-                        }
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -407,11 +433,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Item ID",
-                        "schema": {
-                            "type": "string"
-                        }
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -432,15 +455,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Updated liked items",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "integer",
-                                "format": "int64"
-                            }
-                        }
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -461,41 +477,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/storage/presign": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "other"
-                ],
-                "summary": "Generate presigned URL for s3 operation",
-                "parameters": [
-                    {
-                        "description": "Presign params",
-                        "name": "item",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/storage.PresignParams"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/sqlitem.Item"
-                        }
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -518,7 +501,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/sqluser.User"
+                                "$ref": "#/definitions/userdb.User"
                             }
                         }
                     }
@@ -542,39 +525,15 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sqluser.CreateParams"
+                            "$ref": "#/definitions/usersvc.CreateParams"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/sqluser.User"
-                        }
-                    }
-                }
-            }
-        },
-        "/user/me": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Get current authenticated user",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/sqluser.User"
+                            "$ref": "#/definitions/userdb.User"
                         }
                     }
                 }
@@ -602,7 +561,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/sqluser.User"
+                            "$ref": "#/definitions/userdb.User"
                         }
                     }
                 }
@@ -610,7 +569,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "authapi.loginParams": {
+        "authsvc.LoginParams": {
             "type": "object",
             "properties": {
                 "email": {
@@ -621,7 +580,7 @@ const docTemplate = `{
                 }
             }
         },
-        "sqlcategory.Category": {
+        "categorydb.Category": {
             "type": "object",
             "properties": {
                 "icon": {
@@ -638,45 +597,16 @@ const docTemplate = `{
                 }
             }
         },
-        "sqlitem.CreateParams": {
+        "http.Header": {
             "type": "object",
-            "properties": {
-                "category": {
-                    "type": "string"
-                },
-                "condition": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "images": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "is_negotiable": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "placeholder": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "seller": {
-                    "type": "string"
-                },
-                "subcategory": {
+            "additionalProperties": {
+                "type": "array",
+                "items": {
                     "type": "string"
                 }
             }
         },
-        "sqlitem.Item": {
+        "itemdb.Item": {
             "type": "object",
             "properties": {
                 "category": {
@@ -732,7 +662,7 @@ const docTemplate = `{
                 }
             }
         },
-        "sqlitem.UpdateParams": {
+        "itemsvc.MutationParams": {
             "type": "object",
             "properties": {
                 "category": {
@@ -743,9 +673,6 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "images": {
                     "type": "array",
@@ -759,38 +686,43 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "placeholder": {
-                    "type": "string"
-                },
                 "price": {
                     "type": "number"
                 },
                 "subcategory": {
                     "type": "string"
-                },
-                "views": {
-                    "type": "integer"
                 }
             }
         },
-        "sqluser.CreateParams": {
+        "storage.PresignParams": {
             "type": "object",
             "properties": {
-                "email": {
+                "bucket": {
                     "type": "string"
                 },
-                "first_name": {
+                "contentType": {
                     "type": "string"
                 },
-                "last_name": {
+                "key": {
                     "type": "string"
                 },
-                "password": {
+                "method": {
                     "type": "string"
                 }
             }
         },
-        "sqluser.User": {
+        "storage.PresignResult": {
+            "type": "object",
+            "properties": {
+                "header": {
+                    "$ref": "#/definitions/http.Header"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "userdb.User": {
             "type": "object",
             "properties": {
                 "email": {
@@ -816,19 +748,19 @@ const docTemplate = `{
                 }
             }
         },
-        "storage.PresignParams": {
+        "usersvc.CreateParams": {
             "type": "object",
             "properties": {
-                "bucket": {
+                "email": {
                     "type": "string"
                 },
-                "contentType": {
+                "firstName": {
                     "type": "string"
                 },
-                "key": {
+                "lastName": {
                     "type": "string"
                 },
-                "method": {
+                "password": {
                     "type": "string"
                 }
             }
