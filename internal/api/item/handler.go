@@ -94,7 +94,7 @@ func (h *Handler) Create(c echo.Context) error {
 	var (
 		req    = c.Request()
 		ctx    = req.Context()
-		userId = c.(shared.Context).UserId
+		userId = c.(shared.Context).UserID
 	)
 
 	var params itemsvc.MutationParams
@@ -229,7 +229,7 @@ func (h *Handler) Like(c echo.Context) error {
 	var (
 		req    = c.Request()
 		ctx    = req.Context()
-		userId = c.(shared.Context).UserId
+		userId = c.(shared.Context).UserID
 	)
 
 	var itemId int64
@@ -255,7 +255,7 @@ func (h *Handler) Unlike(c echo.Context) error {
 	var (
 		req    = c.Request()
 		ctx    = req.Context()
-		userId = c.(shared.Context).UserId
+		userId = c.(shared.Context).UserID
 	)
 
 	var itemId int64

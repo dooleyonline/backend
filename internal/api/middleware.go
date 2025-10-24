@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -18,20 +17,21 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func loggerMiddleware(lg *slog.Logger) echo.MiddlewareFunc {
+func loggerMiddleware() echo.MiddlewareFunc {
 	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogStatus:   true,
 		LogURI:      true,
 		LogError:    true,
 		HandleError: true,
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			ctx := c.Request().Context()
 			if v.Error == nil {
-				lg.LogAttrs(context.Background(), slog.LevelInfo, "REQUEST",
+				slog.LogAttrs(ctx, slog.LevelInfo, "REQUEST",
 					slog.String("uri", v.URI),
 					slog.Int("status", v.Status),
 				)
 			} else {
-				lg.LogAttrs(context.Background(), slog.LevelError, "REQUEST_ERROR",
+				slog.LogAttrs(ctx, slog.LevelError, "REQUEST_ERROR",
 					slog.String("uri", v.URI),
 					slog.Int("status", v.Status),
 					slog.String("err", v.Error.Error()),
@@ -57,22 +57,33 @@ func errorMiddleware() echo.MiddlewareFunc {
 	}
 }
 
-func contextMiddleware() echo.MiddlewareFunc {
+func contextMiddleware(cfg *config.Config) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			var userId string
-			token, ok := c.Get("user").(*jwt.Token)
-			if ok {
-				claims, ok := token.Claims.(*authsvc.JWTClaims)
-				if ok {
-					userId = claims.ID
-				}
-			}
-
 			cc := shared.Context{
 				Context: c,
-				UserId:  userId,
+				UserID:  "",
 			}
+
+			cookie, err := c.Cookie(cfg.AuthTokenName)
+			if err != nil {
+				return next(cc)
+			}
+
+			var claims authsvc.JWTClaims
+			_, err = jwt.ParseWithClaims(
+				cookie.Value,
+				&claims,
+				func(t *jwt.Token) (any, error) {
+					return []byte(cfg.AuthTokenSecret), nil
+				},
+			)
+			if err != nil {
+				return next(cc)
+			}
+
+			cc.UserID = claims.ID
+
 			return next(cc)
 		}
 	}
@@ -89,7 +100,6 @@ func corsMiddleware() echo.MiddlewareFunc {
 }
 
 func authMiddleware(cfg *config.Config, protectedRoutes routesConfig) echo.MiddlewareFunc {
-	// determine if the route is public (hence no auth necessary)
 	isPublic := func(c echo.Context) bool {
 		r, ok := protectedRoutes[c.Path()]
 		if !ok {
@@ -98,11 +108,10 @@ func authMiddleware(cfg *config.Config, protectedRoutes routesConfig) echo.Middl
 		return !slices.Contains(r, c.Request().Method)
 	}
 
-	// configure how to extract token from a request
 	tokenLookup := func(c echo.Context) ([]string, error) {
 		tokenCookie, err := c.Cookie(cfg.AuthTokenName)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get token cookie")
+			return nil, fmt.Errorf("failed to get token cookie: %w", err)
 		}
 
 		return []string{tokenCookie.Value}, nil

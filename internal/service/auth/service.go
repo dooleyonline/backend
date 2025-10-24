@@ -35,13 +35,14 @@ func (s *Service) Login(ctx context.Context, params *LoginParams) (*LoginResult,
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
-	user.Password = ""
 
 	if verified := VerifyPassword(params.Password, user.Password); !verified {
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
-	token, err := CreateJWT(s.cfg, params.Email, user.ID)
+	user.Password = ""
+
+	token, err := s.CreateJWT(params.Email, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create token: %w", err)
 	}
