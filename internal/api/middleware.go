@@ -71,14 +71,14 @@ func contextMiddleware(cfg *config.Config) echo.MiddlewareFunc {
 			}
 
 			var claims authsvc.JWTClaims
-			_, err = jwt.ParseWithClaims(
+			token, err := jwt.ParseWithClaims(
 				cookie.Value,
 				&claims,
 				func(t *jwt.Token) (any, error) {
 					return []byte(cfg.AuthTokenSecret), nil
 				},
 			)
-			if err != nil {
+			if err != nil || !token.Valid {
 				return next(cc)
 			}
 
