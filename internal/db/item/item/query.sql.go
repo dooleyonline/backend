@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: query.sql
 
-package itemdb
+package itemitem
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 
 const create = `-- name: Create :one
 INSERT INTO
-  item (name, description, images, price, condition, is_negotiable, category, subcategory, placeholder, seller)
+  item.item (name, description, images, price, condition, is_negotiable, category, subcategory, placeholder, seller)
 VALUES
   ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
@@ -31,7 +31,7 @@ type CreateParams struct {
 	Seller       string   `json:"seller"`
 }
 
-func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
+func (q *Queries) Create(ctx context.Context, arg CreateParams) (ItemItem, error) {
 	row := q.db.QueryRow(ctx, create,
 		arg.Name,
 		arg.Description,
@@ -44,7 +44,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
 		arg.Placeholder,
 		arg.Seller,
 	)
-	var i Item
+	var i ItemItem
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -68,7 +68,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (Item, error) {
 
 const decrementLike = `-- name: DecrementLike :exec
 UPDATE
-  item
+  item.item
 SET
   likes = GREATEST(likes - 1, 0)
 WHERE
@@ -82,7 +82,7 @@ func (q *Queries) DecrementLike(ctx context.Context, id int64) error {
 
 const delete = `-- name: Delete :exec
 DELETE FROM
-  item
+  item.item
 WHERE
   id = $1
 `
@@ -96,14 +96,14 @@ const get = `-- name: Get :one
 SELECT
   id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
-  item
+  item.item
 WHERE
   id = $1
 `
 
-func (q *Queries) Get(ctx context.Context, id int64) (Item, error) {
+func (q *Queries) Get(ctx context.Context, id int64) (ItemItem, error) {
 	row := q.db.QueryRow(ctx, get, id)
-	var i Item
+	var i ItemItem
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -129,18 +129,18 @@ const getAll = `-- name: GetAll :many
 SELECT
   id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
-  item
+  item.item
 `
 
-func (q *Queries) GetAll(ctx context.Context) ([]Item, error) {
+func (q *Queries) GetAll(ctx context.Context) ([]ItemItem, error) {
 	rows, err := q.db.Query(ctx, getAll)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Item{}
+	items := []ItemItem{}
 	for rows.Next() {
-		var i Item
+		var i ItemItem
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -173,20 +173,20 @@ const getByCategory = `-- name: GetByCategory :many
 SELECT
   id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
-  item
+  item.item
 WHERE
   category = $1
 `
 
-func (q *Queries) GetByCategory(ctx context.Context, category string) ([]Item, error) {
+func (q *Queries) GetByCategory(ctx context.Context, category string) ([]ItemItem, error) {
 	rows, err := q.db.Query(ctx, getByCategory, category)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Item{}
+	items := []ItemItem{}
 	for rows.Next() {
-		var i Item
+		var i ItemItem
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -219,20 +219,20 @@ const getByIDs = `-- name: GetByIDs :many
 SELECT
   id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
-  "item"
+  item.item
 WHERE
   id = ANY($1::bigint[])
 `
 
-func (q *Queries) GetByIDs(ctx context.Context, itemIds []int64) ([]Item, error) {
+func (q *Queries) GetByIDs(ctx context.Context, itemIds []int64) ([]ItemItem, error) {
 	rows, err := q.db.Query(ctx, getByIDs, itemIds)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Item{}
+	items := []ItemItem{}
 	for rows.Next() {
-		var i Item
+		var i ItemItem
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -265,22 +265,22 @@ const getBySeller = `-- name: GetBySeller :many
 SELECT
   id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
-  "item"
+  item.item
 WHERE
   seller = $1::uuid
 ORDER BY
   posted_at DESC
 `
 
-func (q *Queries) GetBySeller(ctx context.Context, sellerID string) ([]Item, error) {
+func (q *Queries) GetBySeller(ctx context.Context, sellerID string) ([]ItemItem, error) {
 	rows, err := q.db.Query(ctx, getBySeller, sellerID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Item{}
+	items := []ItemItem{}
 	for rows.Next() {
-		var i Item
+		var i ItemItem
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -311,7 +311,7 @@ func (q *Queries) GetBySeller(ctx context.Context, sellerID string) ([]Item, err
 
 const incrementLike = `-- name: IncrementLike :exec
 UPDATE
-  item
+  item.item
 SET
   likes = likes + 1
 WHERE
@@ -325,7 +325,7 @@ func (q *Queries) IncrementLike(ctx context.Context, id int64) error {
 
 const incrementView = `-- name: IncrementView :exec
 UPDATE
-  item
+  item.item
 SET
   views = views + 1
 WHERE
@@ -341,20 +341,20 @@ const search = `-- name: Search :many
 SELECT
  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
-  item
+  item.item
 WHERE
   fts @@ websearch_to_tsquery($1)
 `
 
-func (q *Queries) Search(ctx context.Context, websearchToTsquery string) ([]Item, error) {
+func (q *Queries) Search(ctx context.Context, websearchToTsquery string) ([]ItemItem, error) {
 	rows, err := q.db.Query(ctx, search, websearchToTsquery)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Item{}
+	items := []ItemItem{}
 	for rows.Next() {
-		var i Item
+		var i ItemItem
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -387,7 +387,7 @@ const searchByCategory = `-- name: SearchByCategory :many
 SELECT
   id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
-  item
+  item.item
 WHERE
   category = $1 AND fts @@ to_tsquery($2)
 `
@@ -397,15 +397,15 @@ type SearchByCategoryParams struct {
 	ToTsquery string `json:"to_tsquery"`
 }
 
-func (q *Queries) SearchByCategory(ctx context.Context, arg SearchByCategoryParams) ([]Item, error) {
+func (q *Queries) SearchByCategory(ctx context.Context, arg SearchByCategoryParams) ([]ItemItem, error) {
 	rows, err := q.db.Query(ctx, searchByCategory, arg.Category, arg.ToTsquery)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Item{}
+	items := []ItemItem{}
 	for rows.Next() {
-		var i Item
+		var i ItemItem
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -436,7 +436,7 @@ func (q *Queries) SearchByCategory(ctx context.Context, arg SearchByCategoryPara
 
 const sell = `-- name: Sell :exec
 UPDATE
-  item
+  item.item
 SET
   sold_at = $2
 WHERE
@@ -444,7 +444,7 @@ WHERE
 `
 
 type SellParams struct {
-	ID     int64      `json:"id" param:"id"`
+	ID     int64      `json:"id"`
 	SoldAt *time.Time `json:"sold_at"`
 }
 
@@ -455,7 +455,7 @@ func (q *Queries) Sell(ctx context.Context, arg SellParams) error {
 
 const update = `-- name: Update :one
 UPDATE
-  item
+  item.item
 SET
   name = $2,
   description = $3,
@@ -472,7 +472,7 @@ RETURNING id, name, description, images, price, condition, is_negotiable, posted
 `
 
 type UpdateParams struct {
-	ID           int64    `json:"id" param:"id"`
+	ID           int64    `json:"id"`
 	Name         string   `json:"name"`
 	Description  string   `json:"description"`
 	Images       []string `json:"images"`
@@ -484,7 +484,7 @@ type UpdateParams struct {
 	Placeholder  string   `json:"placeholder"`
 }
 
-func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
+func (q *Queries) Update(ctx context.Context, arg UpdateParams) (ItemItem, error) {
 	row := q.db.QueryRow(ctx, update,
 		arg.ID,
 		arg.Name,
@@ -497,7 +497,7 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (Item, error) {
 		arg.Subcategory,
 		arg.Placeholder,
 	)
-	var i Item
+	var i ItemItem
 	err := row.Scan(
 		&i.ID,
 		&i.Name,

@@ -2,9 +2,9 @@
 // versions:
 //   sqlc v1.30.0
 
-package userdb
+package useruser
 
-type User struct {
+type UserUser struct {
 	Email      string  `json:"email"`
 	Password   string  `json:"password"`
 	LikedItems []int64 `json:"liked_items"`

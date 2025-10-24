@@ -2,9 +2,9 @@
 // versions:
 //   sqlc v1.30.0
 
-package categorydb
+package itemcategory
 
-type Category struct {
+type ItemCategory struct {
 	Name        string   `json:"name"`
 	Subcategory []string `json:"subcategory"`
 	Icon        string   `json:"icon"`

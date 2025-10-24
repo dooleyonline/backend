@@ -51,7 +51,7 @@ func (h *Handler) GetMany(c echo.Context) error {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }
 
 // Get godoc
@@ -78,7 +78,7 @@ func (h *Handler) Get(c echo.Context) error {
 		return echo.ErrNotFound.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }
 
 // Create godoc
@@ -107,7 +107,7 @@ func (h *Handler) Create(c echo.Context) error {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusCreated, *res)
+	return c.JSON(http.StatusCreated, res)
 }
 
 // Update godoc
@@ -295,7 +295,7 @@ func (h *Handler) GetBatch(c echo.Context) error {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }
 
 // GetUploadPresignURL godoc
@@ -331,5 +331,5 @@ func (h *Handler) GetUploadURL(c echo.Context) error {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }

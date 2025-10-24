@@ -5,7 +5,8 @@ import (
 	"fmt"
 
 	"github.com/dooleyonline/backend/internal/db"
-	userdb "github.com/dooleyonline/backend/internal/db/user"
+	useruser "github.com/dooleyonline/backend/internal/db/user/user"
+	"github.com/dooleyonline/backend/internal/model"
 	authsvc "github.com/dooleyonline/backend/internal/service/auth"
 )
 
@@ -17,19 +18,19 @@ func New(db *db.DB) *Service {
 	return &Service{db}
 }
 
-func (s *Service) GetMany(ctx context.Context) (*[]userdb.User, error) {
-	users, err := s.db.User.GetMany(ctx)
+func (s *Service) GetMany(ctx context.Context) ([]model.User, error) {
+	users, err := s.db.User.User.GetMany(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	var result []userdb.User
+	var result []model.User
 	for _, user := range users {
 		user.Password = ""
 		user.LikedItems = []int64{}
 		result = append(result, user)
 	}
-	return &result, nil
+	return result, nil
 }
 
 type CreateParams struct {
@@ -39,8 +40,8 @@ type CreateParams struct {
 	LastName  string
 }
 
-func (s *Service) Create(ctx context.Context, p *CreateParams) (*userdb.User, error) {
-	dbparams := userdb.CreateParams{
+func (s *Service) Create(ctx context.Context, p *CreateParams) (*model.User, error) {
+	dbparams := useruser.CreateParams{
 		Email:     p.Email,
 		FirstName: p.FirstName,
 		LastName:  p.LastName,
@@ -52,7 +53,7 @@ func (s *Service) Create(ctx context.Context, p *CreateParams) (*userdb.User, er
 	}
 	dbparams.Password = string(hash)
 
-	user, err := s.db.User.Create(ctx, dbparams)
+	user, err := s.db.User.User.Create(ctx, dbparams)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
@@ -61,8 +62,8 @@ func (s *Service) Create(ctx context.Context, p *CreateParams) (*userdb.User, er
 	return &user, nil
 }
 
-func (s *Service) Get(ctx context.Context, id string) (*userdb.User, error) {
-	user, err := s.db.User.GetByID(ctx, id)
+func (s *Service) Get(ctx context.Context, id string) (*model.User, error) {
+	user, err := s.db.User.User.GetByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}

@@ -2,19 +2,19 @@
 SELECT
   *
 FROM
-  "user";
+  "user"."user";
 
 -- name: Get :one
 SELECT
   *
 FROM
-  "user"
+  "user"."user"
 WHERE
   email = $1;
 
 -- name: Create :one
 INSERT INTO
-  "user" (email, password, first_name, last_name)
+  "user"."user" (email, password, first_name, last_name)
 VALUES
   ($1, $2, $3, $4)
 RETURNING *;
@@ -23,13 +23,13 @@ RETURNING *;
 SELECT
   liked_items
 FROM 
-  "user"
+  "user"."user"
 WHERE
   id = $1;
 
 -- name: DeleteLikedItem :exec
 UPDATE
-  "user"
+  "user"."user"
 SET
   liked_items = array_remove(liked_items, @item_ID::bigint)
 WHERE
@@ -38,7 +38,7 @@ WHERE
 
 -- name: AddLikedItem :exec
 UPDATE
-  "user"
+  "user"."user"
 SET
   liked_items = array_append(liked_items, @item_ID::bigint)
 WHERE
@@ -49,6 +49,6 @@ WHERE
 SELECT
   *
 FROM
-  "user"
+  "user"."user"
 WHERE
   id = $1;

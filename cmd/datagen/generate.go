@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	itemdb "github.com/dooleyonline/backend/internal/db/item"
+	"github.com/dooleyonline/backend/internal/model"
 	"google.golang.org/genai"
 )
 
@@ -14,7 +14,7 @@ var (
 	ConditionMax = 5.0
 )
 
-func generate(ctx context.Context, categories []string) ([]itemdb.Item, error) {
+func generate(ctx context.Context, categories []string) ([]model.Item, error) {
 	gemini, err := genai.NewClient(ctx, &genai.ClientConfig{
 		Backend: genai.BackendGeminiAPI,
 	})
@@ -34,7 +34,7 @@ func generate(ctx context.Context, categories []string) ([]itemdb.Item, error) {
 
 	data := content.Text()
 
-	var items []itemdb.Item
+	var items []model.Item
 	if err := json.Unmarshal([]byte(data), &items); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal items: %w", err)
 	}

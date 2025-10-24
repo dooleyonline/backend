@@ -11,8 +11,7 @@ import (
 	"time"
 
 	"github.com/dooleyonline/backend/internal/config"
-	categorydb "github.com/dooleyonline/backend/internal/db/category"
-	itemdb "github.com/dooleyonline/backend/internal/db/item"
+	"github.com/dooleyonline/backend/internal/model"
 )
 
 type Credential struct {
@@ -75,7 +74,7 @@ func getCategories(cfg *config.Config, client *http.Client) ([]string, error) {
 		return nil, fmt.Errorf("unexpected status: %s", res.Status)
 	}
 
-	var categories []categorydb.Category
+	var categories []model.Category
 	if err := json.NewDecoder(res.Body).Decode(&categories); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal body: %w", err)
 	}
@@ -88,7 +87,7 @@ func getCategories(cfg *config.Config, client *http.Client) ([]string, error) {
 	return categoriesStr, nil
 }
 
-func createItem(ctx context.Context, cfg *config.Config, client *http.Client, cred *http.Cookie, item itemdb.Item) error {
+func createItem(ctx context.Context, cfg *config.Config, client *http.Client, cred *http.Cookie, item model.Item) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 

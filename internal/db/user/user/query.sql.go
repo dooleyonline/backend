@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: query.sql
 
-package userdb
+package useruser
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 
 const addLikedItem = `-- name: AddLikedItem :exec
 UPDATE
-  "user"
+  "user"."user"
 SET
   liked_items = array_append(liked_items, $1::bigint)
 WHERE
@@ -31,7 +31,7 @@ func (q *Queries) AddLikedItem(ctx context.Context, arg AddLikedItemParams) erro
 
 const create = `-- name: Create :one
 INSERT INTO
-  "user" (email, password, first_name, last_name)
+  "user"."user" (email, password, first_name, last_name)
 VALUES
   ($1, $2, $3, $4)
 RETURNING email, password, liked_items, first_name, last_name, id
@@ -44,14 +44,14 @@ type CreateParams struct {
 	LastName  string `json:"last_name"`
 }
 
-func (q *Queries) Create(ctx context.Context, arg CreateParams) (User, error) {
+func (q *Queries) Create(ctx context.Context, arg CreateParams) (UserUser, error) {
 	row := q.db.QueryRow(ctx, create,
 		arg.Email,
 		arg.Password,
 		arg.FirstName,
 		arg.LastName,
 	)
-	var i User
+	var i UserUser
 	err := row.Scan(
 		&i.Email,
 		&i.Password,
@@ -65,7 +65,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (User, error) {
 
 const deleteLikedItem = `-- name: DeleteLikedItem :exec
 UPDATE
-  "user"
+  "user"."user"
 SET
   liked_items = array_remove(liked_items, $1::bigint)
 WHERE
@@ -87,14 +87,14 @@ const get = `-- name: Get :one
 SELECT
   email, password, liked_items, first_name, last_name, id
 FROM
-  "user"
+  "user"."user"
 WHERE
   email = $1
 `
 
-func (q *Queries) Get(ctx context.Context, email string) (User, error) {
+func (q *Queries) Get(ctx context.Context, email string) (UserUser, error) {
 	row := q.db.QueryRow(ctx, get, email)
-	var i User
+	var i UserUser
 	err := row.Scan(
 		&i.Email,
 		&i.Password,
@@ -110,14 +110,14 @@ const getByID = `-- name: GetByID :one
 SELECT
   email, password, liked_items, first_name, last_name, id
 FROM
-  "user"
+  "user"."user"
 WHERE
   id = $1
 `
 
-func (q *Queries) GetByID(ctx context.Context, id string) (User, error) {
+func (q *Queries) GetByID(ctx context.Context, id string) (UserUser, error) {
 	row := q.db.QueryRow(ctx, getByID, id)
-	var i User
+	var i UserUser
 	err := row.Scan(
 		&i.Email,
 		&i.Password,
@@ -133,7 +133,7 @@ const getLikedItems = `-- name: GetLikedItems :one
 SELECT
   liked_items
 FROM 
-  "user"
+  "user"."user"
 WHERE
   id = $1
 `
@@ -149,18 +149,18 @@ const getMany = `-- name: GetMany :many
 SELECT
   email, password, liked_items, first_name, last_name, id
 FROM
-  "user"
+  "user"."user"
 `
 
-func (q *Queries) GetMany(ctx context.Context) ([]User, error) {
+func (q *Queries) GetMany(ctx context.Context) ([]UserUser, error) {
 	rows, err := q.db.Query(ctx, getMany)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []User{}
+	items := []UserUser{}
 	for rows.Next() {
-		var i User
+		var i UserUser
 		if err := rows.Scan(
 			&i.Email,
 			&i.Password,

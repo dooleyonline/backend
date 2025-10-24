@@ -2,11 +2,11 @@
 SELECT
   *
 FROM
-  category;
+  item.category;
 
 -- name: Create :one
 INSERT INTO
-  category (name, subcategory, icon)
+  item.category (name, subcategory, icon)
 VALUES
   ($1, $2, $3)
 RETURNING *;
@@ -15,6 +15,6 @@ RETURNING *;
 SELECT
   *
 FROM
-  category
+  item.category
 WHERE
   name = $1;
