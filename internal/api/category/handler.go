@@ -20,7 +20,7 @@ func New(svc *categorysvc.Service) *Handler {
 //	@Summary	Get all categories
 //	@Tags		category
 //	@Produce	json
-//	@Success	200	{array}	categorydb.Category
+//	@Success	200	{array}	model.Category
 //	@Router		/category [get]
 func (h *Handler) GetAll(c echo.Context) error {
 	var (

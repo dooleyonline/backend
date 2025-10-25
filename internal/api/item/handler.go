@@ -25,7 +25,7 @@ func New(svc *itemsvc.Service) *Handler {
 //	@Param		seller		query	string	false	"Seller filter"
 //	@Param		q			query	string	false	"Search query"
 //	@param		category	query	string	false	"Category filter"
-//	@Success	200			{array}	itemdb.Item
+//	@Success	200			{array}	model.Item
 //	@Router		/item [get]
 func (h *Handler) GetMany(c echo.Context) error {
 	var (

@@ -24,7 +24,7 @@ func New(svc *authsvc.Service) *Handler {
 //	@Accept		json
 //	@Produce	json
 //	@Param		user	body		authsvc.LoginParams	true	"Login Params"
-//	@Success	200		{object}	userdb.User			"User"
+//	@Success	200		{object}	model.User			"User"
 //	@Router		/auth/login [post]
 func (h *Handler) Login(c echo.Context) error {
 	var (
@@ -89,7 +89,7 @@ func (h *Handler) Logout(c echo.Context) error {
 //	@Summary	Get current authenticated user
 //	@Tags		auth
 //	@Produce	json
-//	@Success	200	{object}	userdb.User
+//	@Success	200	{object}	model.User
 //	@Failure	401	"Unauthorized"
 //	@Router		/auth/me [get]
 func (h *Handler) GetMe(c echo.Context) error {

@@ -8,10 +8,8 @@ sql:
   - engine: "postgresql"
     database:
       managed: true
-    queries:
-      - "sqlc/item/item/query.sql"
-    schema:
-      - "sqlc/item/item/schema.sql"
+    queries: "sqlc/item/item/query.sql"
+    schema: "sqlc/item/item/schema.sql"
     gen:
       go:
         package: "itemitem"
@@ -36,14 +34,51 @@ sql:
   - engine: "postgresql"
     database:
       managed: true
-    queries:
-      - "sqlc/user/user/query.sql"
-    schema:
-      - "sqlc/user/user/schema.sql"
+    queries: "sqlc/user/user/query.sql"
+    schema: "sqlc/user/user/schema.sql"
     gen:
       go:
         package: "useruser"
         out: "internal/db/user/user"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_empty_slices: true
+
+  - engine: "postgresql"
+    database:
+      managed: true
+    queries: "sqlc/chat/message/query.sql"
+    schema: "sqlc/chat/message/schema.sql"
+    gen:
+      go:
+        package: "chatmessage"
+        out: "internal/db/chat/message"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_empty_slices: true
+
+  - engine: "postgresql"
+    database:
+      managed: true
+    queries: "sqlc/chat/room/query.sql"
+    schema: "sqlc/chat/room/schema.sql"
+    gen:
+      go:
+        package: "chatroom"
+        out: "internal/db/chat/room"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_empty_slices: true
+
+  - engine: "postgresql"
+    database:
+      managed: true
+    queries: "sqlc/chat/participant/query.sql"
+    schema: "sqlc/chat/participant/schema.sql"
+    gen:
+      go:
+        package: "chatparticipant"
+        out: "internal/db/chat/participant"
         sql_package: "pgx/v5"
         emit_json_tags: true
         emit_empty_slices: true
