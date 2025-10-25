@@ -24,3 +24,101 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) error {
 	_, err := q.db.Exec(ctx, create, arg.RoomID, arg.UserID)
 	return err
 }
+
+const delete = `-- name: Delete :exec
+DELETE FROM
+  chat.participant
+WHERE
+  room_id = $1
+  AND user_id = $2
+`
+
+type DeleteParams struct {
+	RoomID string `json:"room_id"`
+	UserID string `json:"user_id"`
+}
+
+func (q *Queries) Delete(ctx context.Context, arg DeleteParams) error {
+	_, err := q.db.Exec(ctx, delete, arg.RoomID, arg.UserID)
+	return err
+}
+
+const get = `-- name: Get :one
+SELECT
+  room_id, user_id, last_read_message_id
+FROM
+  chat.participant
+WHERE
+  room_id = $1
+  AND user_id = $2
+`
+
+type GetParams struct {
+	RoomID string `json:"room_id"`
+	UserID string `json:"user_id"`
+}
+
+func (q *Queries) Get(ctx context.Context, arg GetParams) (ChatParticipant, error) {
+	row := q.db.QueryRow(ctx, get, arg.RoomID, arg.UserID)
+	var i ChatParticipant
+	err := row.Scan(&i.RoomID, &i.UserID, &i.LastReadMessageID)
+	return i, err
+}
+
+const getByRoomID = `-- name: GetByRoomID :many
+SELECT 
+  room_id, user_id, last_read_message_id
+FROM
+  chat.participant
+WHERE
+  room_id = $1
+`
+
+func (q *Queries) GetByRoomID(ctx context.Context, roomID string) ([]ChatParticipant, error) {
+	rows, err := q.db.Query(ctx, getByRoomID, roomID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ChatParticipant{}
+	for rows.Next() {
+		var i ChatParticipant
+		if err := rows.Scan(&i.RoomID, &i.UserID, &i.LastReadMessageID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getByUserID = `-- name: GetByUserID :many
+SELECT 
+  room_id, user_id, last_read_message_id
+FROM
+  chat.participant
+WHERE
+  user_id = $1
+`
+
+func (q *Queries) GetByUserID(ctx context.Context, userID string) ([]ChatParticipant, error) {
+	rows, err := q.db.Query(ctx, getByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ChatParticipant{}
+	for rows.Next() {
+		var i ChatParticipant
+		if err := rows.Scan(&i.RoomID, &i.UserID, &i.LastReadMessageID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

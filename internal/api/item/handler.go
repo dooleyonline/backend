@@ -60,7 +60,7 @@ func (h *Handler) GetMany(c echo.Context) error {
 //	@Tags		item
 //	@Produce	json
 //	@Param		id	path		int	true	"Item ID"
-//	@Success	200	{object}	itemdb.Item
+//	@Success	200	{object}	model.Item
 //	@Router		/item/{id} [get]
 func (h *Handler) Get(c echo.Context) error {
 	var (
@@ -88,7 +88,7 @@ func (h *Handler) Get(c echo.Context) error {
 //	@Accept		json
 //	@Produce	json
 //	@Param		item	body		itemsvc.MutationParams	true	"Item"
-//	@Success	201		{object}	itemdb.Item
+//	@Success	201		{object}	model.Item
 //	@Router		/item [post]
 func (h *Handler) Create(c echo.Context) error {
 	var (
@@ -118,7 +118,7 @@ func (h *Handler) Create(c echo.Context) error {
 //	@Produce	json
 //	@Param		id		path		int						true	"Item ID"
 //	@Param		item	body		itemsvc.MutationParams	true	"Item"
-//	@Success	200		{object}	itemdb.Item
+//	@Success	200		{object}	model.Item
 //	@Router		/item/{id} [put]
 func (h *Handler) Update(c echo.Context) error {
 	var (
@@ -277,7 +277,7 @@ func (h *Handler) Unlike(c echo.Context) error {
 //	@Accept		json
 //	@Produce	json
 //	@Param		item_IDs	body	[]int64	true	"Item IDs"
-//	@Success	200			{array}	itemdb.Item
+//	@Success	200			{array}	model.Item
 //	@Router		/item/batch [post]
 func (h *Handler) GetBatch(c echo.Context) error {
 	var (

@@ -7,7 +7,34 @@ definitions:
       password:
         type: string
     type: object
-  categorydb.Category:
+  http.Header:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  itemsvc.MutationParams:
+    properties:
+      category:
+        type: string
+      condition:
+        type: integer
+      description:
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+      is_negotiable:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      subcategory:
+        type: string
+    type: object
+  model.Category:
     properties:
       icon:
         type: string
@@ -18,13 +45,31 @@ definitions:
           type: string
         type: array
     type: object
-  http.Header:
-    additionalProperties:
-      items:
+  model.ChatMessage:
+    properties:
+      body:
         type: string
-      type: array
+      edited:
+        type: boolean
+      id:
+        type: integer
+      room_id:
+        type: string
+      sent_at:
+        type: string
+      sent_by:
+        type: string
     type: object
-  itemdb.Item:
+  model.ChatParticipant:
+    properties:
+      last_read_message_id:
+        $ref: '#/definitions/pgtype.Int8'
+      room_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  model.Item:
     properties:
       category:
         type: string
@@ -32,8 +77,7 @@ definitions:
         type: integer
       description:
         type: string
-      fts:
-        type: string
+      fts: {}
       id:
         type: integer
       images:
@@ -61,26 +105,30 @@ definitions:
       views:
         type: integer
     type: object
-  itemsvc.MutationParams:
+  model.User:
     properties:
-      category:
+      email:
         type: string
-      condition:
-        type: integer
-      description:
+      first_name:
         type: string
-      images:
+      id:
+        type: string
+      last_name:
+        type: string
+      liked_items:
         items:
-          type: string
+          type: integer
         type: array
-      is_negotiable:
+      password:
+        type: string
+    type: object
+  pgtype.Int8:
+    properties:
+      int64:
+        format: int64
+        type: integer
+      valid:
         type: boolean
-      name:
-        type: string
-      price:
-        type: number
-      subcategory:
-        type: string
     type: object
   storage.PresignParams:
     properties:
@@ -98,23 +146,6 @@ definitions:
       header:
         $ref: '#/definitions/http.Header'
       url:
-        type: string
-    type: object
-  userdb.User:
-    properties:
-      email:
-        type: string
-      first_name:
-        type: string
-      id:
-        type: string
-      last_name:
-        type: string
-      liked_items:
-        items:
-          type: integer
-        type: array
-      password:
         type: string
     type: object
   usersvc.CreateParams:
@@ -169,7 +200,7 @@ paths:
         "200":
           description: User
           schema:
-            $ref: '#/definitions/userdb.User'
+            $ref: '#/definitions/model.User'
       summary: Log in
       tags:
       - auth
@@ -193,7 +224,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/userdb.User'
+            $ref: '#/definitions/model.User'
         "401":
           description: Unauthorized
       summary: Get current authenticated user
@@ -208,7 +239,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/categorydb.Category'
+              $ref: '#/definitions/model.Category'
             type: array
       summary: Get all categories
       tags:
@@ -227,10 +258,204 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/categorydb.Category'
+            $ref: '#/definitions/model.Category'
       summary: Get category by name
       tags:
       - category
+  /chat/messages/{messageID}:
+    delete:
+      parameters:
+      - description: Message ID
+        format: int64
+        in: path
+        name: messageID
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a message
+      tags:
+      - chat
+    patch:
+      parameters:
+      - description: Message ID
+        format: int64
+        in: path
+        name: messageID
+        required: true
+        type: integer
+      - description: New message body
+        in: body
+        name: body
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Edit an existing message
+      tags:
+      - chat
+  /chat/rooms:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ChatParticipant'
+            type: array
+      summary: Get chat rooms for a user
+      tags:
+      - chat
+    post:
+      parameters:
+      - description: User IDs
+        in: body
+        name: userIDs
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+      summary: Create a new room
+      tags:
+      - chat
+  /chat/rooms/{roomID}:
+    delete:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a chat room
+      tags:
+      - chat
+  /chat/rooms/{roomID}/messages:
+    get:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ChatMessage'
+            type: array
+      summary: Get latest messages
+      tags:
+      - chat
+    post:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      - description: Message body
+        in: body
+        name: body
+        required: true
+        schema:
+          type: string
+      responses:
+        "201":
+          description: Created
+      summary: Post a new message
+      tags:
+      - chat
+  /chat/rooms/{roomID}/participants:
+    get:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ChatParticipant'
+            type: array
+      summary: Get participants in a chat room
+      tags:
+      - chat
+    post:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      - description: User ID
+        in: body
+        name: userID
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Add a user to a chat room
+      tags:
+      - chat
+  /chat/rooms/{roomID}/participants/{userID}:
+    delete:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Remove a user from a chat room
+      tags:
+      - chat
+  /chat/rooms/{roomID}/ws:
+    get:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Handle WebSocket connections
+      tags:
+      - chat
   /item:
     get:
       parameters:
@@ -253,7 +478,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/itemdb.Item'
+              $ref: '#/definitions/model.Item'
             type: array
       summary: Get many items
       tags:
@@ -274,7 +499,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/itemdb.Item'
+            $ref: '#/definitions/model.Item'
       summary: Create item
       tags:
       - item
@@ -305,7 +530,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/itemdb.Item'
+            $ref: '#/definitions/model.Item'
       summary: Get item by ID
       tags:
       - item
@@ -330,7 +555,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/itemdb.Item'
+            $ref: '#/definitions/model.Item'
       summary: Update item by ID
       tags:
       - item
@@ -410,7 +635,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/itemdb.Item'
+              $ref: '#/definitions/model.Item'
             type: array
       summary: Get items in bulk by list of IDs
       tags:
@@ -447,27 +672,10 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/userdb.User'
+              $ref: '#/definitions/model.User'
             type: array
       summary: Get many users
       tags:
-      - other
-  /user:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/sqluser.User'
-            type: array
-      summary: Get many users
-      tags:
-      - user
       - user
     post:
       consumes:
@@ -485,7 +693,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/userdb.User'
+            $ref: '#/definitions/model.User'
       summary: Create user
       tags:
       - user
@@ -503,7 +711,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/userdb.User'
+            $ref: '#/definitions/model.User'
       summary: Get seller by ID
       tags:
       - user

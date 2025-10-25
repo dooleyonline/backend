@@ -9,48 +9,29 @@ import (
 	"context"
 )
 
-const addMessage = `-- name: AddMessage :exec
-UPDATE
-  chat.room
-SET
-  messages = array_append(messages, $2::bigint)
-WHERE
-  id = $1
-  AND NOT (messages @> ARRAY[$2::bigint])
-`
-
-type AddMessageParams struct {
-	ID        string `json:"id"`
-	MessageID int64  `json:"message_id"`
-}
-
-func (q *Queries) AddMessage(ctx context.Context, arg AddMessageParams) error {
-	_, err := q.db.Exec(ctx, addMessage, arg.ID, arg.MessageID)
-	return err
-}
-
 const addParticipant = `-- name: AddParticipant :exec
 UPDATE
   chat.room
 SET
-  participants = $1
+  participants = array_append(participants, $1::uuid)
 WHERE
   id = $2
+  AND NOT participants @> ARRAY[$1::uuid]
 `
 
 type AddParticipantParams struct {
-	Participants []string `json:"participants"`
-	ID           string   `json:"id"`
+	UserID string `json:"user_id"`
+	RoomID string `json:"room_id"`
 }
 
 func (q *Queries) AddParticipant(ctx context.Context, arg AddParticipantParams) error {
-	_, err := q.db.Exec(ctx, addParticipant, arg.Participants, arg.ID)
+	_, err := q.db.Exec(ctx, addParticipant, arg.UserID, arg.RoomID)
 	return err
 }
 
 const createRoom = `-- name: CreateRoom :one
 INSERT INTO
-  "chat"."room" (participants)
+  chat.room (participants)
 VALUES
   ($1)
 RETURNING id
@@ -63,21 +44,34 @@ func (q *Queries) CreateRoom(ctx context.Context, participants []string) (string
 	return id, err
 }
 
+const deleteRoom = `-- name: DeleteRoom :exec
+DELETE FROM
+  chat.room
+WHERE
+  id = $1
+`
+
+func (q *Queries) DeleteRoom(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, deleteRoom, id)
+	return err
+}
+
 const removeParticipant = `-- name: RemoveParticipant :exec
 UPDATE
   chat.room
 SET
-  participants = $1
+  participants = array_remove(participants, $1::uuid)
 WHERE
   id = $2
+  AND participants @> ARRAY[$1::uuid]
 `
 
 type RemoveParticipantParams struct {
-	Participants []string `json:"participants"`
-	ID           string   `json:"id"`
+	UserID string `json:"user_id"`
+	RoomID string `json:"room_id"`
 }
 
 func (q *Queries) RemoveParticipant(ctx context.Context, arg RemoveParticipantParams) error {
-	_, err := q.db.Exec(ctx, removeParticipant, arg.Participants, arg.ID)
+	_, err := q.db.Exec(ctx, removeParticipant, arg.UserID, arg.RoomID)
 	return err
 }

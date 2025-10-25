@@ -42,7 +42,7 @@ func (h *Handler) GetAll(c echo.Context) error {
 //	@Tags		category
 //	@Produce	json
 //	@Param		name	path		string	true	"Category name"
-//	@Success	200		{object}	categorydb.Category
+//	@Success	200		{object}	model.Category
 //	@Router		/category/{name} [get]
 func (h *Handler) Get(c echo.Context) error {
 	var (

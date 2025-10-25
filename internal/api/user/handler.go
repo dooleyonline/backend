@@ -21,7 +21,7 @@ func New(svc *usersvc.Service) *Handler {
 //	@Tags		user
 //	@Accept		json
 //	@Produce	json
-//	@Success	200	{array}	userdb.User
+//	@Success	200	{array}	model.User
 //	@Router		/user [get]
 func (h *Handler) GetMany(c echo.Context) error {
 	var (
@@ -44,7 +44,7 @@ func (h *Handler) GetMany(c echo.Context) error {
 //	@Accept		json
 //	@Produce	json
 //	@Param		user	body		usersvc.CreateParams	true	"User"
-//	@Success	201		{object}	userdb.User
+//	@Success	201		{object}	model.User
 //	@Router		/user [post]
 func (h *Handler) Create(c echo.Context) error {
 	var (
@@ -71,7 +71,7 @@ func (h *Handler) Create(c echo.Context) error {
 //	@Tags		user
 //	@Produce	json
 //	@Param		id	path		string	true	"User ID (UUID)"
-//	@Success	200	{object}	userdb.User
+//	@Success	200	{object}	model.User
 //	@Router		/user/{id} [get]
 func (h *Handler) Get(c echo.Context) error {
 	var (

@@ -25,8 +25,8 @@ type Config struct {
 }
 
 const (
-	envEnv         = "ENV"
-	envPort        = "PORT"
+	envEnv  = "ENV"
+	envPort = "PORT"
 
 	envDatabaseUrl = "DATABASE_URL"
 

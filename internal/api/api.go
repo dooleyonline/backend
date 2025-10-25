@@ -6,6 +6,7 @@ import (
 
 	authhandler "github.com/dooleyonline/backend/internal/api/auth"
 	categoryhandler "github.com/dooleyonline/backend/internal/api/category"
+	chathandler "github.com/dooleyonline/backend/internal/api/chat"
 	itemhandler "github.com/dooleyonline/backend/internal/api/item"
 	userhandler "github.com/dooleyonline/backend/internal/api/user"
 	"github.com/dooleyonline/backend/internal/config"
@@ -38,6 +39,8 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	auth := authhandler.New(services.Auth)
 	category := categoryhandler.New(services.Category)
 	user := userhandler.New(services.User)
+
+	chat := chathandler.New(services.Chat)
 
 	e := echo.New()
 	e.HideBanner = true
@@ -83,6 +86,19 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.POST("/auth/logout", auth.Logout)
 	e.GET("/auth/me", auth.GetMe)
 
+	// chat routes
+	e.POST("/chat/rooms", chat.CreateRoom)
+	e.GET("/chat/rooms", chat.GetRooms)
+	e.DELETE("/chat/rooms/:roomID", chat.DeleteRoom)
+	e.GET("/chat/rooms/:roomID/messages", chat.GetLatest)
+	e.POST("/chat/rooms/:roomID/messages", chat.CreateMessage)
+	e.PATCH("/chat/messages/:messageID", chat.EditMessage)
+	e.DELETE("/chat/messages/:messageID", chat.DeleteMessage)
+	e.GET("/chat/rooms/:roomID/participants", chat.GetParticipants)
+	e.POST("/chat/rooms/:roomID/participants", chat.AddParticipant)
+	e.DELETE("/chat/rooms/:roomID/participants/:userID", chat.RemoveParticipant)
+	e.GET("/chat/rooms/:roomID/ws", chat.HandleConnections)
+
 	return e, nil
 }
 
@@ -96,6 +112,8 @@ var protectedRoutes = routesConfig{
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
 	"/auth/logout":     {http.MethodPost},
+	"/chat":            {http.MethodPost},
+	"/chat/:roomID/ws": {http.MethodGet},
 }
 
 // hello godoc

@@ -1,31 +1,31 @@
 -- name: CreateRoom :one
 INSERT INTO
-  "chat"."room" (participants)
+  chat.room (participants)
 VALUES
   ($1)
 RETURNING id;
+
+-- name: DeleteRoom :exec 
+DELETE FROM
+  chat.room
+WHERE
+  id = $1;
 
 -- name: AddParticipant :exec
 UPDATE
   chat.room
 SET
-  participants = $1
+  participants = array_append(participants, @user_id::uuid)
 WHERE
-  id = $2;
+  id = @room_id
+  AND NOT participants @> ARRAY[@user_id::uuid];
 
 -- name: RemoveParticipant :exec
 UPDATE
   chat.room
 SET
-  participants = $1
+  participants = array_remove(participants, @user_id::uuid)
 WHERE
-  id = $2;
+  id = @room_id
+  AND participants @> ARRAY[@user_id::uuid];
 
--- name: AddMessage :exec
-UPDATE
-  chat.room
-SET
-  messages = array_append(messages, @message_id::bigint)
-WHERE
-  id = $1
-  AND NOT (messages @> ARRAY[@message_id::bigint]);

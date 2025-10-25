@@ -7,5 +7,4 @@ package chatroom
 type ChatRoom struct {
 	ID           string   `json:"id"`
 	Participants []string `json:"participants"`
-	Messages     []int64  `json:"messages"`
 }

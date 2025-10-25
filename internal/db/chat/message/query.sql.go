@@ -11,7 +11,7 @@ import (
 
 const create = `-- name: Create :exec
 INSERT INTO
-  chat.message(id,room_id, sent_by, body)
+  chat.message(id, room_id, sent_by, body)
 VALUES
   ($1, $2, $3, $4)
 `
@@ -45,6 +45,25 @@ func (q *Queries) Delete(ctx context.Context, id int64) error {
 	return err
 }
 
+const editMessage = `-- name: EditMessage :exec
+UPDATE
+  chat.message
+SET
+  body = $2, edited = true
+WHERE
+  id = $1
+`
+
+type EditMessageParams struct {
+	ID   int64  `json:"id"`
+	Body string `json:"body"`
+}
+
+func (q *Queries) EditMessage(ctx context.Context, arg EditMessageParams) error {
+	_, err := q.db.Exec(ctx, editMessage, arg.ID, arg.Body)
+	return err
+}
+
 const getMany = `-- name: GetMany :many
 SELECT
   room_id, sent_by, body, id, edited, sent_at
@@ -53,7 +72,7 @@ FROM
 WHERE
   room_id = $1
 ORDER BY
-  sent_at
+  sent_at DESC
 LIMIT $2
 `
 
