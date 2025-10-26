@@ -441,7 +441,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/rooms/{roomID}/ws": {
+        "/chat/{roomID}/ws": {
             "get": {
                 "tags": [
                     "chat"

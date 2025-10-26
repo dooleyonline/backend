@@ -262,6 +262,20 @@ paths:
       summary: Get category by name
       tags:
       - category
+  /chat/{roomID}/ws:
+    get:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Handle WebSocket connections
+      tags:
+      - chat
   /chat/messages/{messageID}:
     delete:
       parameters:
@@ -440,20 +454,6 @@ paths:
         "204":
           description: No Content
       summary: Remove a user from a chat room
-      tags:
-      - chat
-  /chat/rooms/{roomID}/ws:
-    get:
-      parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-      summary: Handle WebSocket connections
       tags:
       - chat
   /item:
