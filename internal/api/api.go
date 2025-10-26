@@ -94,7 +94,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.PATCH("/chat/messages/:messageID", chat.EditMessage)
 	e.DELETE("/chat/messages/:messageID", chat.DeleteMessage)
 	e.GET("/chat/:roomID/participants", chat.GetParticipants)
-	e.POST("/chat/:roomID/participants", chat.AddParticipant)
+	e.POST("/chat/:roomID/participants/:userID", chat.AddParticipant)
 	e.DELETE("/chat/:roomID/participants/:userID", chat.RemoveParticipant)
 	e.GET("/chat/:roomID/ws", chat.HandleConnections)
 
@@ -111,7 +111,7 @@ var protectedRoutes = routesConfig{
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
 	"/auth/logout":     {http.MethodPost},
-	"/chat/*":            {http.MethodPost},
+	"/chat/*":          {http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPatch},
 }
 
 // hello godoc

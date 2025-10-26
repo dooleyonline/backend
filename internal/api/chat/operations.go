@@ -204,27 +204,32 @@ func (h *Handler) DeleteRoom(c echo.Context) error {
 //	@Param		roomID	path	string	true	"Room ID"
 //	@Param		userID	body	string	true	"User ID"
 //	@Success	204
-//	@Router		/chat/rooms/{roomID}/participants [post]
+//	@Router		/chat/{roomID}/participants/{userID} [post]
 func (h *Handler) AddParticipant(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
-	var roomID string
-	if err := echo.PathParamsBinder(c).String("roomID", &roomID).BindError(); err != nil {
+	var roomID, participantID string
+	if err := echo.PathParamsBinder(c).String("roomID", &roomID).String("userID", &participantID).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	var userID string
-	if err := c.Bind(&userID); err != nil {
-		return echo.ErrBadRequest.WithInternal(err)
+	isParticipant, err := h.svc.IsParticipant(ctx, roomID, userID)
+	if err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+	if !isParticipant {
+		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant and does not have authority to add another user"))
 	}
 
 	params := &chatsvc.ParticipantParams{
 		RoomID: roomID,
-		UserID: userID,
+		UserID: participantID,
 	}
+
 	if err := h.svc.AddParticipant(ctx, params); err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
@@ -252,6 +257,15 @@ func (h *Handler) RemoveParticipant(c echo.Context) error {
 		String("userID", &userID).
 		BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	isParticipant, err := h.svc.IsParticipant(ctx, roomID, userID)
+	if err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+
+	if !isParticipant {
+		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant and does not have authority to remove another user"))
 	}
 
 	if err := h.svc.RemoveParticipant(ctx, &chatsvc.ParticipantParams{
