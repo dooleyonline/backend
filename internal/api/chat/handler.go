@@ -1,6 +1,7 @@
 package chathandler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
@@ -56,8 +57,9 @@ var (
 //	@Router		/chat/{roomID}/ws [get]
 func (h *Handler) HandleConnections(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
 	var roomID string
@@ -66,6 +68,15 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 	}
 	if roomID == "" {
 		return echo.ErrBadRequest
+	}
+
+	isParticipant, err := h.svc.IsParticipant(ctx, roomID, userID)
+	if err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	if !isParticipant {
+		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant"))
 	}
 
 	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
@@ -77,7 +88,7 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 	client := &Client{
 		conn:   conn,
 		roomID: roomID,
-		userID: c.(shared.Context).UserID,
+		userID: userID,
 	}
 
 	h.hub.register <- client
@@ -90,7 +101,7 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 		if err != nil {
 			break
 		}
-		userID := c.(shared.Context).UserID
+
 		msg := string(m)
 
 		params := &chatsvc.CreateMessageParams{
@@ -98,6 +109,7 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 			RoomID:  roomID,
 			Message: msg,
 		}
+
 		if err := h.svc.CreateMessage(ctx, params); err != nil {
 			conn.WriteJSON(err)
 			continue

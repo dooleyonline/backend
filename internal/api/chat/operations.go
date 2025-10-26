@@ -1,6 +1,7 @@
 package chathandler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
@@ -15,16 +16,26 @@ import (
 //	@Produce	json
 //	@Param		roomID	path	string	true	"Room ID"
 //	@Success	200		{array}	model.ChatMessage
-//	@Router		/chat/rooms/{roomID}/messages [get]
-func (h *Handler) GetLatest(c echo.Context) error {
+//	@Router		/chat/{roomID}/messages [get]
+func (h *Handler) GetMessages(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
 	var roomID string
 	if err := echo.PathParamsBinder(c).String("roomID", &roomID).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	isParticipant, err := h.svc.IsParticipant(ctx, roomID, userID)
+	if err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	if !isParticipant {
+		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant"))
 	}
 
 	res, err := h.svc.GetLatestMessages(ctx, roomID)
@@ -42,7 +53,7 @@ func (h *Handler) GetLatest(c echo.Context) error {
 //	@Param		roomID	path	string	true	"Room ID"
 //	@Param		body	body	string	true	"Message body"
 //	@Success	201
-//	@Router		/chat/rooms/{roomID}/messages [post]
+//	@Router		/chat/{roomID}/messages [post]
 func (h *Handler) CreateMessage(c echo.Context) error {
 	var (
 		req    = c.Request()

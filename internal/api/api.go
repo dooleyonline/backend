@@ -89,14 +89,13 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	// chat routes
 	e.POST("/chat/rooms", chat.CreateRoom)
 	e.GET("/chat/rooms", chat.GetRooms)
-	e.DELETE("/chat/rooms/:roomID", chat.DeleteRoom)
-	e.GET("/chat/rooms/:roomID/messages", chat.GetLatest)
-	e.POST("/chat/rooms/:roomID/messages", chat.CreateMessage)
+	e.DELETE("/chat/:roomID", chat.DeleteRoom)
+	e.GET("/chat/:roomID/messages", chat.GetMessages)
 	e.PATCH("/chat/messages/:messageID", chat.EditMessage)
 	e.DELETE("/chat/messages/:messageID", chat.DeleteMessage)
-	e.GET("/chat/rooms/:roomID/participants", chat.GetParticipants)
-	e.POST("/chat/rooms/:roomID/participants", chat.AddParticipant)
-	e.DELETE("/chat/rooms/:roomID/participants/:userID", chat.RemoveParticipant)
+	e.GET("/chat/:roomID/participants", chat.GetParticipants)
+	e.POST("/chat/:roomID/participants", chat.AddParticipant)
+	e.DELETE("/chat/:roomID/participants/:userID", chat.RemoveParticipant)
 	e.GET("/chat/:roomID/ws", chat.HandleConnections)
 
 	return e, nil
@@ -112,8 +111,7 @@ var protectedRoutes = routesConfig{
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
 	"/auth/logout":     {http.MethodPost},
-	"/chat":            {http.MethodPost},
-	"/chat/:roomID/ws": {http.MethodGet},
+	"/chat/*":            {http.MethodPost},
 }
 
 // hello godoc

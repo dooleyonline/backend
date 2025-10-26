@@ -2,6 +2,7 @@ package chatsvc
 
 import (
 	"context"
+	"slices"
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/dooleyonline/backend/internal/config"
@@ -144,4 +145,19 @@ func (s *Service) GetRooms(ctx context.Context, userID string) ([]model.ChatPart
 
 func (s *Service) GetParticipants(ctx context.Context, roomID string) ([]model.ChatParticipant, error) {
 	return s.db.Chat.Participant.GetByRoomID(ctx, roomID)
+}
+
+func (s *Service) IsParticipant(ctx context.Context, roomID string, userID string) (bool, error) {
+	participants, err := s.GetParticipants(ctx, roomID)
+	if err != nil {
+		return false, err
+	}
+
+	if !slices.ContainsFunc(
+		participants,
+		func(p model.ChatParticipant) bool { return p.UserID == userID },
+	) {
+		return false, nil
+	}
+	return true, nil
 }
