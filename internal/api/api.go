@@ -97,7 +97,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.GET("/chat/rooms/:roomID/participants", chat.GetParticipants)
 	e.POST("/chat/rooms/:roomID/participants", chat.AddParticipant)
 	e.DELETE("/chat/rooms/:roomID/participants/:userID", chat.RemoveParticipant)
-	e.GET("/chat/rooms/:roomID/ws", chat.HandleConnections)
+	e.GET("/chat/:roomID/ws", chat.HandleConnections)
 
 	return e, nil
 }
