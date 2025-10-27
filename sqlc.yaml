@@ -101,5 +101,5 @@ overrides:
         go_type: "string"
       - column: item.id
         go_struct_tag: 'param:"id"'
-      - column: "item.fts"
+      - column: "item.item.fts"
         go_type: "string"

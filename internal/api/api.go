@@ -111,7 +111,7 @@ var protectedRoutes = routesConfig{
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
 	"/auth/logout":     {http.MethodPost},
-	"/chat/*":            {http.MethodPost},
+	"/chat/*":          {http.MethodPost},
 }
 
 // hello godoc

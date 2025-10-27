@@ -262,6 +262,45 @@ paths:
       summary: Get category by name
       tags:
       - category
+  /chat/{roomID}/messages:
+    get:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ChatMessage'
+            type: array
+      summary: Get latest messages
+      tags:
+      - chat
+    post:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      - description: Message body
+        in: body
+        name: body
+        required: true
+        schema:
+          type: string
+      responses:
+        "201":
+          description: Created
+      summary: Post a new message
+      tags:
+      - chat
   /chat/{roomID}/ws:
     get:
       parameters:
@@ -359,45 +398,6 @@ paths:
       summary: Delete a chat room
       tags:
       - chat
-  /chat/rooms/{roomID}/messages:
-    get:
-      parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.ChatMessage'
-            type: array
-      summary: Get latest messages
-      tags:
-      - chat
-    post:
-      parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
-      - description: Message body
-        in: body
-        name: body
-        required: true
-        schema:
-          type: string
-      responses:
-        "201":
-          description: Created
-      summary: Post a new message
-      tags:
-      - chat
   /chat/rooms/{roomID}/participants:
     get:
       parameters:
@@ -471,6 +471,11 @@ paths:
         in: query
         name: category
         type: string
+      - description: Page number
+        format: int32
+        in: query
+        name: page
+        type: integer
       produces:
       - application/json
       responses:
@@ -628,6 +633,11 @@ paths:
           items:
             type: integer
           type: array
+      - description: Page number
+        format: int32
+        in: query
+        name: page
+        type: integer
       produces:
       - application/json
       responses:

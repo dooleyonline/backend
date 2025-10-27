@@ -130,10 +130,69 @@ SELECT
   id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
   item.item
+ORDER BY 
+  posted_at DESC
+LIMIT 
+  50 OFFSET 50*(CAST($1 AS integer)-1)
 `
 
-func (q *Queries) GetAll(ctx context.Context) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, getAll)
+func (q *Queries) GetAll(ctx context.Context, page int32) ([]ItemItem, error) {
+	rows, err := q.db.Query(ctx, getAll, page)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ItemItem{}
+	for rows.Next() {
+		var i ItemItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Images,
+			&i.Price,
+			&i.Condition,
+			&i.IsNegotiable,
+			&i.PostedAt,
+			&i.SoldAt,
+			&i.Views,
+			&i.Category,
+			&i.Subcategory,
+			&i.Fts,
+			&i.Placeholder,
+			&i.Likes,
+			&i.Seller,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getBatch = `-- name: GetBatch :many
+SELECT
+  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
+FROM
+  item.item
+WHERE
+  id = ANY($1::bigint[])
+ORDER BY
+  posted_at DESC
+LIMIT 
+  50 OFFSET 50*(CAST($2 AS integer)-1)
+`
+
+type GetBatchParams struct {
+	ItemIds []int64 `json:"item_ids"`
+	Page    int32   `json:"page"`
+}
+
+func (q *Queries) GetBatch(ctx context.Context, arg GetBatchParams) ([]ItemItem, error) {
+	rows, err := q.db.Query(ctx, getBatch, arg.ItemIds, arg.Page)
 	if err != nil {
 		return nil, err
 	}
@@ -176,56 +235,19 @@ FROM
   item.item
 WHERE
   category = $1
+ORDER BY 
+  posted_at DESC
+LIMIT 
+  50 OFFSET 50*(CAST($2 AS integer)-1)
 `
 
-func (q *Queries) GetByCategory(ctx context.Context, category string) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, getByCategory, category)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []ItemItem{}
-	for rows.Next() {
-		var i ItemItem
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Description,
-			&i.Images,
-			&i.Price,
-			&i.Condition,
-			&i.IsNegotiable,
-			&i.PostedAt,
-			&i.SoldAt,
-			&i.Views,
-			&i.Category,
-			&i.Subcategory,
-			&i.Fts,
-			&i.Placeholder,
-			&i.Likes,
-			&i.Seller,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+type GetByCategoryParams struct {
+	Category string `json:"category"`
+	Page     int32  `json:"page"`
 }
 
-const getByIDs = `-- name: GetByIDs :many
-SELECT
-  id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
-FROM
-  item.item
-WHERE
-  id = ANY($1::bigint[])
-`
-
-func (q *Queries) GetByIDs(ctx context.Context, itemIds []int64) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, getByIDs, itemIds)
+func (q *Queries) GetByCategory(ctx context.Context, arg GetByCategoryParams) ([]ItemItem, error) {
+	rows, err := q.db.Query(ctx, getByCategory, arg.Category, arg.Page)
 	if err != nil {
 		return nil, err
 	}
@@ -270,10 +292,17 @@ WHERE
   seller = $1::uuid
 ORDER BY
   posted_at DESC
+LIMIT 
+  50 OFFSET 50*(CAST($2 AS integer)-1)
 `
 
-func (q *Queries) GetBySeller(ctx context.Context, sellerID string) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, getBySeller, sellerID)
+type GetBySellerParams struct {
+	SellerID string `json:"seller_id"`
+	Page     int32  `json:"page"`
+}
+
+func (q *Queries) GetBySeller(ctx context.Context, arg GetBySellerParams) ([]ItemItem, error) {
+	rows, err := q.db.Query(ctx, getBySeller, arg.SellerID, arg.Page)
 	if err != nil {
 		return nil, err
 	}
@@ -344,10 +373,19 @@ FROM
   item.item
 WHERE
   fts @@ websearch_to_tsquery($1)
+ORDER BY 
+  posted_at DESC
+LIMIT 
+  50 OFFSET 50*(CAST($2 AS integer)-1)
 `
 
-func (q *Queries) Search(ctx context.Context, websearchToTsquery string) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, search, websearchToTsquery)
+type SearchParams struct {
+	WebsearchToTsquery string `json:"websearch_to_tsquery"`
+	Page               int32  `json:"page"`
+}
+
+func (q *Queries) Search(ctx context.Context, arg SearchParams) ([]ItemItem, error) {
+	rows, err := q.db.Query(ctx, search, arg.WebsearchToTsquery, arg.Page)
 	if err != nil {
 		return nil, err
 	}
@@ -390,15 +428,20 @@ FROM
   item.item
 WHERE
   category = $1 AND fts @@ to_tsquery($2)
+ORDER BY 
+  posted_at DESC
+LIMIT 
+  50 OFFSET 50*(CAST($3 AS integer)-1)
 `
 
 type SearchByCategoryParams struct {
 	Category  string `json:"category"`
 	ToTsquery string `json:"to_tsquery"`
+	Page      int32  `json:"page"`
 }
 
 func (q *Queries) SearchByCategory(ctx context.Context, arg SearchByCategoryParams) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, searchByCategory, arg.Category, arg.ToTsquery)
+	rows, err := q.db.Query(ctx, searchByCategory, arg.Category, arg.ToTsquery, arg.Page)
 	if err != nil {
 		return nil, err
 	}

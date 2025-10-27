@@ -292,66 +292,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/rooms/{roomID}/messages": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Get latest messages",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.ChatMessage"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Post a new message",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Message body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            }
-        },
         "/chat/rooms/{roomID}/participants": {
             "get": {
                 "produces": [
@@ -441,6 +381,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/chat/{roomID}/messages": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Get latest messages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.ChatMessage"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Post a new message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Message body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
         "/chat/{roomID}/ws": {
             "get": {
                 "tags": [
@@ -489,6 +489,13 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Category filter",
                         "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page number",
+                        "name": "page",
                         "in": "query"
                     }
                 ],
@@ -560,6 +567,13 @@ const docTemplate = `{
                                 "type": "integer"
                             }
                         }
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
                     }
                 ],
                 "responses": {

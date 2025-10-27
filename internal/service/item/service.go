@@ -28,7 +28,7 @@ type GetManyParams struct {
 	Category string
 }
 
-func (s *Service) GetMany(ctx context.Context, params *GetManyParams) ([]model.Item, error) {
+func (s *Service) GetMany(ctx context.Context, params *GetManyParams, page int32) ([]model.Item, error) {
 	if params.Seller != "" && params.Query != "" && params.Category != "" {
 		return nil, fmt.Errorf("cannot filter by seller, query, and category simultaneously")
 	}
@@ -38,19 +38,32 @@ func (s *Service) GetMany(ctx context.Context, params *GetManyParams) ([]model.I
 
 	switch {
 	case params.Seller != "":
-		items, err = s.db.Item.Item.GetBySeller(ctx, params.Seller)
+		getbysellerParams := itemitem.GetBySellerParams{
+			SellerID: params.Seller,
+			Page:     page,
+		}
+		items, err = s.db.Item.Item.GetBySeller(ctx, getbysellerParams)
 	case params.Query != "" && params.Category != "":
-		searchParams := itemitem.SearchByCategoryParams{
+		searchbycategoryParams := itemitem.SearchByCategoryParams{
 			Category:  params.Category,
 			ToTsquery: params.Query,
+			Page:      page,
 		}
-		items, err = s.db.Item.Item.SearchByCategory(ctx, searchParams)
+		items, err = s.db.Item.Item.SearchByCategory(ctx, searchbycategoryParams)
 	case params.Query != "":
-		items, err = s.db.Item.Item.Search(ctx, params.Query)
+		searchparams := itemitem.SearchParams{
+			WebsearchToTsquery: params.Query,
+			Page:               page,
+		}
+		items, err = s.db.Item.Item.Search(ctx, searchparams)
 	case params.Category != "":
-		items, err = s.db.Item.Item.GetByCategory(ctx, params.Category)
+		getbycategoryParams := itemitem.GetByCategoryParams{
+			Category: params.Category,
+			Page:     page,
+		}
+		items, err = s.db.Item.Item.GetByCategory(ctx, getbycategoryParams)
 	default:
-		items, err = s.db.Item.Item.GetAll(ctx)
+		items, err = s.db.Item.Item.GetAll(ctx, page)
 	}
 
 	if err != nil {
@@ -201,8 +214,12 @@ func (s *Service) Unlike(ctx context.Context, itemId int64, userId string) error
 	return nil
 }
 
-func (s *Service) GetBatch(ctx context.Context, ids *[]int64) ([]model.Item, error) {
-	items, err := s.db.Item.Item.GetByIDs(ctx, *ids)
+func (s *Service) GetBatch(ctx context.Context, ids *[]int64, page int32) ([]model.Item, error) {
+	getbatchparams := itemitem.GetBatchParams{
+		ItemIds: *ids,
+		Page:    page,
+	}
+	items, err := s.db.Item.Item.GetBatch(ctx, getbatchparams)
 	if err != nil {
 		return nil, err
 	}

@@ -24,7 +24,9 @@ func (h *Handler) GetMessages(c echo.Context) error {
 		userID = c.(shared.Context).UserID
 	)
 
-	var roomID string
+	var (
+		roomID string
+	)
 	if err := echo.PathParamsBinder(c).String("roomID", &roomID).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}

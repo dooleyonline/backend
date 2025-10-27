@@ -2,7 +2,11 @@
 SELECT
   *
 FROM
-  item.item;
+  item.item
+ORDER BY 
+  posted_at DESC
+LIMIT 
+  50 OFFSET 50*(CAST(@page AS integer)-1);
 
 -- name: Get :one
 SELECT
@@ -80,7 +84,9 @@ SELECT
 FROM
   item.item
 WHERE
-  fts @@ websearch_to_tsquery($1);
+  fts @@ websearch_to_tsquery($1)
+LIMIT 
+  50 OFFSET 50*(CAST(@page AS integer)-1);
 
 -- name: GetByCategory :many
 SELECT
@@ -88,7 +94,11 @@ SELECT
 FROM
   item.item
 WHERE
-  category = $1;
+  category = $1
+ORDER BY 
+  posted_at DESC
+LIMIT 
+  50 OFFSET 50*(CAST(@page AS integer)-1);
 
 -- name: SearchByCategory :many 
 SELECT
@@ -96,7 +106,9 @@ SELECT
 FROM
   item.item
 WHERE
-  category = $1 AND fts @@ to_tsquery($2); 
+  category = $1 AND fts @@ to_tsquery($2)
+LIMIT 
+  50 OFFSET 50*(CAST(@page AS integer)-1);
 
 -- name: GetBySeller :many
 SELECT
@@ -106,12 +118,18 @@ FROM
 WHERE
   seller = @seller_ID::uuid
 ORDER BY
-  posted_at DESC;
+  posted_at DESC
+LIMIT 
+  50 OFFSET 50*(CAST(@page AS integer)-1);
 
--- name: GetByIDs :many 
+-- name: GetBatch :many 
 SELECT
   *
 FROM
   item.item
 WHERE
-  id = ANY(@item_IDs::bigint[]);
+  id = ANY(@item_IDs::bigint[])
+ORDER BY
+  posted_at DESC
+LIMIT 
+  50 OFFSET 50*(CAST(@page AS integer)-1);

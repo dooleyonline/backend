@@ -9,20 +9,20 @@ import (
 )
 
 type ItemItem struct {
-	ID           int64       `json:"id"`
-	Name         string      `json:"name"`
-	Description  string      `json:"description"`
-	Images       []string    `json:"images"`
-	Price        float64     `json:"price"`
-	Condition    int16       `json:"condition"`
-	IsNegotiable bool        `json:"is_negotiable"`
-	PostedAt     time.Time   `json:"posted_at"`
-	SoldAt       *time.Time  `json:"sold_at"`
-	Views        int64       `json:"views"`
-	Category     string      `json:"category"`
-	Subcategory  string      `json:"subcategory"`
-	Fts          interface{} `json:"fts"`
-	Placeholder  string      `json:"placeholder"`
-	Likes        int64       `json:"likes"`
-	Seller       string      `json:"seller"`
+	ID           int64      `json:"id"`
+	Name         string     `json:"name"`
+	Description  string     `json:"description"`
+	Images       []string   `json:"images"`
+	Price        float64    `json:"price"`
+	Condition    int16      `json:"condition"`
+	IsNegotiable bool       `json:"is_negotiable"`
+	PostedAt     time.Time  `json:"posted_at"`
+	SoldAt       *time.Time `json:"sold_at"`
+	Views        int64      `json:"views"`
+	Category     string     `json:"category"`
+	Subcategory  string     `json:"subcategory"`
+	Fts          string     `json:"fts"`
+	Placeholder  string     `json:"placeholder"`
+	Likes        int64      `json:"likes"`
+	Seller       string     `json:"seller"`
 }
