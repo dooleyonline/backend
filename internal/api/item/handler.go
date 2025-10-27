@@ -34,21 +34,17 @@ func (h *Handler) GetMany(c echo.Context) error {
 		ctx = req.Context()
 	)
 
-	var (
-		seller   string
-		query    string
-		category string
-		page     int32
-	)
-	if err := echo.QueryParamsBinder(c).String("seller", &seller).String("q", &query).String("category", &category).Int32("page", &page).BindError(); err != nil {
+	var params itemsvc.GetManyParams
+	if err := echo.QueryParamsBinder(c).
+		String("seller", &params.Seller).
+		String("q", &params.Query).
+		String("category", &params.Category).
+		Int32("page", &params.Page).
+		BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	res, err := h.svc.GetMany(ctx, &itemsvc.GetManyParams{
-		Seller:   seller,
-		Query:    query,
-		Category: category,
-	}, page)
+	res, err := h.svc.GetMany(ctx, &params)
 	if err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}

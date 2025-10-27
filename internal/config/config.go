@@ -11,6 +11,8 @@ type Config struct {
 	Url        string
 	ServerAddr string
 
+	ItemPageSize int32
+
 	DatabaseUrl string
 
 	StorageUrl          string
@@ -89,6 +91,8 @@ func New() (*Config, error) {
 		IsProd:     env == "prod",
 		Url:        "https://api.dooleyonline.net",
 		ServerAddr: ":" + port,
+
+		ItemPageSize: 10,
 
 		DatabaseUrl: databaseUrl,
 

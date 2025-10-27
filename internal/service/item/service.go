@@ -26,11 +26,16 @@ type GetManyParams struct {
 	Seller   string
 	Query    string
 	Category string
+	Page     int32
 }
 
-func (s *Service) GetMany(ctx context.Context, params *GetManyParams, page int32) ([]model.Item, error) {
+func (s *Service) GetMany(ctx context.Context, params *GetManyParams) ([]model.Item, error) {
 	if params.Seller != "" && params.Query != "" && params.Category != "" {
 		return nil, fmt.Errorf("cannot filter by seller, query, and category simultaneously")
+	}
+
+	if params.Page < 1 {
+		params.Page = 1
 	}
 
 	var items []model.Item
@@ -40,30 +45,38 @@ func (s *Service) GetMany(ctx context.Context, params *GetManyParams, page int32
 	case params.Seller != "":
 		getbysellerParams := itemitem.GetBySellerParams{
 			SellerID: params.Seller,
-			Page:     page,
+			Page:     params.Page,
+			Size:     s.cfg.ItemPageSize,
 		}
 		items, err = s.db.Item.Item.GetBySeller(ctx, getbysellerParams)
 	case params.Query != "" && params.Category != "":
 		searchbycategoryParams := itemitem.SearchByCategoryParams{
 			Category:  params.Category,
 			ToTsquery: params.Query,
-			Page:      page,
+			Page:      params.Page,
+			Size:      s.cfg.ItemPageSize,
 		}
 		items, err = s.db.Item.Item.SearchByCategory(ctx, searchbycategoryParams)
 	case params.Query != "":
 		searchparams := itemitem.SearchParams{
 			WebsearchToTsquery: params.Query,
-			Page:               page,
+			Page:               params.Page,
+			Size:               s.cfg.ItemPageSize,
 		}
 		items, err = s.db.Item.Item.Search(ctx, searchparams)
 	case params.Category != "":
 		getbycategoryParams := itemitem.GetByCategoryParams{
 			Category: params.Category,
-			Page:     page,
+			Page:     params.Page,
+			Size:     s.cfg.ItemPageSize,
 		}
 		items, err = s.db.Item.Item.GetByCategory(ctx, getbycategoryParams)
 	default:
-		items, err = s.db.Item.Item.GetAll(ctx, page)
+		getAllParams := itemitem.GetAllParams{
+			Page: params.Page,
+			Size: s.cfg.ItemPageSize,
+		}
+		items, err = s.db.Item.Item.GetAll(ctx, getAllParams)
 	}
 
 	if err != nil {
@@ -218,6 +231,7 @@ func (s *Service) GetBatch(ctx context.Context, ids *[]int64, page int32) ([]mod
 	getbatchparams := itemitem.GetBatchParams{
 		ItemIds: *ids,
 		Page:    page,
+		Size:    s.cfg.ItemPageSize,
 	}
 	items, err := s.db.Item.Item.GetBatch(ctx, getbatchparams)
 	if err != nil {

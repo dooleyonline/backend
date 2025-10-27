@@ -6,7 +6,7 @@ FROM
 ORDER BY 
   posted_at DESC
 LIMIT 
-  50 OFFSET 50*(CAST(@page AS integer)-1);
+  CAST(@size AS integer) OFFSET CAST(@size AS integer)*(CAST(@page AS integer)-1);
 
 -- name: Get :one
 SELECT
@@ -86,7 +86,7 @@ FROM
 WHERE
   fts @@ websearch_to_tsquery($1)
 LIMIT 
-  50 OFFSET 50*(CAST(@page AS integer)-1);
+  CAST(@size AS integer) OFFSET CAST(@size AS integer)*(CAST(@page AS integer)-1);
 
 -- name: GetByCategory :many
 SELECT
@@ -98,7 +98,7 @@ WHERE
 ORDER BY 
   posted_at DESC
 LIMIT 
-  50 OFFSET 50*(CAST(@page AS integer)-1);
+  CAST(@size AS integer) OFFSET CAST(@size AS integer)*(CAST(@page AS integer)-1);
 
 -- name: SearchByCategory :many 
 SELECT
@@ -108,7 +108,7 @@ FROM
 WHERE
   category = $1 AND fts @@ to_tsquery($2)
 LIMIT 
-  50 OFFSET 50*(CAST(@page AS integer)-1);
+  CAST(@size AS integer) OFFSET CAST(@size AS integer)*(CAST(@page AS integer)-1);
 
 -- name: GetBySeller :many
 SELECT
@@ -120,7 +120,7 @@ WHERE
 ORDER BY
   posted_at DESC
 LIMIT 
-  50 OFFSET 50*(CAST(@page AS integer)-1);
+  CAST(@size AS integer) OFFSET CAST(@size AS integer)*(CAST(@page AS integer)-1);
 
 -- name: GetBatch :many 
 SELECT
@@ -132,4 +132,4 @@ WHERE
 ORDER BY
   posted_at DESC
 LIMIT 
-  50 OFFSET 50*(CAST(@page AS integer)-1);
+  CAST(@size AS integer) OFFSET CAST(@size AS integer)*(CAST(@page AS integer)-1);

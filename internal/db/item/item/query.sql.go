@@ -133,11 +133,16 @@ FROM
 ORDER BY 
   posted_at DESC
 LIMIT 
-  50 OFFSET 50*(CAST($1 AS integer)-1)
+  CAST($1 AS integer) OFFSET CAST($1 AS integer)*(CAST($2 AS integer)-1)
 `
 
-func (q *Queries) GetAll(ctx context.Context, page int32) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, getAll, page)
+type GetAllParams struct {
+	Size int32 `json:"size"`
+	Page int32 `json:"page"`
+}
+
+func (q *Queries) GetAll(ctx context.Context, arg GetAllParams) ([]ItemItem, error) {
+	rows, err := q.db.Query(ctx, getAll, arg.Size, arg.Page)
 	if err != nil {
 		return nil, err
 	}
@@ -183,16 +188,17 @@ WHERE
 ORDER BY
   posted_at DESC
 LIMIT 
-  50 OFFSET 50*(CAST($2 AS integer)-1)
+  CAST($2 AS integer) OFFSET CAST($2 AS integer)*(CAST($3 AS integer)-1)
 `
 
 type GetBatchParams struct {
 	ItemIds []int64 `json:"item_ids"`
+	Size    int32   `json:"size"`
 	Page    int32   `json:"page"`
 }
 
 func (q *Queries) GetBatch(ctx context.Context, arg GetBatchParams) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, getBatch, arg.ItemIds, arg.Page)
+	rows, err := q.db.Query(ctx, getBatch, arg.ItemIds, arg.Size, arg.Page)
 	if err != nil {
 		return nil, err
 	}
@@ -238,16 +244,17 @@ WHERE
 ORDER BY 
   posted_at DESC
 LIMIT 
-  50 OFFSET 50*(CAST($2 AS integer)-1)
+  CAST($2 AS integer) OFFSET CAST($2 AS integer)*(CAST($3 AS integer)-1)
 `
 
 type GetByCategoryParams struct {
 	Category string `json:"category"`
+	Size     int32  `json:"size"`
 	Page     int32  `json:"page"`
 }
 
 func (q *Queries) GetByCategory(ctx context.Context, arg GetByCategoryParams) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, getByCategory, arg.Category, arg.Page)
+	rows, err := q.db.Query(ctx, getByCategory, arg.Category, arg.Size, arg.Page)
 	if err != nil {
 		return nil, err
 	}
@@ -293,16 +300,17 @@ WHERE
 ORDER BY
   posted_at DESC
 LIMIT 
-  50 OFFSET 50*(CAST($2 AS integer)-1)
+  CAST($2 AS integer) OFFSET CAST($2 AS integer)*(CAST($3 AS integer)-1)
 `
 
 type GetBySellerParams struct {
 	SellerID string `json:"seller_id"`
+	Size     int32  `json:"size"`
 	Page     int32  `json:"page"`
 }
 
 func (q *Queries) GetBySeller(ctx context.Context, arg GetBySellerParams) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, getBySeller, arg.SellerID, arg.Page)
+	rows, err := q.db.Query(ctx, getBySeller, arg.SellerID, arg.Size, arg.Page)
 	if err != nil {
 		return nil, err
 	}
@@ -373,19 +381,18 @@ FROM
   item.item
 WHERE
   fts @@ websearch_to_tsquery($1)
-ORDER BY 
-  posted_at DESC
 LIMIT 
-  50 OFFSET 50*(CAST($2 AS integer)-1)
+  CAST($2 AS integer) OFFSET CAST($2 AS integer)*(CAST($3 AS integer)-1)
 `
 
 type SearchParams struct {
 	WebsearchToTsquery string `json:"websearch_to_tsquery"`
+	Size               int32  `json:"size"`
 	Page               int32  `json:"page"`
 }
 
 func (q *Queries) Search(ctx context.Context, arg SearchParams) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, search, arg.WebsearchToTsquery, arg.Page)
+	rows, err := q.db.Query(ctx, search, arg.WebsearchToTsquery, arg.Size, arg.Page)
 	if err != nil {
 		return nil, err
 	}
@@ -428,20 +435,24 @@ FROM
   item.item
 WHERE
   category = $1 AND fts @@ to_tsquery($2)
-ORDER BY 
-  posted_at DESC
 LIMIT 
-  50 OFFSET 50*(CAST($3 AS integer)-1)
+  CAST($3 AS integer) OFFSET CAST($3 AS integer)*(CAST($4 AS integer)-1)
 `
 
 type SearchByCategoryParams struct {
 	Category  string `json:"category"`
 	ToTsquery string `json:"to_tsquery"`
+	Size      int32  `json:"size"`
 	Page      int32  `json:"page"`
 }
 
 func (q *Queries) SearchByCategory(ctx context.Context, arg SearchByCategoryParams) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, searchByCategory, arg.Category, arg.ToTsquery, arg.Page)
+	rows, err := q.db.Query(ctx, searchByCategory,
+		arg.Category,
+		arg.ToTsquery,
+		arg.Size,
+		arg.Page,
+	)
 	if err != nil {
 		return nil, err
 	}
