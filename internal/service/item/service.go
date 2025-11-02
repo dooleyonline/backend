@@ -240,9 +240,9 @@ func (s *Service) GetBatch(ctx context.Context, ids *[]int64, page int32) ([]mod
 	return items, nil
 }
 
-func (s *Service) GetUploadPresignURL(ctx context.Context, p *storage.PresignParams) (*storage.PresignResult, error) {
+func (s *Service) GetUploadPresignURL(ctx context.Context, contentType string) (*storage.PresignResult, error) {
 	storage := storage.New(s.cfg)
-	res, err := storage.PresignUpload(ctx, p)
+	res, err := storage.PresignUpload(ctx, contentType)
 	if err != nil {
 		return nil, err
 	}

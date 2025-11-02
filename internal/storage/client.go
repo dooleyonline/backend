@@ -11,6 +11,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	"github.com/google/uuid"
 
 	"github.com/dooleyonline/backend/internal/config"
 )
@@ -27,30 +28,25 @@ func New(cfg *config.Config) *Storage {
 	return &Storage{cfg, signer}
 }
 
-type PresignParams struct {
-	Method      string
-	Bucket      string
-	Key         string
-	ContentType string
-}
-
 type PresignResult struct {
-	URL    string      `json:"url"`
-	Header http.Header `json:"header"`
+	URL     string      `json:"url"`
+	Header  http.Header `json:"header"`
+	ImageID string      `json:"imageId"`
 }
 
-func (s *Storage) PresignUpload(ctx context.Context, p *PresignParams) (*PresignResult, error) {
-	url, err := s.buildURL(p.Bucket, p.Key)
+func (s *Storage) PresignUpload(ctx context.Context, contentType string) (*PresignResult, error) {
+	key := s.GenerateImageID()
+
+	url, err := s.buildURL(key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build url: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, p.Method, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("Content-Type", p.ContentType)
-
+	req.Header.Set("Content-Type", contentType)
 	signedURI, signedHeader, err := s.signer.PresignHTTP(ctx,
 		s.credentials(),
 		req,
@@ -64,10 +60,15 @@ func (s *Storage) PresignUpload(ctx context.Context, p *PresignParams) (*Presign
 	}
 
 	res := &PresignResult{
-		URL:    signedURI,
-		Header: signedHeader,
+		URL:     signedURI,
+		Header:  signedHeader,
+		ImageID: key,
 	}
 	return res, nil
+}
+
+func (s *Storage) GenerateImageID() string {
+	return uuid.NewString()
 }
 
 func (s *Storage) credentials() aws.Credentials {
@@ -77,8 +78,8 @@ func (s *Storage) credentials() aws.Credentials {
 	}
 }
 
-func (s *Storage) buildURL(bucket, key string) (string, error) {
-	return url.JoinPath(s.cfg.StorageS3Url, bucket, key)
+func (s *Storage) buildURL(key string) (string, error) {
+	return url.JoinPath(s.cfg.StorageS3Url, s.cfg.StorageBucket, key)
 }
 
 func hashPayload(payload string) string {

@@ -321,35 +321,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Add a user to a chat room",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "User ID",
-                        "name": "userID",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
             }
         },
         "/chat/rooms/{roomID}/participants/{userID}": {
@@ -437,6 +408,37 @@ const docTemplate = `{
                 "responses": {
                     "201": {
                         "description": "Created"
+                    }
+                }
+            }
+        },
+        "/chat/{roomID}/participants/{userID}": {
+            "post": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Add a user to a chat room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -603,13 +605,11 @@ const docTemplate = `{
                 "summary": "Generate presigned URL for item upload",
                 "parameters": [
                     {
-                        "description": "Presign params",
-                        "name": "item",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/storage.PresignParams"
-                        }
+                        "type": "string",
+                        "description": "Content type of the item to be uploaded",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1000,7 +1000,9 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "fts": {},
+                "fts": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1080,28 +1082,14 @@ const docTemplate = `{
                 }
             }
         },
-        "storage.PresignParams": {
-            "type": "object",
-            "properties": {
-                "bucket": {
-                    "type": "string"
-                },
-                "contentType": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "method": {
-                    "type": "string"
-                }
-            }
-        },
         "storage.PresignResult": {
             "type": "object",
             "properties": {
                 "header": {
                     "$ref": "#/definitions/http.Header"
+                },
+                "imageId": {
+                    "type": "string"
                 },
                 "url": {
                     "type": "string"
