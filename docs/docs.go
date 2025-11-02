@@ -893,15 +893,6 @@ const docTemplate = `{
                 }
             }
         },
-        "http.Header": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
-            }
-        },
         "itemsvc.MutationParams": {
             "type": "object",
             "properties": {
@@ -1085,10 +1076,7 @@ const docTemplate = `{
         "storage.PresignResult": {
             "type": "object",
             "properties": {
-                "header": {
-                    "$ref": "#/definitions/http.Header"
-                },
-                "imageId": {
+                "image_id": {
                     "type": "string"
                 },
                 "url": {

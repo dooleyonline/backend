@@ -7,12 +7,6 @@ definitions:
       password:
         type: string
     type: object
-  http.Header:
-    additionalProperties:
-      items:
-        type: string
-      type: array
-    type: object
   itemsvc.MutationParams:
     properties:
       category:
@@ -133,9 +127,7 @@ definitions:
     type: object
   storage.PresignResult:
     properties:
-      header:
-        $ref: '#/definitions/http.Header'
-      imageId:
+      image_id:
         type: string
       url:
         type: string

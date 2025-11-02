@@ -31,7 +31,6 @@ func TestPresignUploadText(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed to create request:", err)
 	}
-	req.Header = presign.Header
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -68,7 +67,6 @@ func TestPresignUploadImage(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed to create request:", err)
 	}
-	req.Header = presign.Header
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
