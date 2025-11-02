@@ -91,3 +91,17 @@ func (h *Handler) Get(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, *res)
 }
+
+func (h *Handler) GetLikedAll(c echo.Context) error {
+	var (
+		req = c.Request()
+		ctx = req.Context()
+	)
+
+	res, err := h.svc.GetLikedAll(ctx)
+	if err != nil {
+		return echo.ErrNotFound.WithInternal(err)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
