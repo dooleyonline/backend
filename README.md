@@ -239,23 +239,6 @@ task sql
 6. Register routes in `internal/api/api.go`
 7. Update documentation: `task docs`
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the Apache 2.0 License - see the LICENSE file for details.
-
-## 📧 Contact
-
-- **API Support**: support@swagger.io
-- **Project Link**: https://github.com/dooleyonline/backend
-
 ## 🙏 Acknowledgments
 
 - Echo Framework for the excellent web framework
