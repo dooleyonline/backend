@@ -270,7 +270,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/rooms/{roomID}": {
+        "/chat/{roomID}": {
             "delete": {
                 "tags": [
                     "chat"
@@ -281,66 +281,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Room ID",
                         "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/chat/rooms/{roomID}/participants": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Get participants in a chat room",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.ChatParticipant"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/chat/rooms/{roomID}/participants/{userID}": {
-            "delete": {
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Remove a user from a chat room",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "userID",
                         "in": "path",
                         "required": true
                     }
@@ -381,12 +321,17 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
+            }
+        },
+        "/chat/{roomID}/participants": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "chat"
                 ],
-                "summary": "Post a new message",
+                "summary": "Get participants in a chat room",
                 "parameters": [
                     {
                         "type": "string",
@@ -394,20 +339,17 @@ const docTemplate = `{
                         "name": "roomID",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Message body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.ChatParticipant"
+                            }
+                        }
                     }
                 }
             }
@@ -434,6 +376,33 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Remove a user from a chat room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
