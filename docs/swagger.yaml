@@ -7,12 +7,6 @@ definitions:
       password:
         type: string
     type: object
-  http.Header:
-    additionalProperties:
-      items:
-        type: string
-      type: array
-    type: object
   itemsvc.MutationParams:
     properties:
       category:
@@ -140,21 +134,10 @@ definitions:
       valid:
         type: boolean
     type: object
-  storage.PresignParams:
-    properties:
-      bucket:
-        type: string
-      contentType:
-        type: string
-      key:
-        type: string
-      method:
-        type: string
-    type: object
   storage.PresignResult:
     properties:
-      header:
-        $ref: '#/definitions/http.Header'
+      image_id:
+        type: string
       url:
         type: string
     type: object
@@ -272,6 +255,20 @@ paths:
       summary: Get category by name
       tags:
       - category
+  /chat/{roomID}:
+    delete:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a chat room
+      tags:
+      - chat
   /chat/{roomID}/messages:
     get:
       parameters:
@@ -292,6 +289,45 @@ paths:
       summary: Get latest messages
       tags:
       - chat
+  /chat/{roomID}/participants:
+    get:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ChatParticipant'
+            type: array
+      summary: Get participants in a chat room
+      tags:
+      - chat
+  /chat/{roomID}/participants/{userID}:
+    delete:
+      parameters:
+      - description: Room ID
+        in: path
+        name: roomID
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Remove a user from a chat room
+      tags:
+      - chat
     post:
       parameters:
       - description: Room ID
@@ -299,16 +335,16 @@ paths:
         name: roomID
         required: true
         type: string
-      - description: Message body
+      - description: User ID
         in: body
-        name: body
+        name: userID
         required: true
         schema:
           type: string
       responses:
-        "201":
-          description: Created
-      summary: Post a new message
+        "204":
+          description: No Content
+      summary: Add a user to a chat room
       tags:
       - chat
   /chat/{roomID}/participants/{userID}:
@@ -412,59 +448,6 @@ paths:
           schema:
             type: string
       summary: Create a new room
-      tags:
-      - chat
-  /chat/rooms/{roomID}:
-    delete:
-      parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
-      responses:
-        "204":
-          description: No Content
-      summary: Delete a chat room
-      tags:
-      - chat
-  /chat/rooms/{roomID}/participants:
-    get:
-      parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.ChatParticipant'
-            type: array
-      summary: Get participants in a chat room
-      tags:
-      - chat
-  /chat/rooms/{roomID}/participants/{userID}:
-    delete:
-      parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
-      - description: User ID
-        in: path
-        name: userID
-        required: true
-        type: string
-      responses:
-        "204":
-          description: No Content
-      summary: Remove a user from a chat room
       tags:
       - chat
   /item:
@@ -661,17 +644,16 @@ paths:
       summary: Get items in bulk by list of IDs
       tags:
       - item
-  /item/upload-url:
+  /item/presign:
     post:
       consumes:
       - application/json
       parameters:
-      - description: Presign params
-        in: body
-        name: item
+      - description: Content type of the item to be uploaded
+        in: query
+        name: type
         required: true
-        schema:
-          $ref: '#/definitions/storage.PresignParams'
+        type: string
       produces:
       - application/json
       responses:

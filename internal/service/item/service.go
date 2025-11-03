@@ -104,21 +104,25 @@ type MutationParams struct {
 	Subcategory  string   `json:"subcategory"`
 }
 
-func (s *Service) Create(ctx context.Context, sellerId string, p *MutationParams) (*model.Item, error) {
-	placeholder, err := generatePlaceholder(s.cfg, p.Images[0])
+func (s *Service) Create(ctx context.Context, sellerId string, params *MutationParams) (*model.Item, error) {
+	if len(params.Images) == 0 {
+		return nil, fmt.Errorf("no image provided")
+	}
+
+	placeholder, err := generatePlaceholder(s.cfg, params.Images[0])
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate placeholder: %w", err)
 	}
 
 	dbparams := itemitem.CreateParams{
-		Name:         p.Name,
-		Description:  p.Description,
-		Images:       p.Images,
-		Price:        p.Price,
-		Condition:    p.Condition,
-		IsNegotiable: p.IsNegotiable,
-		Category:     p.Category,
-		Subcategory:  p.Subcategory,
+		Name:         params.Name,
+		Description:  params.Description,
+		Images:       params.Images,
+		Price:        params.Price,
+		Condition:    params.Condition,
+		IsNegotiable: params.IsNegotiable,
+		Category:     params.Category,
+		Subcategory:  params.Subcategory,
 		Seller:       sellerId,
 		Placeholder:  placeholder,
 	}
@@ -240,9 +244,9 @@ func (s *Service) GetBatch(ctx context.Context, ids *[]int64, page int32) ([]mod
 	return items, nil
 }
 
-func (s *Service) GetUploadPresignURL(ctx context.Context, p *storage.PresignParams) (*storage.PresignResult, error) {
+func (s *Service) GetUploadPresignURL(ctx context.Context, contentType string) (*storage.PresignResult, error) {
 	storage := storage.New(s.cfg)
-	res, err := storage.PresignUpload(ctx, p)
+	res, err := storage.PresignUpload(ctx, contentType)
 	if err != nil {
 		return nil, err
 	}
