@@ -68,9 +68,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.POST("/item/:id/like", item.Like)
 	e.POST("/item/:id/unlike", item.Unlike)
 	e.POST("/item/batch", item.GetBatch)
-
-	// presign upload URL
-	e.POST("/item/upload-url", item.GetUploadURL)
+	e.POST("/item/presign", item.GetUploadURL)
 
 	// category
 	e.GET("/category", category.GetAll)

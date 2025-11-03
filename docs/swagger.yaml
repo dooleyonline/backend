@@ -615,7 +615,7 @@ paths:
       summary: Get items in bulk by list of IDs
       tags:
       - item
-  /item/upload-url:
+  /item/presign:
     post:
       consumes:
       - application/json

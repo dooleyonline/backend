@@ -104,21 +104,25 @@ type MutationParams struct {
 	Subcategory  string   `json:"subcategory"`
 }
 
-func (s *Service) Create(ctx context.Context, sellerId string, p *MutationParams) (*model.Item, error) {
-	placeholder, err := generatePlaceholder(s.cfg, p.Images[0])
+func (s *Service) Create(ctx context.Context, sellerId string, params *MutationParams) (*model.Item, error) {
+	if len(params.Images) == 0 {
+		return nil, fmt.Errorf("no image provided")
+	}
+
+	placeholder, err := generatePlaceholder(s.cfg, params.Images[0])
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate placeholder: %w", err)
 	}
 
 	dbparams := itemitem.CreateParams{
-		Name:         p.Name,
-		Description:  p.Description,
-		Images:       p.Images,
-		Price:        p.Price,
-		Condition:    p.Condition,
-		IsNegotiable: p.IsNegotiable,
-		Category:     p.Category,
-		Subcategory:  p.Subcategory,
+		Name:         params.Name,
+		Description:  params.Description,
+		Images:       params.Images,
+		Price:        params.Price,
+		Condition:    params.Condition,
+		IsNegotiable: params.IsNegotiable,
+		Category:     params.Category,
+		Subcategory:  params.Subcategory,
 		Seller:       sellerId,
 		Placeholder:  placeholder,
 	}

@@ -313,7 +313,7 @@ func (h *Handler) GetBatch(c echo.Context) error {
 //	@Produce	json
 //	@Param		type	query		string	true	"Content type of the item to be uploaded"
 //	@Success	200		{object}	storage.PresignResult
-//	@Router		/item/upload-url [post]
+//	@Router		/item/presign [post]
 func (h *Handler) GetUploadURL(c echo.Context) error {
 	var (
 		req = c.Request()

@@ -560,7 +560,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/item/upload-url": {
+        "/item/presign": {
             "post": {
                 "consumes": [
                     "application/json"

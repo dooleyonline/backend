@@ -29,8 +29,9 @@ func New(cfg *config.Config) *Storage {
 }
 
 type PresignResult struct {
-	URL     string `json:"url"`
-	ImageID string `json:"image_id"`
+	URL     string      `json:"url"`
+	Headers http.Header `json:"headers"`
+	ImageID string      `json:"image_id"`
 }
 
 func (s *Storage) PresignUpload(ctx context.Context, contentType string) (*PresignResult, error) {
@@ -46,7 +47,7 @@ func (s *Storage) PresignUpload(ctx context.Context, contentType string) (*Presi
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 	req.Header.Set("Content-Type", contentType)
-	signedURI, _, err := s.signer.PresignHTTP(ctx,
+	signedURI, signedHeaders, err := s.signer.PresignHTTP(ctx,
 		s.credentials(),
 		req,
 		hashPayload(""),
@@ -60,6 +61,7 @@ func (s *Storage) PresignUpload(ctx context.Context, contentType string) (*Presi
 
 	res := &PresignResult{
 		URL:     signedURI,
+		Headers: signedHeaders,
 		ImageID: key,
 	}
 	return res, nil
