@@ -92,6 +92,13 @@ func (h *Handler) Get(c echo.Context) error {
 	return c.JSON(http.StatusOK, *res)
 }
 
+// GetLikedAll godoc
+//
+//	@Summary	Get the entire user.liked table
+//	@Tags		user
+//	@Produce	json
+//	@Success	200	{array}	model.Liked
+//	@Router		/user/liked [get]
 func (h *Handler) GetLikedAll(c echo.Context) error {
 	var (
 		req = c.Request()

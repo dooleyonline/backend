@@ -321,35 +321,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Add a user to a chat room",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "User ID",
-                        "name": "userID",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
             }
         },
         "/chat/rooms/{roomID}/participants/{userID}": {
@@ -437,6 +408,37 @@ const docTemplate = `{
                 "responses": {
                     "201": {
                         "description": "Created"
+                    }
+                }
+            }
+        },
+        "/chat/{roomID}/participants/{userID}": {
+            "post": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Add a user to a chat room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -852,6 +854,28 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/liked": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get the entire user.liked table",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Liked"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/user/{id}": {
             "get": {
                 "produces": [
@@ -1000,7 +1024,9 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "fts": {},
+                "fts": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1039,6 +1065,20 @@ const docTemplate = `{
                 },
                 "views": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.Liked": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "item_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
