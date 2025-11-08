@@ -49,7 +49,7 @@ func (h *Handler) Login(c echo.Context) error {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   res.CookieConfig.Secure,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteNoneMode, // TODO: change to LAX in production
 	}
 	c.SetCookie(cookie)
 
@@ -77,7 +77,7 @@ func (h *Handler) Logout(c echo.Context) error {
 		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
 		Secure:   res.Secure,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteNoneMode, // TODO: change to LAX in production
 	}
 	c.SetCookie(cookie)
 
