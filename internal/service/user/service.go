@@ -27,7 +27,6 @@ func (s *Service) GetMany(ctx context.Context) ([]model.User, error) {
 	var result []model.User
 	for _, user := range users {
 		user.Password = ""
-		user.LikedItems = []int64{}
 		result = append(result, user)
 	}
 	return result, nil
@@ -69,7 +68,6 @@ func (s *Service) Get(ctx context.Context, id string) (*model.User, error) {
 	}
 
 	user.Password = ""
-	user.LikedItems = []int64{}
 
 	return &user, nil
 }

@@ -9,32 +9,12 @@ import (
 	"context"
 )
 
-const addLikedItem = `-- name: AddLikedItem :exec
-UPDATE
-  "user"."user"
-SET
-  liked_items = array_append(liked_items, $1::bigint)
-WHERE
-  id = $2
-  AND NOT liked_items @> ARRAY[$1::bigint]
-`
-
-type AddLikedItemParams struct {
-	ItemID int64  `json:"item_id"`
-	ID     string `json:"id"`
-}
-
-func (q *Queries) AddLikedItem(ctx context.Context, arg AddLikedItemParams) error {
-	_, err := q.db.Exec(ctx, addLikedItem, arg.ItemID, arg.ID)
-	return err
-}
-
 const create = `-- name: Create :one
 INSERT INTO
   "user"."user" (email, password, first_name, last_name)
 VALUES
   ($1, $2, $3, $4)
-RETURNING email, password, liked_items, first_name, last_name, id
+RETURNING email, password, first_name, last_name, id
 `
 
 type CreateParams struct {
@@ -55,7 +35,6 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (UserUser, error
 	err := row.Scan(
 		&i.Email,
 		&i.Password,
-		&i.LikedItems,
 		&i.FirstName,
 		&i.LastName,
 		&i.ID,
@@ -63,29 +42,9 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (UserUser, error
 	return i, err
 }
 
-const deleteLikedItem = `-- name: DeleteLikedItem :exec
-UPDATE
-  "user"."user"
-SET
-  liked_items = array_remove(liked_items, $1::bigint)
-WHERE
-  id = $2
-  AND (liked_items @> ARRAY[$1::bigint])
-`
-
-type DeleteLikedItemParams struct {
-	ItemID int64  `json:"item_id"`
-	ID     string `json:"id"`
-}
-
-func (q *Queries) DeleteLikedItem(ctx context.Context, arg DeleteLikedItemParams) error {
-	_, err := q.db.Exec(ctx, deleteLikedItem, arg.ItemID, arg.ID)
-	return err
-}
-
 const get = `-- name: Get :one
 SELECT
-  email, password, liked_items, first_name, last_name, id
+  email, password, first_name, last_name, id
 FROM
   "user"."user"
 WHERE
@@ -98,7 +57,6 @@ func (q *Queries) Get(ctx context.Context, email string) (UserUser, error) {
 	err := row.Scan(
 		&i.Email,
 		&i.Password,
-		&i.LikedItems,
 		&i.FirstName,
 		&i.LastName,
 		&i.ID,
@@ -108,7 +66,7 @@ func (q *Queries) Get(ctx context.Context, email string) (UserUser, error) {
 
 const getByID = `-- name: GetByID :one
 SELECT
-  email, password, liked_items, first_name, last_name, id
+  email, password, first_name, last_name, id
 FROM
   "user"."user"
 WHERE
@@ -121,7 +79,6 @@ func (q *Queries) GetByID(ctx context.Context, id string) (UserUser, error) {
 	err := row.Scan(
 		&i.Email,
 		&i.Password,
-		&i.LikedItems,
 		&i.FirstName,
 		&i.LastName,
 		&i.ID,
@@ -129,25 +86,9 @@ func (q *Queries) GetByID(ctx context.Context, id string) (UserUser, error) {
 	return i, err
 }
 
-const getLikedItems = `-- name: GetLikedItems :one
-SELECT
-  liked_items
-FROM 
-  "user"."user"
-WHERE
-  id = $1
-`
-
-func (q *Queries) GetLikedItems(ctx context.Context, id string) ([]int64, error) {
-	row := q.db.QueryRow(ctx, getLikedItems, id)
-	var liked_items []int64
-	err := row.Scan(&liked_items)
-	return liked_items, err
-}
-
 const getMany = `-- name: GetMany :many
 SELECT
-  email, password, liked_items, first_name, last_name, id
+  email, password, first_name, last_name, id
 FROM
   "user"."user"
 `
@@ -164,7 +105,6 @@ func (q *Queries) GetMany(ctx context.Context) ([]UserUser, error) {
 		if err := rows.Scan(
 			&i.Email,
 			&i.Password,
-			&i.LikedItems,
 			&i.FirstName,
 			&i.LastName,
 			&i.ID,
