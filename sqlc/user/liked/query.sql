@@ -4,16 +4,16 @@ SELECT
 FROM
   "user"."liked";
 
--- name: Create :one
+-- name: Like :exec
 INSERT INTO
-"user"."liked" (user_id, item_id, created_at)
+"user"."liked" (user_id, item_id)
 VALUES
-($1, $2, $3)
+($1, $2)
 RETURNING *;
 
--- name: Delete :one
+-- name: Unlike :exec
 DELETE FROM
 "user"."liked"
 WHERE
-user_id = $1
+user_id = $1 AND item_id = $2
 RETURNING *;

@@ -4,16 +4,9 @@ SELECT
 FROM
   "user"."viewed";
 
--- name: Create :one
+-- name: Create :exec
 INSERT INTO
-"user"."viewed" (user_id, item_id, created_at)
+"user"."viewed" (user_id, item_id)
 VALUES
-($1, $2, $3)
-RETURNING *;
-
--- name: Delete :one
-DELETE FROM
-"user"."viewed"
-WHERE
-user_id = $1
+($1, $2)
 RETURNING *;

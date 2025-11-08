@@ -92,20 +92,41 @@ func (h *Handler) Get(c echo.Context) error {
 	return c.JSON(http.StatusOK, *res)
 }
 
-// GetLikedAll godoc
+// GetLikes godoc
 //
-//	@Summary	Get the entire user.liked table
+//	@Summary	Get the entire liked table.
 //	@Tags		user
 //	@Produce	json
 //	@Success	200	{array}	model.Liked
 //	@Router		/user/liked [get]
-func (h *Handler) GetLikedAll(c echo.Context) error {
+func (h *Handler) GetLikes(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
 	)
 
-	res, err := h.svc.GetLikedAll(ctx)
+	res, err := h.svc.GetLikes(ctx)
+	if err != nil {
+		return echo.ErrNotFound.WithInternal(err)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+// GetViews godoc
+//
+//	@Summary	Get the entire viewed table.
+//	@Tags		user
+//	@Produce	json
+//	@Success	200	{object}	model.Viewed
+//	@Router		/user/viewed [get]
+func (h *Handler) GetViews(c echo.Context) error {
+	var (
+		req = c.Request()
+		ctx = req.Context()
+	)
+
+	res, err := h.svc.GetViews(ctx)
 	if err != nil {
 		return echo.ErrNotFound.WithInternal(err)
 	}

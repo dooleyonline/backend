@@ -192,9 +192,9 @@ func (h *Handler) Sell(c echo.Context) error {
 
 // View godoc
 //
-//	@Summary	Increment item views by ID
+//	@Summary	Increment item views by itemID and add to user.viewed table if the view's authenticated
 //	@Tags		item
-//	@Param		id	path	int	true	"Item ID"
+//	@Param		item	body	itemsvc.ViewParams	true	"ItemID, UserID"
 //	@Success	204
 //	@Router		/item/{id}/view [post]
 func (h *Handler) View(c echo.Context) error {
@@ -203,12 +203,11 @@ func (h *Handler) View(c echo.Context) error {
 		ctx = req.Context()
 	)
 
-	var itemId int64
-	if err := echo.PathParamsBinder(c).Int64("id", &itemId).BindError(); err != nil {
+	var params itemsvc.ViewParams
+	if err := c.Bind(&params); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
-
-	if err := h.svc.IncrementView(ctx, itemId); err != nil {
+	if err := h.svc.View(ctx, &params); err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
@@ -226,7 +225,8 @@ func (h *Handler) Like(c echo.Context) error {
 	var (
 		req    = c.Request()
 		ctx    = req.Context()
-		userId = c.(shared.Context).UserID
+		userId = "70458b3b-839b-431f-92a0-b073e16a9f09"
+		// c.(shared.Context).UserID
 	)
 
 	var itemId int64
@@ -252,7 +252,8 @@ func (h *Handler) Unlike(c echo.Context) error {
 	var (
 		req    = c.Request()
 		ctx    = req.Context()
-		userId = c.(shared.Context).UserID
+		userId = "70458b3b-839b-431f-92a0-b073e16a9f09"
+		// c.(shared.Context).UserID
 	)
 
 	var itemId int64

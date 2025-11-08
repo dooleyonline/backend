@@ -7,44 +7,7 @@ package userliked
 
 import (
 	"context"
-	"time"
 )
-
-const create = `-- name: Create :one
-INSERT INTO
-"user"."liked" (user_id, item_id, created_at)
-VALUES
-($1, $2, $3)
-RETURNING user_id, item_id, created_at
-`
-
-type CreateParams struct {
-	UserID    string    `json:"user_id"`
-	ItemID    int64     `json:"item_id"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-func (q *Queries) Create(ctx context.Context, arg CreateParams) (UserLiked, error) {
-	row := q.db.QueryRow(ctx, create, arg.UserID, arg.ItemID, arg.CreatedAt)
-	var i UserLiked
-	err := row.Scan(&i.UserID, &i.ItemID, &i.CreatedAt)
-	return i, err
-}
-
-const delete = `-- name: Delete :one
-DELETE FROM
-"user"."liked"
-WHERE
-user_id = $1
-RETURNING user_id, item_id, created_at
-`
-
-func (q *Queries) Delete(ctx context.Context, userID string) (UserLiked, error) {
-	row := q.db.QueryRow(ctx, delete, userID)
-	var i UserLiked
-	err := row.Scan(&i.UserID, &i.ItemID, &i.CreatedAt)
-	return i, err
-}
 
 const getAll = `-- name: GetAll :many
 SELECT
@@ -71,4 +34,40 @@ func (q *Queries) GetAll(ctx context.Context) ([]UserLiked, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const like = `-- name: Like :exec
+INSERT INTO
+"user"."liked" (user_id, item_id)
+VALUES
+($1, $2)
+RETURNING user_id, item_id, created_at
+`
+
+type LikeParams struct {
+	UserID string `json:"user_id"`
+	ItemID int64  `json:"item_id"`
+}
+
+func (q *Queries) Like(ctx context.Context, arg LikeParams) error {
+	_, err := q.db.Exec(ctx, like, arg.UserID, arg.ItemID)
+	return err
+}
+
+const unlike = `-- name: Unlike :exec
+DELETE FROM
+"user"."liked"
+WHERE
+user_id = $1 AND item_id = $2
+RETURNING user_id, item_id, created_at
+`
+
+type UnlikeParams struct {
+	UserID string `json:"user_id"`
+	ItemID int64  `json:"item_id"`
+}
+
+func (q *Queries) Unlike(ctx context.Context, arg UnlikeParams) error {
+	_, err := q.db.Exec(ctx, unlike, arg.UserID, arg.ItemID)
+	return err
 }

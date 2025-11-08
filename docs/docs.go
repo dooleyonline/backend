@@ -270,7 +270,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/rooms/{roomID}": {
+        "/chat/{roomID}": {
             "delete": {
                 "tags": [
                     "chat"
@@ -281,66 +281,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Room ID",
                         "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/chat/rooms/{roomID}/participants": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Get participants in a chat room",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.ChatParticipant"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/chat/rooms/{roomID}/participants/{userID}": {
-            "delete": {
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Remove a user from a chat room",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "userID",
                         "in": "path",
                         "required": true
                     }
@@ -381,12 +321,17 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
+            }
+        },
+        "/chat/{roomID}/participants": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "chat"
                 ],
-                "summary": "Post a new message",
+                "summary": "Get participants in a chat room",
                 "parameters": [
                     {
                         "type": "string",
@@ -394,20 +339,17 @@ const docTemplate = `{
                         "name": "roomID",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Message body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.ChatParticipant"
+                            }
+                        }
                     }
                 }
             }
@@ -434,6 +376,33 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Remove a user from a chat room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -591,7 +560,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/item/upload-url": {
+        "/item/presign": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -605,13 +574,11 @@ const docTemplate = `{
                 "summary": "Generate presigned URL for item upload",
                 "parameters": [
                     {
-                        "description": "Presign params",
-                        "name": "item",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/storage.PresignParams"
-                        }
+                        "type": "string",
+                        "description": "Content type of the item to be uploaded",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -781,14 +748,16 @@ const docTemplate = `{
                 "tags": [
                     "item"
                 ],
-                "summary": "Increment item views by ID",
+                "summary": "Increment item views by itemID and add to user.viewed table if the view's authenticated",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Item ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "ItemID, UserID",
+                        "name": "item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/itemsvc.ViewParams"
+                        }
                     }
                 ],
                 "responses": {
@@ -862,7 +831,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Get the entire user.liked table",
+                "summary": "Get the entire liked table.",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -871,6 +840,25 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/model.Liked"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/viewed": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get the entire viewed table.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Viewed"
                         }
                     }
                 }
@@ -954,6 +942,18 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "subcategory": {
+                    "type": "string"
+                }
+            }
+        },
+        "itemsvc.ViewParams": {
+            "type": "object",
+            "properties": {
+                "itemID": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "userID": {
                     "type": "string"
                 }
             }
@@ -1108,6 +1108,20 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Viewed": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "item_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "pgtype.Int8": {
             "type": "object",
             "properties": {
@@ -1120,28 +1134,14 @@ const docTemplate = `{
                 }
             }
         },
-        "storage.PresignParams": {
-            "type": "object",
-            "properties": {
-                "bucket": {
-                    "type": "string"
-                },
-                "contentType": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "method": {
-                    "type": "string"
-                }
-            }
-        },
         "storage.PresignResult": {
             "type": "object",
             "properties": {
-                "header": {
+                "headers": {
                     "$ref": "#/definitions/http.Header"
+                },
+                "image_id": {
+                    "type": "string"
                 },
                 "url": {
                     "type": "string"

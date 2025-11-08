@@ -8,7 +8,8 @@ import (
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	itemitem "github.com/dooleyonline/backend/internal/db/item/item"
-	useruser "github.com/dooleyonline/backend/internal/db/user/user"
+	userliked "github.com/dooleyonline/backend/internal/db/user/liked"
+	userviewed "github.com/dooleyonline/backend/internal/db/user/viewed"
 	"github.com/dooleyonline/backend/internal/model"
 	"github.com/dooleyonline/backend/internal/storage"
 )
@@ -183,12 +184,12 @@ func (s *Service) Like(ctx context.Context, itemId int64, userId string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	userTx := s.db.User.User.WithTx(tx)
+	likedTx := s.db.User.Liked.WithTx(tx)
 	itemTx := s.db.Item.Item.WithTx(tx)
 
-	if err := userTx.AddLikedItem(ctx, useruser.AddLikedItemParams{
+	if err := likedTx.Like(ctx, userliked.LikeParams{
 		ItemID: itemId,
-		ID:     userId,
+		UserID: userId,
 	}); err != nil {
 		return fmt.Errorf("failed to like item: %w", err)
 	}
@@ -211,12 +212,12 @@ func (s *Service) Unlike(ctx context.Context, itemId int64, userId string) error
 	}
 	defer tx.Rollback(ctx)
 
-	userTx := s.db.User.User.WithTx(tx)
+	likedTx := s.db.User.Liked.WithTx(tx)
 	itemTx := s.db.Item.Item.WithTx(tx)
 
-	if err := userTx.DeleteLikedItem(ctx, useruser.DeleteLikedItemParams{
+	if err := likedTx.Unlike(ctx, userliked.UnlikeParams{
 		ItemID: itemId,
-		ID:     userId,
+		UserID: userId,
 	}); err != nil {
 		return fmt.Errorf("failed to unlike item: %w", err)
 	}
@@ -251,4 +252,42 @@ func (s *Service) GetUploadPresignURL(ctx context.Context, contentType string) (
 		return nil, err
 	}
 	return res, nil
+}
+
+type ViewParams struct {
+	UserID string
+	ItemID int64
+}
+
+func (s *Service) View(ctx context.Context, p *ViewParams) error {
+	if p.UserID != "" { // if viewer is an user
+		tx, err := s.db.Pool.Begin(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to begin transaction: %w", err)
+		}
+		defer tx.Rollback(ctx)
+
+		viewedTx := s.db.User.Viewed.WithTx(tx)
+		itemTx := s.db.Item.Item.WithTx(tx)
+
+		if err := viewedTx.Create(ctx, userviewed.CreateParams{
+			ItemID: p.ItemID,
+			UserID: p.UserID,
+		}); err != nil {
+			return fmt.Errorf("failed to view item: %w", err)
+		}
+
+		if err := itemTx.IncrementView(ctx, p.ItemID); err != nil {
+			return fmt.Errorf("failed to decrement item like: %w", err)
+		}
+
+		if err := tx.Commit(ctx); err != nil {
+			return fmt.Errorf("failed to commit transaction: %w", err)
+		}
+	} else { // if user isn't an user
+		if err := s.db.Item.Item.IncrementView(ctx, p.ItemID); err != nil {
+			return fmt.Errorf("failed to decrement item like: %w", err)
+		}
+	}
+	return nil
 }
