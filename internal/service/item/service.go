@@ -278,7 +278,7 @@ func (s *Service) View(ctx context.Context, p *ViewParams) error {
 		}
 
 		if err := itemTx.IncrementView(ctx, p.ItemID); err != nil {
-			return fmt.Errorf("failed to decrement item like: %w", err)
+			return fmt.Errorf("failed to increment item like: %w", err)
 		}
 
 		if err := tx.Commit(ctx); err != nil {
@@ -286,7 +286,7 @@ func (s *Service) View(ctx context.Context, p *ViewParams) error {
 		}
 	} else { // if user isn't an user
 		if err := s.db.Item.Item.IncrementView(ctx, p.ItemID); err != nil {
-			return fmt.Errorf("failed to decrement item like: %w", err)
+			return fmt.Errorf("failed to increment item like: %w", err)
 		}
 	}
 	return nil

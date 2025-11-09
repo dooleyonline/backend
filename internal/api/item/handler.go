@@ -252,8 +252,7 @@ func (h *Handler) Unlike(c echo.Context) error {
 	var (
 		req    = c.Request()
 		ctx    = req.Context()
-		userId = "70458b3b-839b-431f-92a0-b073e16a9f09"
-		// c.(shared.Context).UserID
+		userId = c.(shared.Context).UserID
 	)
 
 	var itemId int64
