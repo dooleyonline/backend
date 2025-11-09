@@ -34,10 +34,15 @@ type PresignResult struct {
 	ImageID string      `json:"image_id"`
 }
 
-func (s *Storage) PresignUpload(ctx context.Context, contentType string) (*PresignResult, error) {
+type PresignParams struct {
+	ContentType string
+	Bucket      string
+}
+
+func (s *Storage) PresignUpload(ctx context.Context, params PresignParams) (*PresignResult, error) {
 	key := s.GenerateImageID()
 
-	url, err := s.buildURL(key)
+	url, err := s.buildURL(key, params.Bucket)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build url: %w", err)
 	}
@@ -46,7 +51,7 @@ func (s *Storage) PresignUpload(ctx context.Context, contentType string) (*Presi
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("Content-Type", params.ContentType)
 	signedURI, signedHeaders, err := s.signer.PresignHTTP(ctx,
 		s.credentials(),
 		req,
@@ -78,8 +83,8 @@ func (s *Storage) credentials() aws.Credentials {
 	}
 }
 
-func (s *Storage) buildURL(key string) (string, error) {
-	return url.JoinPath(s.cfg.StorageS3Url, s.cfg.StorageBucket, key)
+func (s *Storage) buildURL(key string, bucket string) (string, error) {
+	return url.JoinPath(s.cfg.StorageS3Url, bucket, key)
 }
 
 func hashPayload(payload string) string {

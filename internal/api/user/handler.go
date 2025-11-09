@@ -3,6 +3,7 @@ package user
 import (
 	"net/http"
 
+	"github.com/dooleyonline/backend/internal/api/shared"
 	usersvc "github.com/dooleyonline/backend/internal/service/user"
 	"github.com/labstack/echo/v4"
 )
@@ -90,4 +91,34 @@ func (h *Handler) Get(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, *res)
+}
+
+// UpdateAvatar godoc
+//
+//	@Summary	Update user avatar
+//	@Tags		user
+//	@Accept		json
+//	@Produce	json
+//	@Param		avatar	body	string	true	"Avatar ID (UUID)"
+//	@Success	200		"OK"
+//	@Router		/user/avatar [put]
+func (h *Handler) UpdateAvatar(c echo.Context) error {
+	var (
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
+	)
+
+	// empty avatarID sets avatar to NULL
+	var avatarID string
+	if err := c.Bind(&avatarID); err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	err := h.svc.UpdateAvatar(ctx, userID, avatarID)
+	if err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+
+	return c.NoContent(http.StatusOK)
 }

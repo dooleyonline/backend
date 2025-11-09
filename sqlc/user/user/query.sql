@@ -52,3 +52,11 @@ FROM
   "user"."user"
 WHERE
   id = $1;
+
+-- name: UpdateAvatar :exec 
+UPDATE
+  "user"."user"
+SET
+  avatar = $2
+WHERE
+  id = $1; 

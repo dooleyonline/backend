@@ -73,3 +73,14 @@ func (s *Service) Get(ctx context.Context, id string) (*model.User, error) {
 
 	return &user, nil
 }
+
+func (s *Service) UpdateAvatar(ctx context.Context, userID string, avatarID string) error {
+	err := s.db.User.User.UpdateAvatar(ctx, useruser.UpdateAvatarParams{
+		ID:     userID,
+		Avatar: avatarID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update user avatar: %w", err)
+	}
+	return nil
+}

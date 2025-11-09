@@ -18,10 +18,14 @@ func TestPresignUploadText(t *testing.T) {
 	}
 
 	contentType := "text/plain"
+	bucket := "item"
 
 	storage := New(cfg)
 
-	presign, err := storage.PresignUpload(t.Context(), contentType)
+	presign, err := storage.PresignUpload(t.Context(), PresignParams{
+		ContentType: contentType,
+		Bucket:      bucket,
+	})
 	if err != nil {
 		t.Fatal("failed to presign:", err)
 	}
@@ -55,10 +59,14 @@ func TestPresignUploadImage(t *testing.T) {
 	defer payload.Close()
 
 	contentType := "image/png"
+	bucket := "item"
 
 
 	storage := New(cfg)
-	presign, err := storage.PresignUpload(t.Context(), contentType)
+	presign, err := storage.PresignUpload(t.Context(), PresignParams{
+		ContentType: contentType,
+		Bucket:      bucket,
+	})
 	if err != nil {
 		t.Fatal("failed to presign:", err)
 	}
