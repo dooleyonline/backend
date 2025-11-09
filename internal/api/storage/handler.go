@@ -40,7 +40,7 @@ func (h *Handler) GetUploadURL(c echo.Context) error {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	if params.ContentType == "" && params.Bucket == "" {
+	if params.ContentType == "" || params.Bucket == "" {
 		return echo.ErrBadRequest
 	}
 
