@@ -53,7 +53,7 @@ FROM
 WHERE
   id = $1;
 
--- name: UpdateAvatar :exec 
+-- name: UpdateAvatar :exec
 UPDATE
   "user"."user"
 SET
