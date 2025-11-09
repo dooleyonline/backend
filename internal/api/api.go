@@ -113,6 +113,7 @@ var protectedRoutes = routesConfig{
 	"/item/:id/sell":   {http.MethodPost},
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
+	"/user/avatar":     {http.MethodPut},
 	"/auth/logout":     {http.MethodPost},
 	"/chat/*":          {http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPatch},
 }
