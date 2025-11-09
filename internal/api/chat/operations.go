@@ -48,42 +48,6 @@ func (h *Handler) GetMessages(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-// CreateMessage godoc
-//
-//	@Summary	Post a new message
-//	@Tags		chat
-//	@Param		roomID	path	string	true	"Room ID"
-//	@Param		body	body	string	true	"Message body"
-//	@Success	201
-//	@Router		/chat/{roomID}/messages [post]
-func (h *Handler) CreateMessage(c echo.Context) error {
-	var (
-		req    = c.Request()
-		ctx    = req.Context()
-		userID = c.(shared.Context).UserID
-	)
-
-	params := &chatsvc.CreateMessageParams{}
-
-	if err := echo.PathParamsBinder(c).
-		String("roomID", &params.RoomID).
-		BindError(); err != nil {
-		return echo.ErrBadRequest.WithInternal(err)
-	}
-
-	params.UserID = userID
-
-	if err := c.Bind(&params.Message); err != nil {
-		return echo.ErrBadRequest.WithInternal(err)
-	}
-
-	if err := h.svc.CreateMessage(ctx, params); err != nil {
-		return echo.ErrInternalServerError.WithInternal(err)
-	}
-
-	return c.NoContent(http.StatusCreated)
-}
-
 // EditMessage godoc
 //
 //	@Summary	Edit an existing message
@@ -180,7 +144,7 @@ func (h *Handler) CreateRoom(c echo.Context) error {
 //	@Tags		chat
 //	@Param		roomID	path	string	true	"Room ID"
 //	@Success	204
-//	@Router		/chat/rooms/{roomID} [delete]
+//	@Router		/chat/{roomID} [delete]
 func (h *Handler) DeleteRoom(c echo.Context) error {
 	var (
 		req = c.Request()
@@ -246,7 +210,7 @@ func (h *Handler) AddParticipant(c echo.Context) error {
 //	@Param		roomID	path	string	true	"Room ID"
 //	@Param		userID	path	string	true	"User ID"
 //	@Success	204
-//	@Router		/chat/rooms/{roomID}/participants/{userID} [delete]
+//	@Router		/chat/{roomID}/participants/{userID} [delete]
 func (h *Handler) RemoveParticipant(c echo.Context) error {
 	var (
 		req = c.Request()
@@ -309,7 +273,7 @@ func (h *Handler) GetRooms(c echo.Context) error {
 //	@Produce	json
 //	@Param		roomID	path	string	true	"Room ID"
 //	@Success	200		{array}	model.ChatParticipant
-//	@Router		/chat/rooms/{roomID}/participants [get]
+//	@Router		/chat/{roomID}/participants [get]
 func (h *Handler) GetParticipants(c echo.Context) error {
 	var (
 		req = c.Request()

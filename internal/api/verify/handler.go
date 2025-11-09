@@ -48,16 +48,15 @@ func (h *Handler) SendVerification(c echo.Context) error {
 // VerifyUser godoc
 //
 //	@Summary		Verify user by token
-//	@Description	Consumes the verification token (JSON body). On success, marks the user verified.
+//	@Description	Consumes the verification token from the path and marks the user verified.
 //	@Tags			verify
-//	@Accept			json
 //	@Produce		json
-//	@Param			body	body	VerifyRequest	true	"Verification token payload"
+//	@Param			id	path		string				true	"Verification token (UUID)"
 //	@Success		200	{object}	map[string]string	"user verified"
 //	@Failure		400	{object}	map[string]string	"invalid token format"
 //	@Failure		401	{object}	map[string]string	"invalid or expired token"
 //	@Failure		500	{object}	map[string]string	"internal error"
-//	@Router			/auth/verification [post]
+//	@Router			/auth/verification/{id} [post]
 func (h *Handler) VerifyUser(c echo.Context) error {
 	var (
 		req = c.Request()

@@ -15,6 +15,7 @@ import (
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	"github.com/lmittmann/tint"
+
 	"github.com/mattn/go-isatty"
 )
 

@@ -164,8 +164,8 @@ const docTemplate = `{
             }
         },
         "/auth/verification/{id}": {
-            "get": {
-                "description": "Consumes the verification token (path param). On success, marks the user verified and redirects to the frontend success page.",
+            "post": {
+                "description": "Consumes the verification token from the path and marks the user verified.",
                 "produces": [
                     "application/json"
                 ],
@@ -183,8 +183,14 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "303": {
-                        "description": "Redirect to frontend success page"
+                    "200": {
+                        "description": "user verified",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     },
                     "400": {
                         "description": "invalid token format",
@@ -372,7 +378,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/rooms/{roomID}": {
+        "/chat/{roomID}": {
             "delete": {
                 "tags": [
                     "chat"
@@ -383,66 +389,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Room ID",
                         "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/chat/rooms/{roomID}/participants": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Get participants in a chat room",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.ChatParticipant"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/chat/rooms/{roomID}/participants/{userID}": {
-            "delete": {
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Remove a user from a chat room",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "userID",
                         "in": "path",
                         "required": true
                     }
@@ -483,12 +429,17 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
+            }
+        },
+        "/chat/{roomID}/participants": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "chat"
                 ],
-                "summary": "Post a new message",
+                "summary": "Get participants in a chat room",
                 "parameters": [
                     {
                         "type": "string",
@@ -496,20 +447,17 @@ const docTemplate = `{
                         "name": "roomID",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Message body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.ChatParticipant"
+                            }
+                        }
                     }
                 }
             }
@@ -536,6 +484,33 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Remove a user from a chat room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -705,7 +680,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/item/upload-url": {
+        "/item/presign": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -719,13 +694,11 @@ const docTemplate = `{
                 "summary": "Generate presigned URL for item upload",
                 "parameters": [
                     {
-                        "description": "Presign params",
-                        "name": "item",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/storage.PresignParams"
-                        }
+                        "type": "string",
+                        "description": "Content type of the item to be uploaded",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1201,28 +1174,14 @@ const docTemplate = `{
                 }
             }
         },
-        "storage.PresignParams": {
-            "type": "object",
-            "properties": {
-                "bucket": {
-                    "type": "string"
-                },
-                "contentType": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "method": {
-                    "type": "string"
-                }
-            }
-        },
         "storage.PresignResult": {
             "type": "object",
             "properties": {
-                "header": {
+                "headers": {
                     "$ref": "#/definitions/http.Header"
+                },
+                "image_id": {
+                    "type": "string"
                 },
                 "url": {
                     "type": "string"

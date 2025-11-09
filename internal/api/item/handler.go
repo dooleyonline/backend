@@ -5,7 +5,6 @@ import (
 
 	"github.com/dooleyonline/backend/internal/api/shared"
 	itemsvc "github.com/dooleyonline/backend/internal/service/item"
-	"github.com/dooleyonline/backend/internal/storage"
 	"github.com/labstack/echo/v4"
 )
 
@@ -304,35 +303,31 @@ func (h *Handler) GetBatch(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-// GetUploadPresignURL godoc
+// GetUploadURL godoc
 //
 //	@Summary	Generate presigned URL for item upload
 //	@Tags		item
 //	@Accept		json
 //	@Produce	json
-//	@Param		item	body		storage.PresignParams	true	"Presign params"
+//	@Param		type	query		string	true	"Content type of the item to be uploaded"
 //	@Success	200		{object}	storage.PresignResult
-//	@Router		/item/upload-url [post]
+//	@Router		/item/presign [post]
 func (h *Handler) GetUploadURL(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
 	)
 
-	var input storage.PresignParams
-	if err := c.Bind(&input); err != nil {
+	var contentType string
+	if err := echo.QueryParamsBinder(c).String("type", &contentType).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	if input.Method != http.MethodPut {
+	if contentType == "" {
 		return echo.ErrBadRequest
 	}
 
-	if input.Bucket == "" || input.Key == "" || input.ContentType == "" {
-		return echo.ErrBadRequest
-	}
-
-	res, err := h.svc.GetUploadPresignURL(ctx, &input)
+	res, err := h.svc.GetUploadPresignURL(ctx, contentType)
 	if err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}

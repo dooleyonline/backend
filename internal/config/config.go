@@ -15,6 +15,7 @@ type Config struct {
 
 	DatabaseUrl string
 
+	StorageBucket       string
 	StorageUrl          string
 	StorageS3Url        string
 	StorageRegion       string
@@ -34,6 +35,7 @@ const (
 
 	envDatabaseUrl = "DATABASE_URL"
 
+	envStorageBucket       = "STORAGE_BUCKET"
 	envStorageUrl          = "STORAGE_URL"
 	envStorageS3Url        = "STORAGE_S3_URL"
 	envStorageRegion       = "STORAGE_REGION"
@@ -59,6 +61,11 @@ func New() (*Config, error) {
 	databaseUrl, ok := os.LookupEnv(envDatabaseUrl)
 	if !ok {
 		return nil, fmt.Errorf("environment variable %s is required", envDatabaseUrl)
+	}
+
+	storageBucket, ok := os.LookupEnv(envStorageBucket)
+	if !ok {
+		return nil, fmt.Errorf("environment variable %s is required", envStorageBucket)
 	}
 
 	storageUrl, ok := os.LookupEnv(envStorageUrl)
@@ -105,6 +112,7 @@ func New() (*Config, error) {
 
 		DatabaseUrl: databaseUrl,
 
+		StorageBucket:       storageBucket,
 		StorageS3Url:        storageS3Url,
 		StorageRegion:       storageRegion,
 		StorageAccessId:     storageAccessId,
