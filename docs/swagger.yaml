@@ -153,6 +153,11 @@ definitions:
       password:
         type: string
     type: object
+  usersvc.UpdateAvatarParams:
+    properties:
+      avatar_id:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -714,7 +719,7 @@ paths:
         name: avatar
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/usersvc.UpdateAvatarParams'
       produces:
       - application/json
       responses:

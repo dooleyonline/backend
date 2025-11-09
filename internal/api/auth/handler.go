@@ -49,7 +49,7 @@ func (h *Handler) Login(c echo.Context) error {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   res.CookieConfig.Secure,
-		SameSite: http.SameSiteNoneMode, // TODO: change to LAX in production
+		SameSite: http.SameSiteLaxMode, // TODO: change to LAX in production
 	}
 	c.SetCookie(cookie)
 

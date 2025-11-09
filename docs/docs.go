@@ -847,7 +847,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/usersvc.UpdateAvatarParams"
                         }
                     }
                 ],
@@ -1118,6 +1118,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "usersvc.UpdateAvatarParams": {
+            "type": "object",
+            "properties": {
+                "avatar_id": {
                     "type": "string"
                 }
             }

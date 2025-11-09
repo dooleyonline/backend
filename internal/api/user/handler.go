@@ -99,7 +99,7 @@ func (h *Handler) Get(c echo.Context) error {
 //	@Tags		user
 //	@Accept		json
 //	@Produce	json
-//	@Param		avatar	body	string	true	"Avatar ID (UUID)"
+//	@Param		avatar	body	usersvc.UpdateAvatarParams	true	"Avatar ID (UUID)"
 //	@Success	200		"OK"
 //	@Router		/user/avatar [put]
 func (h *Handler) UpdateAvatar(c echo.Context) error {
@@ -109,13 +109,13 @@ func (h *Handler) UpdateAvatar(c echo.Context) error {
 		userID = c.(shared.Context).UserID
 	)
 
-	// empty avatarID sets avatar to NULL
-	var avatarID string
-	if err := c.Bind(&avatarID); err != nil {
+	var params usersvc.UpdateAvatarParams
+	if err := c.Bind(&params); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
+	params.UserID = userID
 
-	err := h.svc.UpdateAvatar(ctx, userID, avatarID)
+	err := h.svc.UpdateAvatar(ctx, params)
 	if err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}

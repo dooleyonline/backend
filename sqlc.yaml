@@ -100,8 +100,8 @@ overrides:
       - db_type: "uuid"
         go_type: "string"
       - db_type: "uuid"
-        go_type: "string"
         nullable: true
+        go_type: "string"
       - column: item.id
         go_struct_tag: 'param:"id"'
       - column: "item.item.fts"

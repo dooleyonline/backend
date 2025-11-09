@@ -841,7 +841,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/usersvc.UpdateAvatarParams"
                         }
                     }
                 ],
@@ -1112,6 +1112,14 @@
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "usersvc.UpdateAvatarParams": {
+            "type": "object",
+            "properties": {
+                "avatar_id": {
                     "type": "string"
                 }
             }
