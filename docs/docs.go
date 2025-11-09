@@ -114,6 +114,108 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/verification": {
+            "post": {
+                "description": "Sends (or resends) a verification link to the provided email. Returns 204 on success.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "verify"
+                ],
+                "summary": "Send verification email",
+                "parameters": [
+                    {
+                        "description": "Email payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/verifysvc.SendParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "internal error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verification/{id}": {
+            "get": {
+                "description": "Consumes the verification token (path param). On success, marks the user verified and redirects to the frontend success page.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "verify"
+                ],
+                "summary": "Verify user by token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Verification token (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "303": {
+                        "description": "Redirect to frontend success page"
+                    },
+                    "400": {
+                        "description": "invalid token format",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "invalid or expired token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "internal error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/category": {
             "get": {
                 "produces": [
@@ -321,35 +423,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Add a user to a chat room",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "User ID",
-                        "name": "userID",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
             }
         },
         "/chat/rooms/{roomID}/participants/{userID}": {
@@ -441,6 +514,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/chat/{roomID}/participants/{userID}": {
+            "post": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Add a user to a chat room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/chat/{roomID}/ws": {
             "get": {
                 "tags": [
@@ -489,6 +593,18 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Category filter",
                         "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order by",
+                        "name": "orderby",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order direction",
+                        "name": "orderdir",
                         "in": "query"
                     },
                     {
@@ -1000,7 +1116,9 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "fts": {},
+                "fts": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1065,6 +1183,9 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
+                },
+                "verified": {
+                    "type": "boolean"
                 }
             }
         },
@@ -1121,6 +1242,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "verifysvc.SendParams": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }

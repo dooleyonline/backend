@@ -40,8 +40,6 @@ func (s *Service) Login(ctx context.Context, params *LoginParams) (*LoginResult,
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
-	user.Password = ""
-
 	token, err := s.CreateJWT(params.Email, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create token: %w", err)

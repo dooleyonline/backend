@@ -24,6 +24,8 @@ type Config struct {
 	AuthTokenName   string
 	AuthTokenExp    time.Duration
 	AuthTokenSecret string
+
+	ResendApiKey string
 }
 
 const (
@@ -39,6 +41,8 @@ const (
 	envStorageAccessSecret = "STORAGE_ACCESS_SECRET"
 
 	envAuthTokenSecret = "AUTH_TOKEN_SECRET"
+
+	envResendApiKey = "RESEND_API_KEY"
 )
 
 func New() (*Config, error) {
@@ -87,6 +91,11 @@ func New() (*Config, error) {
 		return nil, fmt.Errorf("environment variable %s is required", envAuthTokenSecret)
 	}
 
+	resendApiKey, ok := os.LookupEnv(envResendApiKey)
+	if !ok {
+		return nil, fmt.Errorf("environment variable %s is required", envResendApiKey)
+	}
+
 	cfg := &Config{
 		IsProd:     env == "prod",
 		Url:        "https://api.dooleyonline.net",
@@ -105,6 +114,8 @@ func New() (*Config, error) {
 		AuthTokenExp:    time.Hour * 240,
 		AuthTokenSecret: authTokenSecret,
 		StorageUrl:      storageUrl,
+
+		ResendApiKey: resendApiKey,
 	}
 
 	return cfg, nil

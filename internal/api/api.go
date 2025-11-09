@@ -9,6 +9,7 @@ import (
 	chathandler "github.com/dooleyonline/backend/internal/api/chat"
 	itemhandler "github.com/dooleyonline/backend/internal/api/item"
 	userhandler "github.com/dooleyonline/backend/internal/api/user"
+	verifyhandler "github.com/dooleyonline/backend/internal/api/verify"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	"github.com/dooleyonline/backend/internal/service"
@@ -39,6 +40,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	auth := authhandler.New(services.Auth)
 	category := categoryhandler.New(services.Category)
 	user := userhandler.New(services.User)
+	verify := verifyhandler.New(services.Verify)
 
 	chat := chathandler.New(services.Chat)
 
@@ -85,6 +87,10 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.POST("/auth/login", auth.Login)
 	e.POST("/auth/logout", auth.Logout)
 	e.GET("/auth/me", auth.GetMe)
+
+	// verify routes
+	e.POST("/auth/verification", verify.SendVerification)
+	e.POST("/auth/verification/:id", verify.VerifyUser)
 
 	// chat routes
 	e.POST("/chat/rooms", chat.CreateRoom)

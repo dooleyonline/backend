@@ -23,10 +23,12 @@ func New(cfg *config.Config, db *db.DB) *Service {
 }
 
 type GetManyParams struct {
-	Seller   string
-	Query    string
-	Category string
-	Page     int32
+	Seller   string `json:"seller_id"`
+	Query    string `json:"q"`
+	Category string `json:"category"`
+	Page     int32  `json:"page"`
+	OrderBy  string `json:"orderby"`
+	OrderDir string `json:"orderdir"`
 }
 
 func (s *Service) GetMany(ctx context.Context, params *GetManyParams) ([]model.Item, error) {
@@ -53,6 +55,8 @@ func (s *Service) GetMany(ctx context.Context, params *GetManyParams) ([]model.I
 		searchbycategoryParams := itemitem.SearchByCategoryParams{
 			Category:  params.Category,
 			ToTsquery: params.Query,
+			OrderBy:   params.OrderBy,
+			OrderDir:  params.OrderDir,
 			Page:      params.Page,
 			Size:      s.cfg.ItemPageSize,
 		}
@@ -60,6 +64,8 @@ func (s *Service) GetMany(ctx context.Context, params *GetManyParams) ([]model.I
 	case params.Query != "":
 		searchparams := itemitem.SearchParams{
 			WebsearchToTsquery: params.Query,
+			OrderBy:            params.OrderBy,
+			OrderDir:           params.OrderDir,
 			Page:               params.Page,
 			Size:               s.cfg.ItemPageSize,
 		}
@@ -67,16 +73,20 @@ func (s *Service) GetMany(ctx context.Context, params *GetManyParams) ([]model.I
 	case params.Category != "":
 		getbycategoryParams := itemitem.GetByCategoryParams{
 			Category: params.Category,
+			OrderBy:  params.OrderBy,
+			OrderDir: params.OrderDir,
 			Page:     params.Page,
 			Size:     s.cfg.ItemPageSize,
 		}
 		items, err = s.db.Item.Item.GetByCategory(ctx, getbycategoryParams)
 	default:
-		getAllParams := itemitem.GetAllParams{
-			Page: params.Page,
-			Size: s.cfg.ItemPageSize,
+		getallparams := itemitem.GetAllParams{
+			OrderBy:  params.OrderBy,
+			OrderDir: params.OrderDir,
+			Page:     params.Page,
+			Size:     s.cfg.ItemPageSize,
 		}
-		items, err = s.db.Item.Item.GetAll(ctx, getAllParams)
+		items, err = s.db.Item.Item.GetAll(ctx, getallparams)
 	}
 
 	if err != nil {
@@ -227,13 +237,8 @@ func (s *Service) Unlike(ctx context.Context, itemId int64, userId string) error
 	return nil
 }
 
-func (s *Service) GetBatch(ctx context.Context, ids *[]int64, page int32) ([]model.Item, error) {
-	getbatchparams := itemitem.GetBatchParams{
-		ItemIds: *ids,
-		Page:    page,
-		Size:    s.cfg.ItemPageSize,
-	}
-	items, err := s.db.Item.Item.GetBatch(ctx, getbatchparams)
+func (s *Service) GetBatch(ctx context.Context, ids *[]int64) ([]model.Item, error) {
+	items, err := s.db.Item.Item.GetBatch(ctx, *ids)
 	if err != nil {
 		return nil, err
 	}
