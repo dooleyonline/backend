@@ -254,40 +254,30 @@ func (s *Service) GetUploadPresignURL(ctx context.Context, contentType string) (
 	return res, nil
 }
 
-type ViewParams struct {
-	UserID string
-	ItemID int64
-}
-
-func (s *Service) View(ctx context.Context, p *ViewParams) error {
-	if p.UserID != "" { // if viewer is an user
-		tx, err := s.db.Pool.Begin(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to begin transaction: %w", err)
-		}
-		defer tx.Rollback(ctx)
-
-		viewedTx := s.db.User.Viewed.WithTx(tx)
-		itemTx := s.db.Item.Item.WithTx(tx)
-
-		if err := viewedTx.Create(ctx, userviewed.CreateParams{
-			ItemID: p.ItemID,
-			UserID: p.UserID,
-		}); err != nil {
-			return fmt.Errorf("failed to view item: %w", err)
-		}
-
-		if err := itemTx.IncrementView(ctx, p.ItemID); err != nil {
-			return fmt.Errorf("failed to increment item like: %w", err)
-		}
-
-		if err := tx.Commit(ctx); err != nil {
-			return fmt.Errorf("failed to commit transaction: %w", err)
-		}
-	} else { // if user isn't an user
-		if err := s.db.Item.Item.IncrementView(ctx, p.ItemID); err != nil {
-			return fmt.Errorf("failed to increment item like: %w", err)
-		}
+func (s *Service) View(ctx context.Context, itemId int64, userId string) error {
+	tx, err := s.db.Pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
+	defer tx.Rollback(ctx)
+
+	viewedTx := s.db.User.Viewed.WithTx(tx)
+	itemTx := s.db.Item.Item.WithTx(tx)
+
+	if err := viewedTx.Create(ctx, userviewed.CreateParams{
+		ItemID: itemId,
+		UserID: userId,
+	}); err != nil {
+		return fmt.Errorf("failed to view item: %w", err)
+	}
+
+	if err := itemTx.IncrementView(ctx, itemId); err != nil {
+		return fmt.Errorf("failed to increment item like: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }
