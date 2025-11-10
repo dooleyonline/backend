@@ -83,6 +83,19 @@ sql:
         emit_json_tags: true
         emit_empty_slices: true
 
+  - engine: "postgresql"
+    database:
+      managed: true
+    queries: "sqlc/user/verify/query.sql"
+    schema: "sqlc/user/verify/schema.sql"
+    gen:
+      go:
+        package: "userverify"
+        out: "internal/db/user/verify"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_empty_slices: true
+
 overrides:
   go:
     overrides:
@@ -100,6 +113,11 @@ overrides:
       - db_type: "uuid"
         go_type: "string"
       - db_type: "uuid"
+        nullable: true
+        go_type: "string"
+      - db_type: "text"
+        go_type: "string"
+      - db_type: "text"
         nullable: true
         go_type: "string"
       - column: item.id

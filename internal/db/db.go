@@ -11,6 +11,7 @@ import (
 	itemcategory "github.com/dooleyonline/backend/internal/db/item/category"
 	itemitem "github.com/dooleyonline/backend/internal/db/item/item"
 	useruser "github.com/dooleyonline/backend/internal/db/user/user"
+	userverify "github.com/dooleyonline/backend/internal/db/user/verify"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -28,7 +29,8 @@ type item struct {
 }
 
 type user struct {
-	User *useruser.Queries
+	User   *useruser.Queries
+	Verify *userverify.Queries
 }
 
 type chat struct {
@@ -49,7 +51,8 @@ func New(ctx context.Context, cfg *config.Config) (*DB, error) {
 	}
 
 	user := &user{
-		User: useruser.New(pool),
+		User:   useruser.New(pool),
+		Verify: userverify.New(pool),
 	}
 
 	chat := &chat{

@@ -34,7 +34,7 @@ INSERT INTO
   "user"."user" (email, password, first_name, last_name)
 VALUES
   ($1, $2, $3, $4)
-RETURNING email, password, liked_items, first_name, last_name, id, avatar
+RETURNING email, password, liked_items, first_name, last_name, id, verified, avatar
 `
 
 type CreateParams struct {
@@ -59,6 +59,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (UserUser, error
 		&i.FirstName,
 		&i.LastName,
 		&i.ID,
+		&i.Verified,
 		&i.Avatar,
 	)
 	return i, err
@@ -86,7 +87,7 @@ func (q *Queries) DeleteLikedItem(ctx context.Context, arg DeleteLikedItemParams
 
 const get = `-- name: Get :one
 SELECT
-  email, password, liked_items, first_name, last_name, id, avatar
+  email, password, liked_items, first_name, last_name, id, verified, avatar
 FROM
   "user"."user"
 WHERE
@@ -103,6 +104,7 @@ func (q *Queries) Get(ctx context.Context, email string) (UserUser, error) {
 		&i.FirstName,
 		&i.LastName,
 		&i.ID,
+		&i.Verified,
 		&i.Avatar,
 	)
 	return i, err
@@ -110,7 +112,7 @@ func (q *Queries) Get(ctx context.Context, email string) (UserUser, error) {
 
 const getByID = `-- name: GetByID :one
 SELECT
-  email, password, liked_items, first_name, last_name, id, avatar
+  email, password, liked_items, first_name, last_name, id, verified, avatar
 FROM
   "user"."user"
 WHERE
@@ -127,6 +129,7 @@ func (q *Queries) GetByID(ctx context.Context, id string) (UserUser, error) {
 		&i.FirstName,
 		&i.LastName,
 		&i.ID,
+		&i.Verified,
 		&i.Avatar,
 	)
 	return i, err
@@ -150,7 +153,7 @@ func (q *Queries) GetLikedItems(ctx context.Context, id string) ([]int64, error)
 
 const getMany = `-- name: GetMany :many
 SELECT
-  email, password, liked_items, first_name, last_name, id, avatar
+  email, password, liked_items, first_name, last_name, id, verified, avatar
 FROM
   "user"."user"
 `
@@ -171,6 +174,7 @@ func (q *Queries) GetMany(ctx context.Context) ([]UserUser, error) {
 			&i.FirstName,
 			&i.LastName,
 			&i.ID,
+			&i.Verified,
 			&i.Avatar,
 		); err != nil {
 			return nil, err
@@ -211,5 +215,19 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) error {
 		arg.LastName,
 		arg.Avatar,
 	)
+	return err
+}
+
+const verify = `-- name: Verify :exec
+UPDATE
+  "user"."user"
+SET
+  verified = TRUE
+WHERE
+  id = $1
+`
+
+func (q *Queries) Verify(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, verify, id)
 	return err
 }

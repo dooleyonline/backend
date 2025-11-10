@@ -4,6 +4,11 @@ SELECT
 FROM
   item.item
 ORDER BY 
+  CASE WHEN @order_by = 'posted_at' AND @order_dir = 'asc'  THEN posted_at END ASC,
+  CASE WHEN @order_by = 'posted_at' AND @order_dir = 'desc' THEN posted_at END DESC,
+  CASE WHEN @order_by = 'price' AND @order_dir = 'asc'      THEN price END ASC,
+  CASE WHEN @order_by = 'price' AND @order_dir = 'desc'     THEN price END DESC, 
+
   posted_at DESC
 LIMIT 
   CAST(@size AS integer) OFFSET CAST(@size AS integer)*(CAST(@page AS integer)-1);
@@ -85,6 +90,13 @@ FROM
   item.item
 WHERE
   fts @@ websearch_to_tsquery($1)
+ORDER BY 
+  CASE WHEN @order_by = 'posted_at' AND @order_dir = 'asc'  THEN posted_at END ASC,
+  CASE WHEN @order_by = 'posted_at' AND @order_dir = 'desc' THEN posted_at END DESC,
+  CASE WHEN @order_by = 'price' AND @order_dir = 'asc'      THEN price END ASC,
+  CASE WHEN @order_by = 'price' AND @order_dir = 'desc'     THEN price END DESC, 
+
+  ts_rank(fts, websearch_to_tsquery(@q)) DESC
 LIMIT 
   CAST(@size AS integer) OFFSET CAST(@size AS integer)*(CAST(@page AS integer)-1);
 
@@ -96,6 +108,11 @@ FROM
 WHERE
   category = $1
 ORDER BY 
+  CASE WHEN @order_by = 'posted_at' AND @order_dir = 'asc'  THEN posted_at END ASC,
+  CASE WHEN @order_by = 'posted_at' AND @order_dir = 'desc' THEN posted_at END DESC,
+  CASE WHEN @order_by = 'price' AND @order_dir = 'asc'      THEN price END ASC,
+  CASE WHEN @order_by = 'price' AND @order_dir = 'desc'     THEN price END DESC, 
+
   posted_at DESC
 LIMIT 
   CAST(@size AS integer) OFFSET CAST(@size AS integer)*(CAST(@page AS integer)-1);
@@ -107,6 +124,13 @@ FROM
   item.item
 WHERE
   category = $1 AND fts @@ to_tsquery($2)
+ORDER BY 
+  CASE WHEN @order_by = 'posted_at' AND @order_dir = 'asc'  THEN posted_at END ASC,
+  CASE WHEN @order_by = 'posted_at' AND @order_dir = 'desc' THEN posted_at END DESC,
+  CASE WHEN @order_by = 'price' AND @order_dir = 'asc'      THEN price END ASC,
+  CASE WHEN @order_by = 'price' AND @order_dir = 'desc'     THEN price END DESC,
+  
+  ts_rank(fts, websearch_to_tsquery(@q)) DESC
 LIMIT 
   CAST(@size AS integer) OFFSET CAST(@size AS integer)*(CAST(@page AS integer)-1);
 
@@ -130,6 +154,6 @@ FROM
 WHERE
   id = ANY(@item_IDs::bigint[])
 ORDER BY
-  posted_at DESC
-LIMIT 
-  CAST(@size AS integer) OFFSET CAST(@size AS integer)*(CAST(@page AS integer)-1);
+  posted_at DESC;
+
+

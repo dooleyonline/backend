@@ -24,6 +24,8 @@ func New(svc *itemsvc.Service) *Handler {
 //	@Param		seller		query	string	false	"Seller filter"
 //	@Param		q			query	string	false	"Search query"
 //	@param		category	query	string	false	"Category filter"
+//	@param		order_by	query	string	false	"Order by"
+//	@param		order_dir	query	string	false	"Order direction"
 //	@param		page		query	int		false	"Page number"	format(int32)
 //	@Success	200			{array}	model.Item
 //	@Router		/item [get]
@@ -38,6 +40,8 @@ func (h *Handler) GetMany(c echo.Context) error {
 		String("seller", &params.Seller).
 		String("q", &params.Query).
 		String("category", &params.Category).
+		String("order_by", &params.OrderBy).
+		String("order_dir", &params.OrderDir).
 		Int32("page", &params.Page).
 		BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
@@ -285,19 +289,13 @@ func (h *Handler) GetBatch(c echo.Context) error {
 
 	var (
 		itemIDs []int64
-		page    int32
 	)
 
 	if err := c.Bind(&itemIDs); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
-	if err := echo.QueryParamsBinder(c).
-		Int32("page", &page).
-		BindError(); err != nil {
-		return echo.ErrBadRequest.WithInternal(err)
-	}
 
-	res, err := h.svc.GetBatch(ctx, &itemIDs, page)
+	res, err := h.svc.GetBatch(ctx, &itemIDs)
 	if err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
