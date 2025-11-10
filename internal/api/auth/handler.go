@@ -49,7 +49,7 @@ func (h *Handler) Login(c echo.Context) error {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   res.CookieConfig.Secure,
-		SameSite: http.SameSiteLaxMode, // TODO: change to LAX in production
+		SameSite: http.SameSiteNoneMode, // TODO: change to LAX in production
 	}
 	c.SetCookie(cookie)
 
@@ -111,18 +111,18 @@ func (h *Handler) GetMe(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-//  CreateVerification godoc
+//	CreateVerification godoc
 //
-//	@Summary		Send verification email
-//	@Description	Sends (or resends) a verification link to the provided email. Returns 204 on success.
-//	@Tags			auth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body	authsvc.SendParams	true	"Email payload"
-//	@Success		204
-//	@Failure		400	{object}	map[string]string	"invalid request body"
-//	@Failure		500	{object}	map[string]string	"internal error"
-//	@Router			/auth/verification [post]
+// @Summary		Send verification email
+// @Description	Sends (or resends) a verification link to the provided email. Returns 204 on success.
+// @Tags			auth
+// @Accept			json
+// @Produce		json
+// @Param			request	body	authsvc.SendParams	true	"Email payload"
+// @Success		204
+// @Failure		400	{object}	map[string]string	"invalid request body"
+// @Failure		500	{object}	map[string]string	"internal error"
+// @Router			/auth/verification [post]
 func (h *Handler) CreateVerification(c echo.Context) error {
 	var (
 		req = c.Request()

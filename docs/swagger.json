@@ -1,1153 +1,1269 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "description": "This is the REST API for DooleyOnline.",
-    "title": "DooleyOnline API",
-    "termsOfService": "http://swagger.io/terms/",
-    "contact": {
-      "name": "API Support",
-      "url": "http://www.swagger.io/support",
-      "email": "support@swagger.io"
+    "swagger": "2.0",
+    "info": {
+        "description": "This is the REST API for DooleyOnline.",
+        "title": "DooleyOnline API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
     },
-    "license": {
-      "name": "Apache 2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Greeting",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Log in",
+                "parameters": [
+                    {
+                        "description": "Login Params",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authsvc.LoginParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User",
+                        "schema": {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Log out",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get current authenticated user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/auth/verification": {
+            "post": {
+                "description": "Sends (or resends) a verification link to the provided email. Returns 204 on success.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Send verification email",
+                "parameters": [
+                    {
+                        "description": "Email payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authsvc.SendParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "internal error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verification/{id}": {
+            "post": {
+                "description": "Consumes the verification token from the path and marks the user verified.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Verify user by token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Verification token (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "user verified",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "invalid token format",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "invalid or expired token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "internal error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/category": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "Get all categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Category"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/category/{name}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "Get category by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Category"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/messages/{messageID}": {
+            "delete": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Delete a message",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Message ID",
+                        "name": "messageID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Edit an existing message",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Message ID",
+                        "name": "messageID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New message body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/chat/rooms": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Get chat rooms for a user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.ChatParticipant"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Create a new room",
+                "parameters": [
+                    {
+                        "description": "User IDs",
+                        "name": "userIDs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/{roomID}": {
+            "delete": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Delete a chat room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/chat/{roomID}/messages": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Get latest messages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.ChatMessage"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/{roomID}/participants": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Get participants in a chat room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.ChatParticipant"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/{roomID}/participants/{userID}": {
+            "post": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Add a user to a chat room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Remove a user from a chat room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/chat/{roomID}/ws": {
+            "get": {
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Handle WebSocket connections",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "roomID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/item": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Get many items",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Seller filter",
+                        "name": "seller",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search query",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Category filter",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order by",
+                        "name": "order_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order direction",
+                        "name": "order_dir",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Item"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Create item",
+                "parameters": [
+                    {
+                        "description": "Item",
+                        "name": "item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/itemsvc.MutationParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Item"
+                        }
+                    }
+                }
+            }
+        },
+        "/item/batch": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Get items in bulk by list of IDs",
+                "parameters": [
+                    {
+                        "description": "Item IDs",
+                        "name": "item_IDs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Item"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/item/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Get item by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Item"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "item"
+                ],
+                "summary": "Update item by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Item",
+                        "name": "item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/itemsvc.MutationParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Item"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Delete item by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/item/{id}/like": {
+            "post": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Like an item",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/item/{id}/sell": {
+            "post": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Update sold_at property by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/item/{id}/unlike": {
+            "post": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Unlike an item",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/item/{id}/view": {
+            "post": {
+                "tags": [
+                    "item"
+                ],
+                "summary": "Increment item views by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/storage/presign": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "util"
+                ],
+                "summary": "Generate presigned URL for item upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Content type of the item to be uploaded",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Storage bucket name",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/storagesvc.PresignResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get many users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.User"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update user",
+                "parameters": [
+                    {
+                        "description": "User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/usersvc.UpdateParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Create user",
+                "parameters": [
+                    {
+                        "description": "User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/usersvc.CreateParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get seller by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    }
+                }
+            }
+        }
     },
-    "version": "1.0"
-  },
-  "host": "localhost:8080",
-  "basePath": "/",
-  "paths": {
-    "/": {
-      "get": {
-        "produces": ["text/plain"],
-        "summary": "Greeting",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "string"
+    "definitions": {
+        "authsvc.LoginParams": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
             }
-          }
+        },
+        "authsvc.SendParams": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.Header": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "itemsvc.MutationParams": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "condition": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_negotiable": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "subcategory": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Category": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "subcategory": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "model.ChatMessage": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "edited": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "room_id": {
+                    "type": "string"
+                },
+                "sent_at": {
+                    "type": "string"
+                },
+                "sent_by": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ChatParticipant": {
+            "type": "object",
+            "properties": {
+                "last_read_message_id": {
+                    "$ref": "#/definitions/pgtype.Int8"
+                },
+                "room_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Item": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "condition": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "fts": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_negotiable": {
+                    "type": "boolean"
+                },
+                "likes": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "placeholder": {
+                    "type": "string"
+                },
+                "posted_at": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "seller": {
+                    "type": "string"
+                },
+                "sold_at": {
+                    "type": "string"
+                },
+                "subcategory": {
+                    "type": "string"
+                },
+                "views": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.User": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "liked_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "password": {
+                    "type": "string"
+                },
+                "verified": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "pgtype.Int8": {
+            "type": "object",
+            "properties": {
+                "int64": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "storagesvc.PresignResult": {
+            "type": "object",
+            "properties": {
+                "headers": {
+                    "$ref": "#/definitions/http.Header"
+                },
+                "image_id": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "usersvc.CreateParams": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "usersvc.UpdateParams": {
+            "type": "object",
+            "properties": {
+                "avatar_id": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                }
+            }
         }
-      }
-    },
-    "/auth/login": {
-      "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["auth"],
-        "summary": "Log in",
-        "parameters": [
-          {
-            "description": "Login Params",
-            "name": "user",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/authsvc.LoginParams"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User",
-            "schema": {
-              "$ref": "#/definitions/model.User"
-            }
-          }
-        }
-      }
-    },
-    "/auth/logout": {
-      "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["auth"],
-        "summary": "Log out",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/auth/me": {
-      "get": {
-        "produces": ["application/json"],
-        "tags": ["auth"],
-        "summary": "Get current authenticated user",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/model.User"
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        }
-      }
-    },
-    "/auth/verification": {
-      "post": {
-        "description": "Sends (or resends) a verification link to the provided email. Returns 204 on success.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["verify"],
-        "summary": "Send verification email",
-        "parameters": [
-          {
-            "description": "Email payload",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/verifysvc.SendParams"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "invalid request body",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
-            }
-          },
-          "500": {
-            "description": "internal error",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/auth/verification/{id}": {
-      "post": {
-        "description": "Consumes the verification token from the path and marks the user verified.",
-        "produces": ["application/json"],
-        "tags": ["verify"],
-        "summary": "Verify user by token",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Verification token (UUID)",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "user verified",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
-            }
-          },
-          "400": {
-            "description": "invalid token format",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
-            }
-          },
-          "401": {
-            "description": "invalid or expired token",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
-            }
-          },
-          "500": {
-            "description": "internal error",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/category": {
-      "get": {
-        "produces": ["application/json"],
-        "tags": ["category"],
-        "summary": "Get all categories",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/model.Category"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/category/{name}": {
-      "get": {
-        "produces": ["application/json"],
-        "tags": ["category"],
-        "summary": "Get category by name",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Category name",
-            "name": "name",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/model.Category"
-            }
-          }
-        }
-      }
-    },
-    "/chat/messages/{messageID}": {
-      "delete": {
-        "tags": ["chat"],
-        "summary": "Delete a message",
-        "parameters": [
-          {
-            "type": "integer",
-            "format": "int64",
-            "description": "Message ID",
-            "name": "messageID",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      },
-      "patch": {
-        "tags": ["chat"],
-        "summary": "Edit an existing message",
-        "parameters": [
-          {
-            "type": "integer",
-            "format": "int64",
-            "description": "Message ID",
-            "name": "messageID",
-            "in": "path",
-            "required": true
-          },
-          {
-            "description": "New message body",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      }
-    },
-    "/chat/rooms": {
-      "get": {
-        "produces": ["application/json"],
-        "tags": ["chat"],
-        "summary": "Get chat rooms for a user",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/model.ChatParticipant"
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "produces": ["application/json"],
-        "tags": ["chat"],
-        "summary": "Create a new room",
-        "parameters": [
-          {
-            "description": "User IDs",
-            "name": "userIDs",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "type": "string"
-            }
-          }
-        }
-      }
-    },
-    "/chat/{roomID}": {
-      "delete": {
-        "tags": ["chat"],
-        "summary": "Delete a chat room",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Room ID",
-            "name": "roomID",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      }
-    },
-    "/chat/{roomID}/messages": {
-      "get": {
-        "produces": ["application/json"],
-        "tags": ["chat"],
-        "summary": "Get latest messages",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Room ID",
-            "name": "roomID",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/model.ChatMessage"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/chat/{roomID}/participants": {
-      "get": {
-        "produces": ["application/json"],
-        "tags": ["chat"],
-        "summary": "Get participants in a chat room",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Room ID",
-            "name": "roomID",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/model.ChatParticipant"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/chat/{roomID}/participants/{userID}": {
-      "post": {
-        "tags": ["chat"],
-        "summary": "Add a user to a chat room",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Room ID",
-            "name": "roomID",
-            "in": "path",
-            "required": true
-          },
-          {
-            "description": "User ID",
-            "name": "userID",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      },
-      "delete": {
-        "tags": ["chat"],
-        "summary": "Remove a user from a chat room",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Room ID",
-            "name": "roomID",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "User ID",
-            "name": "userID",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      }
-    },
-    "/chat/{roomID}/ws": {
-      "get": {
-        "tags": ["chat"],
-        "summary": "Handle WebSocket connections",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Room ID",
-            "name": "roomID",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/item": {
-      "get": {
-        "produces": ["application/json"],
-        "tags": ["item"],
-        "summary": "Get many items",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Seller filter",
-            "name": "seller",
-            "in": "query"
-          },
-          {
-            "type": "string",
-            "description": "Search query",
-            "name": "q",
-            "in": "query"
-          },
-          {
-            "type": "string",
-            "description": "Category filter",
-            "name": "category",
-            "in": "query"
-          },
-          {
-            "type": "string",
-            "description": "Order by",
-            "name": "orderby",
-            "in": "query"
-          },
-          {
-            "type": "string",
-            "description": "Order direction",
-            "name": "orderdir",
-            "in": "query"
-          },
-          {
-            "type": "integer",
-            "format": "int32",
-            "description": "Page number",
-            "name": "page",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/model.Item"
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["item"],
-        "summary": "Create item",
-        "parameters": [
-          {
-            "description": "Item",
-            "name": "item",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/itemsvc.MutationParams"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "$ref": "#/definitions/model.Item"
-            }
-          }
-        }
-      }
-    },
-    "/item/batch": {
-      "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["item"],
-        "summary": "Get items in bulk by list of IDs",
-        "parameters": [
-          {
-            "description": "Item IDs",
-            "name": "item_IDs",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "integer"
-              }
-            }
-          },
-          {
-            "type": "integer",
-            "format": "int32",
-            "description": "Page number",
-            "name": "page",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/model.Item"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/item/{id}": {
-      "get": {
-        "produces": ["application/json"],
-        "tags": ["item"],
-        "summary": "Get item by ID",
-        "parameters": [
-          {
-            "type": "integer",
-            "description": "Item ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/model.Item"
-            }
-          }
-        }
-      },
-      "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["item"],
-        "summary": "Update item by ID",
-        "parameters": [
-          {
-            "type": "integer",
-            "description": "Item ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          },
-          {
-            "description": "Item",
-            "name": "item",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/itemsvc.MutationParams"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/model.Item"
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": ["item"],
-        "summary": "Delete item by ID",
-        "parameters": [
-          {
-            "type": "integer",
-            "description": "Item ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      }
-    },
-    "/item/{id}/like": {
-      "post": {
-        "tags": ["item"],
-        "summary": "Like an item",
-        "parameters": [
-          {
-            "type": "integer",
-            "description": "Item ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      }
-    },
-    "/item/{id}/sell": {
-      "post": {
-        "tags": ["item"],
-        "summary": "Update sold_at property by ID",
-        "parameters": [
-          {
-            "type": "integer",
-            "description": "Item ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      }
-    },
-    "/item/{id}/unlike": {
-      "post": {
-        "tags": ["item"],
-        "summary": "Unlike an item",
-        "parameters": [
-          {
-            "type": "integer",
-            "description": "Item ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      }
-    },
-    "/item/{id}/view": {
-      "post": {
-        "tags": ["item"],
-        "summary": "Increment item views by ID",
-        "parameters": [
-          {
-            "type": "integer",
-            "description": "Item ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      }
-    },
-    "/storage/presign": {
-      "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["util"],
-        "summary": "Generate presigned URL for item upload",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Content type of the item to be uploaded",
-            "name": "type",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "Storage bucket name",
-            "name": "bucket",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/storagesvc.PresignResult"
-            }
-          }
-        }
-      }
-    },
-    "/user": {
-      "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["user"],
-        "summary": "Get many users",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/model.User"
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["user"],
-        "summary": "Update user",
-        "parameters": [
-          {
-            "description": "User",
-            "name": "user",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/usersvc.UpdateParams"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["user"],
-        "summary": "Create user",
-        "parameters": [
-          {
-            "description": "User",
-            "name": "user",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/usersvc.CreateParams"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "$ref": "#/definitions/model.User"
-            }
-          }
-        }
-      }
-    },
-    "/user/{id}": {
-      "get": {
-        "produces": ["application/json"],
-        "tags": ["user"],
-        "summary": "Get seller by ID",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "User ID (UUID)",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/model.User"
-            }
-          }
-        }
-      }
     }
-  },
-  "definitions": {
-    "authsvc.LoginParams": {
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        }
-      }
-    },
-    "http.Header": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      }
-    },
-    "http.Header": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      }
-    },
-    "itemsvc.MutationParams": {
-      "type": "object",
-      "properties": {
-        "category": {
-          "type": "string"
-        },
-        "condition": {
-          "type": "integer"
-        },
-        "description": {
-          "type": "string"
-        },
-        "images": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "is_negotiable": {
-          "type": "boolean"
-        },
-        "name": {
-          "type": "string"
-        },
-        "price": {
-          "type": "number"
-        },
-        "subcategory": {
-          "type": "string"
-        }
-      }
-    },
-    "model.Category": {
-      "type": "object",
-      "properties": {
-        "icon": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "subcategory": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "model.ChatMessage": {
-      "type": "object",
-      "properties": {
-        "body": {
-          "type": "string"
-        },
-        "edited": {
-          "type": "boolean"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "room_id": {
-          "type": "string"
-        },
-        "sent_at": {
-          "type": "string"
-        },
-        "sent_by": {
-          "type": "string"
-        }
-      }
-    },
-    "model.ChatParticipant": {
-      "type": "object",
-      "properties": {
-        "last_read_message_id": {
-          "$ref": "#/definitions/pgtype.Int8"
-        },
-        "room_id": {
-          "type": "string"
-        },
-        "user_id": {
-          "type": "string"
-        }
-      }
-    },
-    "model.Item": {
-      "type": "object",
-      "properties": {
-        "category": {
-          "type": "string"
-        },
-        "condition": {
-          "type": "integer"
-        },
-        "description": {
-          "type": "string"
-        },
-        "fts": {
-          "type": "string"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "images": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "is_negotiable": {
-          "type": "boolean"
-        },
-        "likes": {
-          "type": "integer"
-        },
-        "name": {
-          "type": "string"
-        },
-        "placeholder": {
-          "type": "string"
-        },
-        "posted_at": {
-          "type": "string"
-        },
-        "price": {
-          "type": "number"
-        },
-        "seller": {
-          "type": "string"
-        },
-        "sold_at": {
-          "type": "string"
-        },
-        "subcategory": {
-          "type": "string"
-        },
-        "views": {
-          "type": "integer"
-        }
-      }
-    },
-    "model.User": {
-      "type": "object",
-      "properties": {
-        "avatar": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "first_name": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "last_name": {
-          "type": "string"
-        },
-        "liked_items": {
-          "type": "array",
-          "items": {
-            "type": "integer"
-          }
-        },
-        "password": {
-          "type": "string"
-        },
-        "verified": {
-          "type": "boolean"
-        }
-      }
-    },
-    "pgtype.Int8": {
-      "type": "object",
-      "properties": {
-        "int64": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "valid": {
-          "type": "boolean"
-        }
-      }
-    },
-    "storagesvc.PresignResult": {
-      "type": "object",
-      "properties": {
-        "headers": {
-          "$ref": "#/definitions/http.Header"
-        },
-        "headers": {
-          "$ref": "#/definitions/http.Header"
-        },
-        "image_id": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
-        }
-      }
-    },
-    "usersvc.CreateParams": {
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string"
-        },
-        "firstName": {
-          "type": "string"
-        },
-        "lastName": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        }
-      }
-    },
-    "usersvc.UpdateParams": {
-      "type": "object",
-      "properties": {
-        "avatar_id": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "first_name": {
-          "type": "string"
-        },
-        "last_name": {
-          "type": "string"
-        }
-      }
-    },
-    "verifysvc.SendParams": {
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string"
-        },
-        "userId": {
-          "type": "string"
-        }
-      }
-    }
-  }
 }

@@ -124,7 +124,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "verify"
+                    "auth"
                 ],
                 "summary": "Send verification email",
                 "parameters": [
@@ -134,7 +134,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/verifysvc.SendParams"
+                            "$ref": "#/definitions/authsvc.SendParams"
                         }
                     }
                 ],
@@ -170,7 +170,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "verify"
+                    "auth"
                 ],
                 "summary": "Verify user by token",
                 "parameters": [
@@ -573,13 +573,13 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Order by",
-                        "name": "orderby",
+                        "name": "order_by",
                         "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "Order direction",
-                        "name": "orderdir",
+                        "name": "order_dir",
                         "in": "query"
                     },
                     {
@@ -1013,6 +1013,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "authsvc.SendParams": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }
