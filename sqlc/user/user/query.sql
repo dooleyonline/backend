@@ -53,10 +53,13 @@ FROM
 WHERE
   id = $1;
 
--- name: UpdateAvatar :exec
+-- name: Update :exec
 UPDATE
   "user"."user"
 SET
-  avatar = $2
+  email = $2,
+  first_name = $3,
+  last_name = $4,
+  avatar = $5
 WHERE
   id = $1;

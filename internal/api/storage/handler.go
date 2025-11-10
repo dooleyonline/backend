@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	storagesvc "github.com/dooleyonline/backend/internal/service/storage"
-	"github.com/dooleyonline/backend/internal/storage"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,7 +15,7 @@ func New(svc *storagesvc.Service) *Handler {
 	return &Handler{svc}
 }
 
-// GetUploadURL godoc
+// PresignUpload godoc
 //
 //	@Summary	Generate presigned URL for item upload
 //	@Tags		util
@@ -24,15 +23,15 @@ func New(svc *storagesvc.Service) *Handler {
 //	@Produce	json
 //	@Param		type	query		string	true	"Content type of the item to be uploaded"
 //	@Param		bucket	query		string	true	"Storage bucket name"
-//	@Success	200		{object}	storage.PresignResult
+//	@Success	200		{object}	storagesvc.PresignResult
 //	@Router		/storage/presign [post]
-func (h *Handler) GetUploadURL(c echo.Context) error {
+func (h *Handler) PresignUpload(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
 	)
 
-	var params storage.PresignParams
+	var params storagesvc.PresignParams
 	if err := echo.QueryParamsBinder(c).
 		String("type", &params.ContentType).
 		String("bucket", &params.Bucket).
@@ -44,7 +43,7 @@ func (h *Handler) GetUploadURL(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	res, err := h.svc.GetUploadPresignURL(ctx, params)
+	res, err := h.svc.PresignUpload(ctx, params)
 	if err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}

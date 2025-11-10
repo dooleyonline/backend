@@ -93,29 +93,29 @@ func (h *Handler) Get(c echo.Context) error {
 	return c.JSON(http.StatusOK, *res)
 }
 
-// UpdateAvatar godoc
+// Update godoc
 //
-//	@Summary	Update user avatar
+//	@Summary	Update user
 //	@Tags		user
 //	@Accept		json
 //	@Produce	json
-//	@Param		avatar	body	usersvc.UpdateAvatarParams	true	"Avatar ID (UUID)"
+//	@Param		user	body	usersvc.UpdateParams	true	"User"
 //	@Success	200		"OK"
-//	@Router		/user/avatar [put]
-func (h *Handler) UpdateAvatar(c echo.Context) error {
+//	@Router		/user [put]
+func (h *Handler) Update(c echo.Context) error {
 	var (
 		req    = c.Request()
 		ctx    = req.Context()
 		userID = c.(shared.Context).UserID
 	)
 
-	var params usersvc.UpdateAvatarParams
+	var params usersvc.UpdateParams
 	if err := c.Bind(&params); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 	params.UserID = userID
 
-	err := h.svc.UpdateAvatar(ctx, params)
+	err := h.svc.Update(ctx, params)
 	if err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}

@@ -183,21 +183,33 @@ func (q *Queries) GetMany(ctx context.Context) ([]UserUser, error) {
 	return items, nil
 }
 
-const updateAvatar = `-- name: UpdateAvatar :exec
+const update = `-- name: Update :exec
 UPDATE
   "user"."user"
 SET
-  avatar = $2
+  email = $2,
+  first_name = $3,
+  last_name = $4,
+  avatar = $5
 WHERE
   id = $1
 `
 
-type UpdateAvatarParams struct {
-	ID     string `json:"id"`
-	Avatar string `json:"avatar"`
+type UpdateParams struct {
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Avatar    string `json:"avatar"`
 }
 
-func (q *Queries) UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) error {
-	_, err := q.db.Exec(ctx, updateAvatar, arg.ID, arg.Avatar)
+func (q *Queries) Update(ctx context.Context, arg UpdateParams) error {
+	_, err := q.db.Exec(ctx, update,
+		arg.ID,
+		arg.Email,
+		arg.FirstName,
+		arg.LastName,
+		arg.Avatar,
+	)
 	return err
 }

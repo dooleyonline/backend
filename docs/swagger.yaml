@@ -133,7 +133,7 @@ definitions:
       valid:
         type: boolean
     type: object
-  storage.PresignResult:
+  storagesvc.PresignResult:
     properties:
       headers:
         $ref: '#/definitions/http.Header'
@@ -153,9 +153,15 @@ definitions:
       password:
         type: string
     type: object
-  usersvc.UpdateAvatarParams:
+  usersvc.UpdateParams:
     properties:
       avatar_id:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
         type: string
     type: object
 host: localhost:8080
@@ -651,7 +657,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/storage.PresignResult'
+            $ref: '#/definitions/storagesvc.PresignResult'
       summary: Generate presigned URL for item upload
       tags:
       - util
@@ -691,6 +697,24 @@ paths:
       summary: Create user
       tags:
       - user
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/usersvc.UpdateParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update user
+      tags:
+      - user
   /user/{id}:
     get:
       parameters:
@@ -707,25 +731,6 @@ paths:
           schema:
             $ref: '#/definitions/model.User'
       summary: Get seller by ID
-      tags:
-      - user
-  /user/avatar:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Avatar ID (UUID)
-        in: body
-        name: avatar
-        required: true
-        schema:
-          $ref: '#/definitions/usersvc.UpdateAvatarParams'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Update user avatar
       tags:
       - user
 swagger: "2.0"

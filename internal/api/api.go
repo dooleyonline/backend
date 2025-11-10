@@ -79,7 +79,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.GET("/user", user.GetMany)
 	e.POST("/user", user.Create)
 	e.GET("/user/:id", user.Get)
-	e.PUT("/user/avatar", user.UpdateAvatar)
+	e.PUT("/user", user.Update)
 
 	// auth routes
 	e.POST("/auth/login", auth.Login)
@@ -87,7 +87,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.GET("/auth/me", auth.GetMe)
 
 	// storage routes
-	e.POST("/storage/presign", storage.GetUploadURL)
+	e.POST("/storage/presign", storage.PresignUpload)
 
 	// chat routes
 	e.POST("/chat/rooms", chat.CreateRoom)
@@ -113,7 +113,7 @@ var protectedRoutes = routesConfig{
 	"/item/:id/sell":   {http.MethodPost},
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
-	"/user/avatar":     {http.MethodPut},
+	"/user":            {http.MethodPut},
 	"/auth/logout":     {http.MethodPost},
 	"/chat/*":          {http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPatch},
 }

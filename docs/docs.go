@@ -766,7 +766,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/storage.PresignResult"
+                            "$ref": "#/definitions/storagesvc.PresignResult"
                         }
                     }
                 }
@@ -793,6 +793,34 @@ const docTemplate = `{
                                 "$ref": "#/definitions/model.User"
                             }
                         }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update user",
+                "parameters": [
+                    {
+                        "description": "User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/usersvc.UpdateParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             },
@@ -824,36 +852,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/model.User"
                         }
-                    }
-                }
-            }
-        },
-        "/user/avatar": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Update user avatar",
-                "parameters": [
-                    {
-                        "description": "Avatar ID (UUID)",
-                        "name": "avatar",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/usersvc.UpdateAvatarParams"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     }
                 }
             }
@@ -1091,7 +1089,7 @@ const docTemplate = `{
                 }
             }
         },
-        "storage.PresignResult": {
+        "storagesvc.PresignResult": {
             "type": "object",
             "properties": {
                 "headers": {
@@ -1122,10 +1120,19 @@ const docTemplate = `{
                 }
             }
         },
-        "usersvc.UpdateAvatarParams": {
+        "usersvc.UpdateParams": {
             "type": "object",
             "properties": {
                 "avatar_id": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
                     "type": "string"
                 }
             }
