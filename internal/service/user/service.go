@@ -27,7 +27,6 @@ func (s *Service) GetMany(ctx context.Context) ([]model.User, error) {
 	var result []model.User
 	for _, user := range users {
 		user.Password = ""
-		user.LikedItems = []int64{}
 		result = append(result, user)
 	}
 	return result, nil
@@ -69,17 +68,34 @@ func (s *Service) Get(ctx context.Context, id string) (*model.User, error) {
 	}
 
 	user.Password = ""
-	user.LikedItems = []int64{}
 
 	return &user, nil
 }
 
+func (s *Service) GetLikes(ctx context.Context) ([]model.Liked, error) {
+	liked, err := s.db.User.Liked.GetAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get liked table: %w", err)
+	}
+
+	return liked, nil
+}
+
+func (s *Service) GetViews(ctx context.Context) ([]model.Viewed, error) {
+	viewed, err := s.db.User.Viewed.GetAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get viewed table: %w", err)
+	}
+
+	return viewed, nil
+}
+
 type UpdateParams struct {
-	UserID    string `json:"-"`
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	AvatarID  string `json:"avatar_id"`
+	UserID    string
+	Email     string
+	FirstName string
+	LastName  string
+	AvatarID  string
 }
 
 func (s *Service) Update(ctx context.Context, params UpdateParams) error {

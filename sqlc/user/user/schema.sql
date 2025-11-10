@@ -4,7 +4,6 @@ set search_path TO "user";
 create table "user"."user" (
   email text not null default ''::text,
   password text not null default ''::text,
-  liked_items bigint[] not null default '{}'::bigint[],
   first_name text not null default ''::text,
   last_name text not null default ''::text,
   id uuid not null default gen_random_uuid (),

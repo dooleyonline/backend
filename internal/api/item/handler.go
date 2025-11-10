@@ -196,15 +196,16 @@ func (h *Handler) Sell(c echo.Context) error {
 
 // View godoc
 //
-//	@Summary	Increment item views by ID
+//	@Summary	Increment item views by itemID and add to user.viewed table
 //	@Tags		item
 //	@Param		id	path	int	true	"Item ID"
 //	@Success	204
 //	@Router		/item/{id}/view [post]
 func (h *Handler) View(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userId = c.(shared.Context).UserID
 	)
 
 	var itemId int64
@@ -212,7 +213,7 @@ func (h *Handler) View(c echo.Context) error {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	if err := h.svc.IncrementView(ctx, itemId); err != nil {
+	if err := h.svc.View(ctx, itemId, userId); err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
@@ -287,10 +288,7 @@ func (h *Handler) GetBatch(c echo.Context) error {
 		ctx = req.Context()
 	)
 
-	var (
-		itemIDs []int64
-	)
-
+	var itemIDs []int64
 	if err := c.Bind(&itemIDs); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}

@@ -113,6 +113,15 @@ definitions:
       views:
         type: integer
     type: object
+  model.Liked:
+    properties:
+      created_at:
+        type: string
+      item_id:
+        type: integer
+      user_id:
+        type: string
+    type: object
   model.User:
     properties:
       avatar:
@@ -125,14 +134,19 @@ definitions:
         type: string
       last_name:
         type: string
-      liked_items:
-        items:
-          type: integer
-        type: array
       password:
         type: string
       verified:
         type: boolean
+    type: object
+  model.Viewed:
+    properties:
+      created_at:
+        type: string
+      item_id:
+        type: integer
+      user_id:
+        type: string
     type: object
   pgtype.Int8:
     properties:
@@ -164,13 +178,15 @@ definitions:
     type: object
   usersvc.UpdateParams:
     properties:
-      avatar_id:
+      avatarID:
         type: string
       email:
         type: string
-      first_name:
+      firstName:
         type: string
-      last_name:
+      lastName:
+        type: string
+      userID:
         type: string
     type: object
 host: localhost:8080
@@ -693,7 +709,7 @@ paths:
       responses:
         "204":
           description: No Content
-      summary: Increment item views by ID
+      summary: Increment item views by itemID and add to user.viewed table
       tags:
       - item
   /item/batch:
@@ -820,7 +836,33 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.User'
-      summary: Get seller by ID
+      summary: Get user by ID
+      tags:
+      - user
+  /user/liked:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Liked'
+            type: array
+      summary: Get the entire liked table.
+      tags:
+      - user
+  /user/viewed:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Viewed'
+      summary: Get the entire viewed table.
       tags:
       - user
 swagger: "2.0"

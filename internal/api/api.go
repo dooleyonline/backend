@@ -41,7 +41,6 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	category := categoryhandler.New(services.Category)
 	user := userhandler.New(services.User)
 	storage := storagehandler.New(services.Storage)
-
 	chat := chathandler.New(services.Chat)
 
 	e := echo.New()
@@ -75,11 +74,17 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.GET("/category", category.GetAll)
 	e.GET("/category/:name", category.Get)
 
-	// user routes
+	// user.user routes
 	e.GET("/user", user.GetMany)
 	e.POST("/user", user.Create)
 	e.GET("/user/:id", user.Get)
 	e.PUT("/user", user.Update)
+
+	// user.liked routes
+	e.GET("/user/liked", user.GetLikes)
+
+	// user.viewed routes
+	e.GET("/user/viewed", user.GetViews)
 
 	// auth routes
 	e.POST("/auth/login", auth.Login)

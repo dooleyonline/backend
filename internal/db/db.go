@@ -10,8 +10,10 @@ import (
 	chatroom "github.com/dooleyonline/backend/internal/db/chat/room"
 	itemcategory "github.com/dooleyonline/backend/internal/db/item/category"
 	itemitem "github.com/dooleyonline/backend/internal/db/item/item"
+	userliked "github.com/dooleyonline/backend/internal/db/user/liked"
 	useruser "github.com/dooleyonline/backend/internal/db/user/user"
 	userverify "github.com/dooleyonline/backend/internal/db/user/verify"
+	userviewed "github.com/dooleyonline/backend/internal/db/user/viewed"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -30,6 +32,8 @@ type item struct {
 
 type user struct {
 	User   *useruser.Queries
+	Liked  *userliked.Queries
+	Viewed *userviewed.Queries
 	Verify *userverify.Queries
 }
 
@@ -52,6 +56,8 @@ func New(ctx context.Context, cfg *config.Config) (*DB, error) {
 
 	user := &user{
 		User:   useruser.New(pool),
+		Liked:  userliked.New(pool),
+		Viewed: userviewed.New(pool),
 		Verify: userverify.New(pool),
 	}
 

@@ -837,7 +837,7 @@ const docTemplate = `{
                 "tags": [
                     "item"
                 ],
-                "summary": "Increment item views by ID",
+                "summary": "Increment item views by itemID and add to user.viewed table",
                 "parameters": [
                     {
                         "type": "integer",
@@ -976,6 +976,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/liked": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get the entire liked table.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Liked"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/viewed": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get the entire viewed table.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Viewed"
+                        }
+                    }
+                }
+            }
+        },
         "/user/{id}": {
             "get": {
                 "produces": [
@@ -984,7 +1025,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Get seller by ID",
+                "summary": "Get user by ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -1179,6 +1220,20 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Liked": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "item_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "model.User": {
             "type": "object",
             "properties": {
@@ -1197,17 +1252,25 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 },
-                "liked_items": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "password": {
                     "type": "string"
                 },
                 "verified": {
                     "type": "boolean"
+                }
+            }
+        },
+        "model.Viewed": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "item_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
@@ -1257,16 +1320,19 @@ const docTemplate = `{
         "usersvc.UpdateParams": {
             "type": "object",
             "properties": {
-                "avatar_id": {
+                "avatarID": {
                     "type": "string"
                 },
                 "email": {
                     "type": "string"
                 },
-                "first_name": {
+                "firstName": {
                     "type": "string"
                 },
-                "last_name": {
+                "lastName": {
+                    "type": "string"
+                },
+                "userID": {
                     "type": "string"
                 }
             }

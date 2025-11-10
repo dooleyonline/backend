@@ -8,7 +8,8 @@ import (
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 	itemitem "github.com/dooleyonline/backend/internal/db/item/item"
-	useruser "github.com/dooleyonline/backend/internal/db/user/user"
+	userliked "github.com/dooleyonline/backend/internal/db/user/liked"
+	userviewed "github.com/dooleyonline/backend/internal/db/user/viewed"
 	"github.com/dooleyonline/backend/internal/model"
 )
 
@@ -181,10 +182,6 @@ func (s *Service) Sell(ctx context.Context, id int64) error {
 	})
 }
 
-func (s *Service) IncrementView(ctx context.Context, id int64) error {
-	return s.db.Item.Item.IncrementView(ctx, id)
-}
-
 func (s *Service) Like(ctx context.Context, itemId int64, userId string) error {
 	tx, err := s.db.Pool.Begin(ctx)
 	if err != nil {
@@ -192,12 +189,12 @@ func (s *Service) Like(ctx context.Context, itemId int64, userId string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	userTx := s.db.User.User.WithTx(tx)
+	likedTx := s.db.User.Liked.WithTx(tx)
 	itemTx := s.db.Item.Item.WithTx(tx)
 
-	if err := userTx.AddLikedItem(ctx, useruser.AddLikedItemParams{
+	if err := likedTx.Like(ctx, userliked.LikeParams{
 		ItemID: itemId,
-		ID:     userId,
+		UserID: userId,
 	}); err != nil {
 		return fmt.Errorf("failed to like item: %w", err)
 	}
@@ -220,12 +217,12 @@ func (s *Service) Unlike(ctx context.Context, itemId int64, userId string) error
 	}
 	defer tx.Rollback(ctx)
 
-	userTx := s.db.User.User.WithTx(tx)
+	likedTx := s.db.User.Liked.WithTx(tx)
 	itemTx := s.db.Item.Item.WithTx(tx)
 
-	if err := userTx.DeleteLikedItem(ctx, useruser.DeleteLikedItemParams{
+	if err := likedTx.Unlike(ctx, userliked.UnlikeParams{
 		ItemID: itemId,
-		ID:     userId,
+		UserID: userId,
 	}); err != nil {
 		return fmt.Errorf("failed to unlike item: %w", err)
 	}
@@ -246,4 +243,21 @@ func (s *Service) GetBatch(ctx context.Context, ids *[]int64) ([]model.Item, err
 		return nil, err
 	}
 	return items, nil
+}
+
+func (s *Service) View(ctx context.Context, itemId int64, userId string) error {
+	if userId != "" {
+		if err := s.db.User.Viewed.Create(ctx, userviewed.CreateParams{
+			ItemID: itemId,
+			UserID: userId,
+		}); err != nil {
+			return fmt.Errorf("failed to view item: %w", err)
+		}
+	}
+
+	if err := s.db.Item.Item.IncrementView(ctx, itemId); err != nil {
+		return fmt.Errorf("failed to increment item like: %w", err)
+	}
+
+	return nil
 }
