@@ -11,8 +11,6 @@ import (
 	userliked "github.com/dooleyonline/backend/internal/db/user/liked"
 	userviewed "github.com/dooleyonline/backend/internal/db/user/viewed"
 	"github.com/dooleyonline/backend/internal/model"
-	storage "github.com/dooleyonline/backend/internal/service/storage"
-	storagesvc "github.com/dooleyonline/backend/internal/service/storage"
 )
 
 type Service struct {
@@ -244,18 +242,6 @@ func (s *Service) GetBatch(ctx context.Context, ids *[]int64, page int32) ([]mod
 		return nil, err
 	}
 	return items, nil
-}
-
-func (s *Service) GetUploadPresignURL(ctx context.Context, contentType string) (*storage.PresignResult, error) {
-	storage := storage.New(s.cfg, s.db)
-	res, err := storage.PresignUpload(ctx, storagesvc.PresignParams{
-		ContentType: contentType,
-		Bucket:      s.cfg.StorageBucket,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
 }
 
 func (s *Service) View(ctx context.Context, itemId int64, userId string) error {
