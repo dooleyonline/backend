@@ -7,4 +7,4 @@ import (
 
 type User = useruser.UserUser
 
-type Verify = userverify.UserVerify
+type Verification = userverify.UserVerification

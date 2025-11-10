@@ -129,12 +129,12 @@ const getAll = `-- name: GetAll :many
 SELECT
   id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
-  item.item AS i
+  item.item
 ORDER BY 
-  CASE WHEN $1 = 'posted_at' AND $2 = 'asc'  THEN i.posted_at END ASC,
-  CASE WHEN $1 = 'posted_at' AND $2 = 'desc' THEN i.posted_at END DESC,
-  CASE WHEN $1 = 'price' AND $2 = 'asc'      THEN i.price END ASC,
-  CASE WHEN $1 = 'price' AND $2 = 'desc'     THEN i.price END DESC, 
+  CASE WHEN $1 = 'posted_at' AND $2 = 'asc'  THEN posted_at END ASC,
+  CASE WHEN $1 = 'posted_at' AND $2 = 'desc' THEN posted_at END DESC,
+  CASE WHEN $1 = 'price' AND $2 = 'asc'      THEN price END ASC,
+  CASE WHEN $1 = 'price' AND $2 = 'desc'     THEN price END DESC, 
 
   posted_at DESC
 LIMIT 
@@ -242,14 +242,14 @@ const getByCategory = `-- name: GetByCategory :many
 SELECT
   id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
-  item.item AS i 
+  item.item
 WHERE
   category = $1
 ORDER BY 
-  CASE WHEN $2 = 'posted_at' AND $3 = 'asc'  THEN i.posted_at END ASC,
-  CASE WHEN $2 = 'posted_at' AND $3 = 'desc' THEN i.posted_at END DESC,
-  CASE WHEN $2 = 'price' AND $3 = 'asc'      THEN i.price END ASC,
-  CASE WHEN $2 = 'price' AND $3 = 'desc'     THEN i.price END DESC, 
+  CASE WHEN $2 = 'posted_at' AND $3 = 'asc'  THEN posted_at END ASC,
+  CASE WHEN $2 = 'posted_at' AND $3 = 'desc' THEN posted_at END DESC,
+  CASE WHEN $2 = 'price' AND $3 = 'asc'      THEN price END ASC,
+  CASE WHEN $2 = 'price' AND $3 = 'desc'     THEN price END DESC, 
 
   posted_at DESC
 LIMIT 
@@ -393,18 +393,18 @@ func (q *Queries) IncrementView(ctx context.Context, id int64) error {
 
 const search = `-- name: Search :many
 SELECT
- i.id, i.name, i.description, i.images, i.price, i.condition, i.is_negotiable, i.posted_at, i.sold_at, i.views, i.category, i.subcategory, i.fts, i.placeholder, i.likes, i.seller
+ id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
-  item.item AS i
+  item.item
 WHERE
-  i.fts @@ websearch_to_tsquery($1)
+  fts @@ websearch_to_tsquery($1)
 ORDER BY 
-  CASE WHEN $2 = 'posted_at' AND $3 = 'asc'  THEN i.posted_at END ASC,
-  CASE WHEN $2 = 'posted_at' AND $3 = 'desc' THEN i.posted_at END DESC,
-  CASE WHEN $2 = 'price' AND $3 = 'asc'      THEN i.price END ASC,
-  CASE WHEN $2 = 'price' AND $3 = 'desc'     THEN i.price END DESC, 
+  CASE WHEN $2 = 'posted_at' AND $3 = 'asc'  THEN posted_at END ASC,
+  CASE WHEN $2 = 'posted_at' AND $3 = 'desc' THEN posted_at END DESC,
+  CASE WHEN $2 = 'price' AND $3 = 'asc'      THEN price END ASC,
+  CASE WHEN $2 = 'price' AND $3 = 'desc'     THEN price END DESC, 
 
-  ts_rank(i.fts, websearch_to_tsquery($4)) DESC
+  ts_rank(fts, websearch_to_tsquery($4)) DESC
 LIMIT 
   CAST($5 AS integer) OFFSET CAST($5 AS integer)*(CAST($6 AS integer)-1)
 `
@@ -466,16 +466,16 @@ const searchByCategory = `-- name: SearchByCategory :many
 SELECT
   id, name, description, images, price, condition, is_negotiable, posted_at, sold_at, views, category, subcategory, fts, placeholder, likes, seller
 FROM
-  item.item AS i
+  item.item
 WHERE
   category = $1 AND fts @@ to_tsquery($2)
 ORDER BY 
-  CASE WHEN $3 = 'posted_at' AND $4 = 'asc'  THEN i.posted_at END ASC,
-  CASE WHEN $3 = 'posted_at' AND $4 = 'desc' THEN i.posted_at END DESC,
-  CASE WHEN $3 = 'price' AND $4 = 'asc'      THEN i.price END ASC,
-  CASE WHEN $3 = 'price' AND $4 = 'desc'     THEN i.price END DESC,
+  CASE WHEN $3 = 'posted_at' AND $4 = 'asc'  THEN posted_at END ASC,
+  CASE WHEN $3 = 'posted_at' AND $4 = 'desc' THEN posted_at END DESC,
+  CASE WHEN $3 = 'price' AND $4 = 'asc'      THEN price END ASC,
+  CASE WHEN $3 = 'price' AND $4 = 'desc'     THEN price END DESC,
   
-  ts_rank(i.fts, websearch_to_tsquery($5)) DESC
+  ts_rank(fts, websearch_to_tsquery($5)) DESC
 LIMIT 
   CAST($6 AS integer) OFFSET CAST($6 AS integer)*(CAST($7 AS integer)-1)
 `

@@ -10,59 +10,28 @@ import (
 )
 
 const create = `-- name: Create :one
-INSERT INTO
-  "user".verify (user_id)
-VALUES
-  ($1)
-RETURNING id, user_id, expired_at
+
+INSERT INTO "user".verification (user_id)
+VALUES ($1) RETURNING id, user_id, expired_at
 `
 
-func (q *Queries) Create(ctx context.Context, userID string) (UserVerify, error) {
+func (q *Queries) Create(ctx context.Context, userID string) (UserVerification, error) {
 	row := q.db.QueryRow(ctx, create, userID)
-	var i UserVerify
+	var i UserVerification
 	err := row.Scan(&i.ID, &i.UserID, &i.ExpiredAt)
 	return i, err
 }
 
 const get = `-- name: Get :one
-SELECT
-  id, user_id, expired_at
-FROM
-  "user".verify
-WHERE
-  id = $1
+
+SELECT id, user_id, expired_at
+FROM "user".verification
+WHERE id = $1
 `
 
-func (q *Queries) Get(ctx context.Context, id string) (UserVerify, error) {
+func (q *Queries) Get(ctx context.Context, id string) (UserVerification, error) {
 	row := q.db.QueryRow(ctx, get, id)
-	var i UserVerify
+	var i UserVerification
 	err := row.Scan(&i.ID, &i.UserID, &i.ExpiredAt)
 	return i, err
-}
-
-const getMany = `-- name: GetMany :many
-SELECT
-  id, user_id, expired_at
-FROM
-  "user".verify
-`
-
-func (q *Queries) GetMany(ctx context.Context) ([]UserVerify, error) {
-	rows, err := q.db.Query(ctx, getMany)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []UserVerify{}
-	for rows.Next() {
-		var i UserVerify
-		if err := rows.Scan(&i.ID, &i.UserID, &i.ExpiredAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type UserVerify struct {
+type UserVerification struct {
 	ID        string    `json:"id"`
 	UserID    string    `json:"user_id"`
 	ExpiredAt time.Time `json:"expired_at"`

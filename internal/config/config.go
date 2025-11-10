@@ -7,9 +7,10 @@ import (
 )
 
 type Config struct {
-	IsProd     bool
-	Url        string
-	ServerAddr string
+	IsProd      bool
+	Url         string
+	FrontendUrl string
+	ServerAddr  string
 
 	ItemPageSize int32
 
@@ -104,9 +105,10 @@ func New() (*Config, error) {
 	}
 
 	cfg := &Config{
-		IsProd:     env == "prod",
-		Url:        "https://api.dooleyonline.net",
-		ServerAddr: ":" + port,
+		IsProd:      env == "prod",
+		Url:         "https://api.dooleyonline.net",
+		FrontendUrl: "https://dooleyonline.vercel.app",
+		ServerAddr:  ":" + port,
 
 		ItemPageSize: 10,
 

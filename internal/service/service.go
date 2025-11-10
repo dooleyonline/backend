@@ -9,7 +9,6 @@ import (
 	itemsvc "github.com/dooleyonline/backend/internal/service/item"
 	storagesvc "github.com/dooleyonline/backend/internal/service/storage"
 	usersvc "github.com/dooleyonline/backend/internal/service/user"
-	verifysvc "github.com/dooleyonline/backend/internal/service/verify"
 )
 
 type Service struct {
@@ -18,7 +17,6 @@ type Service struct {
 	Item     *itemsvc.Service
 	User     *usersvc.Service
 	Chat     *chatsvc.Service
-	Verify   *verifysvc.Service
 	Storage  *storagesvc.Service
 }
 
@@ -29,7 +27,6 @@ func New(cfg *config.Config, db *db.DB) *Service {
 		Item:     itemsvc.New(cfg, db),
 		User:     usersvc.New(db),
 		Chat:     chatsvc.New(cfg, db),
-		Verify:   verifysvc.New(cfg, db),
 		Storage:  storagesvc.New(cfg, db),
 	}
 }

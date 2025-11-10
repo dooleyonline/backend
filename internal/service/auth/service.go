@@ -81,3 +81,11 @@ func (s *Service) GetMe(ctx context.Context, id string) (*model.User, error) {
 
 	return &user, nil
 }
+
+func (s *Service) Get(ctx context.Context, id string) (*model.Verification, error) {
+	verify, err := s.db.User.Verify.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &verify, nil
+}
