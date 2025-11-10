@@ -7,6 +7,12 @@ definitions:
       password:
         type: string
     type: object
+  http.Header:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
   itemsvc.MutationParams:
     properties:
       category:
@@ -102,6 +108,8 @@ definitions:
     type: object
   model.User:
     properties:
+      avatar:
+        type: string
       email:
         type: string
       first_name:
@@ -125,8 +133,10 @@ definitions:
       valid:
         type: boolean
     type: object
-  storage.PresignResult:
+  storagesvc.PresignResult:
     properties:
+      headers:
+        $ref: '#/definitions/http.Header'
       image_id:
         type: string
       url:
@@ -141,6 +151,17 @@ definitions:
       lastName:
         type: string
       password:
+        type: string
+    type: object
+  usersvc.UpdateParams:
+    properties:
+      avatar_id:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
         type: string
     type: object
 host: localhost:8080
@@ -615,7 +636,7 @@ paths:
       summary: Get items in bulk by list of IDs
       tags:
       - item
-  /item/presign:
+  /storage/presign:
     post:
       consumes:
       - application/json
@@ -625,16 +646,21 @@ paths:
         name: type
         required: true
         type: string
+      - description: Storage bucket name
+        in: query
+        name: bucket
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/storage.PresignResult'
+            $ref: '#/definitions/storagesvc.PresignResult'
       summary: Generate presigned URL for item upload
       tags:
-      - item
+      - util
   /user:
     get:
       consumes:
@@ -669,6 +695,24 @@ paths:
           schema:
             $ref: '#/definitions/model.User'
       summary: Create user
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/usersvc.UpdateParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update user
       tags:
       - user
   /user/{id}:

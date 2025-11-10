@@ -11,4 +11,5 @@ type UserUser struct {
 	FirstName  string  `json:"first_name"`
 	LastName   string  `json:"last_name"`
 	ID         string  `json:"id"`
+	Avatar     string  `json:"avatar"`
 }

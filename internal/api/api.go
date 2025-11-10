@@ -8,6 +8,7 @@ import (
 	categoryhandler "github.com/dooleyonline/backend/internal/api/category"
 	chathandler "github.com/dooleyonline/backend/internal/api/chat"
 	itemhandler "github.com/dooleyonline/backend/internal/api/item"
+	storagehandler "github.com/dooleyonline/backend/internal/api/storage"
 	userhandler "github.com/dooleyonline/backend/internal/api/user"
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
@@ -39,6 +40,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	auth := authhandler.New(services.Auth)
 	category := categoryhandler.New(services.Category)
 	user := userhandler.New(services.User)
+	storage := storagehandler.New(services.Storage)
 
 	chat := chathandler.New(services.Chat)
 
@@ -68,7 +70,6 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.POST("/item/:id/like", item.Like)
 	e.POST("/item/:id/unlike", item.Unlike)
 	e.POST("/item/batch", item.GetBatch)
-	e.POST("/item/presign", item.GetUploadURL)
 
 	// category
 	e.GET("/category", category.GetAll)
@@ -78,11 +79,15 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.GET("/user", user.GetMany)
 	e.POST("/user", user.Create)
 	e.GET("/user/:id", user.Get)
+	e.PUT("/user", user.Update)
 
 	// auth routes
 	e.POST("/auth/login", auth.Login)
 	e.POST("/auth/logout", auth.Logout)
 	e.GET("/auth/me", auth.GetMe)
+
+	// storage routes
+	e.POST("/storage/presign", storage.PresignUpload)
 
 	// chat routes
 	e.POST("/chat/rooms", chat.CreateRoom)
@@ -108,6 +113,7 @@ var protectedRoutes = routesConfig{
 	"/item/:id/sell":   {http.MethodPost},
 	"/item/:id/like":   {http.MethodPost},
 	"/item/:id/unlike": {http.MethodPost},
+	"/user":            {http.MethodPut},
 	"/auth/logout":     {http.MethodPost},
 	"/chat/*":          {http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPatch},
 }
