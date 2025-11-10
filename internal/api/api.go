@@ -41,7 +41,6 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	category := categoryhandler.New(services.Category)
 	user := userhandler.New(services.User)
 	storage := storagehandler.New(services.Storage)
-
 	chat := chathandler.New(services.Chat)
 
 	e := echo.New()
