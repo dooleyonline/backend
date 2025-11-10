@@ -65,6 +65,8 @@ func contextMiddleware(cfg *config.Config) echo.MiddlewareFunc {
 				UserID:  "",
 			}
 
+			defer fmt.Println("user", cc.UserID, "request", cc.Request().RequestURI)
+
 			cookie, err := c.Cookie(cfg.AuthTokenName)
 			if err != nil {
 				return next(cc)
