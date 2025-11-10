@@ -34,7 +34,7 @@ INSERT INTO
   "user"."user" (email, password, first_name, last_name)
 VALUES
   ($1, $2, $3, $4)
-RETURNING email, password, liked_items, first_name, last_name, id
+RETURNING email, password, liked_items, first_name, last_name, id, avatar
 `
 
 type CreateParams struct {
@@ -59,6 +59,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (UserUser, error
 		&i.FirstName,
 		&i.LastName,
 		&i.ID,
+		&i.Avatar,
 	)
 	return i, err
 }
@@ -85,7 +86,7 @@ func (q *Queries) DeleteLikedItem(ctx context.Context, arg DeleteLikedItemParams
 
 const get = `-- name: Get :one
 SELECT
-  email, password, liked_items, first_name, last_name, id
+  email, password, liked_items, first_name, last_name, id, avatar
 FROM
   "user"."user"
 WHERE
@@ -102,13 +103,14 @@ func (q *Queries) Get(ctx context.Context, email string) (UserUser, error) {
 		&i.FirstName,
 		&i.LastName,
 		&i.ID,
+		&i.Avatar,
 	)
 	return i, err
 }
 
 const getByID = `-- name: GetByID :one
 SELECT
-  email, password, liked_items, first_name, last_name, id
+  email, password, liked_items, first_name, last_name, id, avatar
 FROM
   "user"."user"
 WHERE
@@ -125,6 +127,7 @@ func (q *Queries) GetByID(ctx context.Context, id string) (UserUser, error) {
 		&i.FirstName,
 		&i.LastName,
 		&i.ID,
+		&i.Avatar,
 	)
 	return i, err
 }
@@ -147,7 +150,7 @@ func (q *Queries) GetLikedItems(ctx context.Context, id string) ([]int64, error)
 
 const getMany = `-- name: GetMany :many
 SELECT
-  email, password, liked_items, first_name, last_name, id
+  email, password, liked_items, first_name, last_name, id, avatar
 FROM
   "user"."user"
 `
@@ -168,6 +171,7 @@ func (q *Queries) GetMany(ctx context.Context) ([]UserUser, error) {
 			&i.FirstName,
 			&i.LastName,
 			&i.ID,
+			&i.Avatar,
 		); err != nil {
 			return nil, err
 		}
@@ -177,4 +181,35 @@ func (q *Queries) GetMany(ctx context.Context) ([]UserUser, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const update = `-- name: Update :exec
+UPDATE
+  "user"."user"
+SET
+  email = $2,
+  first_name = $3,
+  last_name = $4,
+  avatar = $5
+WHERE
+  id = $1
+`
+
+type UpdateParams struct {
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Avatar    string `json:"avatar"`
+}
+
+func (q *Queries) Update(ctx context.Context, arg UpdateParams) error {
+	_, err := q.db.Exec(ctx, update,
+		arg.ID,
+		arg.Email,
+		arg.FirstName,
+		arg.LastName,
+		arg.Avatar,
+	)
+	return err
 }

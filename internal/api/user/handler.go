@@ -3,6 +3,7 @@ package user
 import (
 	"net/http"
 
+	"github.com/dooleyonline/backend/internal/api/shared"
 	usersvc "github.com/dooleyonline/backend/internal/service/user"
 	"github.com/labstack/echo/v4"
 )
@@ -90,4 +91,36 @@ func (h *Handler) Get(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+// TODO: Update email verification if email is changed
+
+// Update godoc
+//
+//	@Summary	Update user
+//	@Tags		user
+//	@Accept		json
+//	@Produce	json
+//	@Param		user	body	usersvc.UpdateParams	true	"User"
+//	@Success	200		"OK"
+//	@Router		/user [put]
+func (h *Handler) Update(c echo.Context) error {
+	var (
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
+	)
+
+	var params usersvc.UpdateParams
+	if err := c.Bind(&params); err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
+	}
+	params.UserID = userID
+
+	err := h.svc.Update(ctx, params)
+	if err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+
+	return c.NoContent(http.StatusOK)
 }

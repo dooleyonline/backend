@@ -1,4 +1,4 @@
-package storage
+package storagesvc
 
 import (
 	"context"
@@ -11,21 +11,22 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
-	"github.com/google/uuid"
-
 	"github.com/dooleyonline/backend/internal/config"
+	"github.com/dooleyonline/backend/internal/db"
+	"github.com/google/uuid"
 )
 
-type Storage struct {
+type Service struct {
 	cfg    *config.Config
+	db     *db.DB
 	signer *v4.Signer
 }
 
-func New(cfg *config.Config) *Storage {
+func New(cfg *config.Config, db *db.DB) *Service {
 	signer := v4.NewSigner(func(signer *v4.SignerOptions) {
 		signer.DisableHeaderHoisting = true
 	})
-	return &Storage{cfg, signer}
+	return &Service{cfg, db, signer}
 }
 
 type PresignResult struct {
@@ -34,10 +35,15 @@ type PresignResult struct {
 	ImageID string      `json:"image_id"`
 }
 
-func (s *Storage) PresignUpload(ctx context.Context, contentType string) (*PresignResult, error) {
-	key := s.GenerateImageID()
+type PresignParams struct {
+	ContentType string
+	Bucket      string
+}
 
-	url, err := s.buildURL(key)
+func (s *Service) PresignUpload(ctx context.Context, params PresignParams) (*PresignResult, error) {
+	key := generateImageID()
+
+	url, err := buildURL(key, params.Bucket, s.cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build url: %w", err)
 	}
@@ -46,9 +52,9 @@ func (s *Storage) PresignUpload(ctx context.Context, contentType string) (*Presi
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("Content-Type", params.ContentType)
 	signedURI, signedHeaders, err := s.signer.PresignHTTP(ctx,
-		s.credentials(),
+		credentials(s.cfg),
 		req,
 		hashPayload(""),
 		"s3",
@@ -67,19 +73,19 @@ func (s *Storage) PresignUpload(ctx context.Context, contentType string) (*Presi
 	return res, nil
 }
 
-func (s *Storage) GenerateImageID() string {
+func generateImageID() string {
 	return uuid.NewString()
 }
 
-func (s *Storage) credentials() aws.Credentials {
+func credentials(cfg *config.Config) aws.Credentials {
 	return aws.Credentials{
-		AccessKeyID:     s.cfg.StorageAccessId,
-		SecretAccessKey: s.cfg.StorageAccessSecret,
+		AccessKeyID:     cfg.StorageAccessId,
+		SecretAccessKey: cfg.StorageAccessSecret,
 	}
 }
 
-func (s *Storage) buildURL(key string) (string, error) {
-	return url.JoinPath(s.cfg.StorageS3Url, s.cfg.StorageBucket, key)
+func buildURL(key string, bucket string, cfg *config.Config) (string, error) {
+	return url.JoinPath(cfg.StorageS3Url, bucket, key)
 }
 
 func hashPayload(payload string) string {

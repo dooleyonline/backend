@@ -8,6 +8,7 @@ create table "user"."user" (
   first_name text not null default ''::text,
   last_name text not null default ''::text,
   id uuid not null default gen_random_uuid (),
+  avatar uuid not null default '00000000-0000-0000-0000-000000000000'::uuid,
   constraint user_pkey primary key (id),
   constraint user_email_key unique (email)
 ) TABLESPACE pg_default;

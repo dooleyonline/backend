@@ -52,3 +52,14 @@ FROM
   "user"."user"
 WHERE
   id = $1;
+
+-- name: Update :exec
+UPDATE
+  "user"."user"
+SET
+  email = $2,
+  first_name = $3,
+  last_name = $4,
+  avatar = $5
+WHERE
+  id = $1;
