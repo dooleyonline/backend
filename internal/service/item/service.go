@@ -246,7 +246,7 @@ func (s *Service) GetBatch(ctx context.Context, ids *[]int64) ([]model.Item, err
 }
 
 func (s *Service) View(ctx context.Context, itemId int64, userId string) error {
-	if(userId != "") {
+	if userId != "" {
 		if err := s.db.User.Viewed.Create(ctx, userviewed.CreateParams{
 			ItemID: itemId,
 			UserID: userId,

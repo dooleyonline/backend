@@ -288,10 +288,7 @@ func (h *Handler) GetBatch(c echo.Context) error {
 		ctx = req.Context()
 	)
 
-	var (
-		itemIDs []int64
-	)
-
+	var itemIDs []int64
 	if err := c.Bind(&itemIDs); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
