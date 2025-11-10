@@ -89,3 +89,25 @@ func (s *Service) GetViews(ctx context.Context) ([]model.Viewed, error) {
 
 	return viewed, nil
 }
+
+type UpdateParams struct {
+	UserID    string
+	Email     string
+	FirstName string
+	LastName  string
+	AvatarID  string
+}
+
+func (s *Service) Update(ctx context.Context, params UpdateParams) error {
+	err := s.db.User.User.Update(ctx, useruser.UpdateParams{
+		ID:        params.UserID,
+		Email:     params.Email,
+		FirstName: params.FirstName,
+		LastName:  params.LastName,
+		Avatar:    params.AvatarID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update user avatar: %w", err)
+	}
+	return nil
+}

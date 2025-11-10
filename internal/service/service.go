@@ -7,6 +7,7 @@ import (
 	categorysvc "github.com/dooleyonline/backend/internal/service/category"
 	chatsvc "github.com/dooleyonline/backend/internal/service/chat"
 	itemsvc "github.com/dooleyonline/backend/internal/service/item"
+	storagesvc "github.com/dooleyonline/backend/internal/service/storage"
 	usersvc "github.com/dooleyonline/backend/internal/service/user"
 )
 
@@ -16,6 +17,7 @@ type Service struct {
 	Item     *itemsvc.Service
 	User     *usersvc.Service
 	Chat     *chatsvc.Service
+	Storage  *storagesvc.Service
 }
 
 func New(cfg *config.Config, db *db.DB) *Service {
@@ -25,5 +27,6 @@ func New(cfg *config.Config, db *db.DB) *Service {
 		Item:     itemsvc.New(cfg, db),
 		User:     usersvc.New(db),
 		Chat:     chatsvc.New(cfg, db),
+		Storage:  storagesvc.New(cfg, db),
 	}
 }

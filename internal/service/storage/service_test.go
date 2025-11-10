@@ -1,4 +1,4 @@
-package storage
+package storagesvc
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/dooleyonline/backend/internal/config"
+	"github.com/dooleyonline/backend/internal/db"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -17,11 +18,20 @@ func TestPresignUploadText(t *testing.T) {
 		t.Fatal("failed to initialize config:", err)
 	}
 
+	db, err := db.New(t.Context(), cfg)
+	if err != nil {
+		t.Fatal("failed to initialize db:", err)
+	}
+
 	contentType := "text/plain"
+	bucket := "item"
 
-	storage := New(cfg)
+	storage := New(cfg, db)
 
-	presign, err := storage.PresignUpload(t.Context(), contentType)
+	presign, err := storage.PresignUpload(t.Context(), PresignParams{
+		ContentType: contentType,
+		Bucket:      bucket,
+	})
 	if err != nil {
 		t.Fatal("failed to presign:", err)
 	}
@@ -31,6 +41,7 @@ func TestPresignUploadText(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed to create request:", err)
 	}
+	req.Header.Set("Content-Type", contentType)
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -48,17 +59,26 @@ func TestPresignUploadImage(t *testing.T) {
 		t.Fatal("failed to initialize config:", err)
 	}
 
-	payload, err := os.Open("../../test.png")
+	payload, err := os.Open("../../../test.png")
 	if err != nil {
 		t.Fatal("failed to open test image:", err)
 	}
 	defer payload.Close()
 
 	contentType := "image/png"
+	bucket := "item"
 
 
-	storage := New(cfg)
-	presign, err := storage.PresignUpload(t.Context(), contentType)
+	db, err := db.New(t.Context(), cfg)
+	if err != nil {
+		t.Fatal("failed to initialize db:", err)
+	}
+
+	storage := New(cfg, db)
+	presign, err := storage.PresignUpload(t.Context(), PresignParams{
+		ContentType: contentType,
+		Bucket:      bucket,
+	})
 	if err != nil {
 		t.Fatal("failed to presign:", err)
 	}
@@ -67,6 +87,7 @@ func TestPresignUploadImage(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed to create request:", err)
 	}
+	req.Header.Set("Content-Type", contentType)
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {

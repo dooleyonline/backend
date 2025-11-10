@@ -3,6 +3,7 @@ package user
 import (
 	"net/http"
 
+	"github.com/dooleyonline/backend/internal/api/shared"
 	usersvc "github.com/dooleyonline/backend/internal/service/user"
 	"github.com/labstack/echo/v4"
 )
@@ -62,12 +63,12 @@ func (h *Handler) Create(c echo.Context) error {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }
 
-// GetSeller godoc
+// Get godoc
 //
-//	@Summary	Get seller by ID
+//	@Summary	Get user by ID
 //	@Tags		user
 //	@Produce	json
 //	@Param		id	path		string	true	"User ID (UUID)"
@@ -89,7 +90,39 @@ func (h *Handler) Get(c echo.Context) error {
 		return echo.ErrNotFound.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
+}
+
+// TODO: Update email verification if email is changed
+
+// Update godoc
+//
+//	@Summary	Update user
+//	@Tags		user
+//	@Accept		json
+//	@Produce	json
+//	@Param		user	body	usersvc.UpdateParams	true	"User"
+//	@Success	200		"OK"
+//	@Router		/user [put]
+func (h *Handler) Update(c echo.Context) error {
+	var (
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
+	)
+
+	var params usersvc.UpdateParams
+	if err := c.Bind(&params); err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
+	}
+	params.UserID = userID
+
+	err := h.svc.Update(ctx, params)
+	if err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+
+	return c.NoContent(http.StatusOK)
 }
 
 // GetLikes godoc
