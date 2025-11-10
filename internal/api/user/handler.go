@@ -93,6 +93,8 @@ func (h *Handler) Get(c echo.Context) error {
 	return c.JSON(http.StatusOK, *res)
 }
 
+// TODO: Update email verification if email is changed
+
 // Update godoc
 //
 //	@Summary	Update user
