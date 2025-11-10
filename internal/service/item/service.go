@@ -182,10 +182,6 @@ func (s *Service) Sell(ctx context.Context, id int64) error {
 	})
 }
 
-func (s *Service) IncrementView(ctx context.Context, id int64) error {
-	return s.db.Item.Item.IncrementView(ctx, id)
-}
-
 func (s *Service) Like(ctx context.Context, itemId int64, userId string) error {
 	tx, err := s.db.Pool.Begin(ctx)
 	if err != nil {
@@ -250,28 +246,17 @@ func (s *Service) GetBatch(ctx context.Context, ids *[]int64) ([]model.Item, err
 }
 
 func (s *Service) View(ctx context.Context, itemId int64, userId string) error {
-	tx, err := s.db.Pool.Begin(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	defer tx.Rollback(ctx)
-
-	viewedTx := s.db.User.Viewed.WithTx(tx)
-	itemTx := s.db.Item.Item.WithTx(tx)
-
-	if err := viewedTx.Create(ctx, userviewed.CreateParams{
-		ItemID: itemId,
-		UserID: userId,
-	}); err != nil {
-		return fmt.Errorf("failed to view item: %w", err)
+	if userId != "" {
+		if err := s.db.User.Viewed.Create(ctx, userviewed.CreateParams{
+			ItemID: itemId,
+			UserID: userId,
+		}); err != nil {
+			return fmt.Errorf("failed to view item: %w", err)
+		}
 	}
 
-	if err := itemTx.IncrementView(ctx, itemId); err != nil {
+	if err := s.db.Item.Item.IncrementView(ctx, itemId); err != nil {
 		return fmt.Errorf("failed to increment item like: %w", err)
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
