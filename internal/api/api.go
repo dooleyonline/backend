@@ -91,6 +91,8 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.POST("/auth/login", auth.Login)
 	e.POST("/auth/logout", auth.Logout)
 	e.GET("/auth/me", auth.GetMe)
+	e.POST("/auth/verification", auth.CreateVerification)
+	e.POST("/auth/verification/:id", auth.VerifyUser)
 
 	// storage routes
 	e.POST("/storage/presign", storage.PresignUpload)

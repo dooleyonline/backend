@@ -37,3 +37,12 @@ SET
   avatar = $5
 WHERE
   id = $1;
+
+
+-- name: Verify :exec
+UPDATE
+  "user"."user"
+SET
+  verified = TRUE
+WHERE
+  id = $1;

@@ -131,18 +131,30 @@ SELECT
 FROM
   item.item
 ORDER BY 
+  CASE WHEN $1 = 'posted_at' AND $2 = 'asc'  THEN posted_at END ASC,
+  CASE WHEN $1 = 'posted_at' AND $2 = 'desc' THEN posted_at END DESC,
+  CASE WHEN $1 = 'price' AND $2 = 'asc'      THEN price END ASC,
+  CASE WHEN $1 = 'price' AND $2 = 'desc'     THEN price END DESC, 
+
   posted_at DESC
 LIMIT 
-  CAST($1 AS integer) OFFSET CAST($1 AS integer)*(CAST($2 AS integer)-1)
+  CAST($3 AS integer) OFFSET CAST($3 AS integer)*(CAST($4 AS integer)-1)
 `
 
 type GetAllParams struct {
-	Size int32 `json:"size"`
-	Page int32 `json:"page"`
+	OrderBy  string `json:"order_by"`
+	OrderDir string `json:"order_dir"`
+	Size     int32  `json:"size"`
+	Page     int32  `json:"page"`
 }
 
 func (q *Queries) GetAll(ctx context.Context, arg GetAllParams) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, getAll, arg.Size, arg.Page)
+	rows, err := q.db.Query(ctx, getAll,
+		arg.OrderBy,
+		arg.OrderDir,
+		arg.Size,
+		arg.Page,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -187,18 +199,10 @@ WHERE
   id = ANY($1::bigint[])
 ORDER BY
   posted_at DESC
-LIMIT 
-  CAST($2 AS integer) OFFSET CAST($2 AS integer)*(CAST($3 AS integer)-1)
 `
 
-type GetBatchParams struct {
-	ItemIds []int64 `json:"item_ids"`
-	Size    int32   `json:"size"`
-	Page    int32   `json:"page"`
-}
-
-func (q *Queries) GetBatch(ctx context.Context, arg GetBatchParams) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, getBatch, arg.ItemIds, arg.Size, arg.Page)
+func (q *Queries) GetBatch(ctx context.Context, itemIds []int64) ([]ItemItem, error) {
+	rows, err := q.db.Query(ctx, getBatch, itemIds)
 	if err != nil {
 		return nil, err
 	}
@@ -242,19 +246,32 @@ FROM
 WHERE
   category = $1
 ORDER BY 
+  CASE WHEN $2 = 'posted_at' AND $3 = 'asc'  THEN posted_at END ASC,
+  CASE WHEN $2 = 'posted_at' AND $3 = 'desc' THEN posted_at END DESC,
+  CASE WHEN $2 = 'price' AND $3 = 'asc'      THEN price END ASC,
+  CASE WHEN $2 = 'price' AND $3 = 'desc'     THEN price END DESC, 
+
   posted_at DESC
 LIMIT 
-  CAST($2 AS integer) OFFSET CAST($2 AS integer)*(CAST($3 AS integer)-1)
+  CAST($4 AS integer) OFFSET CAST($4 AS integer)*(CAST($5 AS integer)-1)
 `
 
 type GetByCategoryParams struct {
 	Category string `json:"category"`
+	OrderBy  string `json:"order_by"`
+	OrderDir string `json:"order_dir"`
 	Size     int32  `json:"size"`
 	Page     int32  `json:"page"`
 }
 
 func (q *Queries) GetByCategory(ctx context.Context, arg GetByCategoryParams) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, getByCategory, arg.Category, arg.Size, arg.Page)
+	rows, err := q.db.Query(ctx, getByCategory,
+		arg.Category,
+		arg.OrderBy,
+		arg.OrderDir,
+		arg.Size,
+		arg.Page,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -381,18 +398,35 @@ FROM
   item.item
 WHERE
   fts @@ websearch_to_tsquery($1)
+ORDER BY 
+  CASE WHEN $2 = 'posted_at' AND $3 = 'asc'  THEN posted_at END ASC,
+  CASE WHEN $2 = 'posted_at' AND $3 = 'desc' THEN posted_at END DESC,
+  CASE WHEN $2 = 'price' AND $3 = 'asc'      THEN price END ASC,
+  CASE WHEN $2 = 'price' AND $3 = 'desc'     THEN price END DESC, 
+
+  ts_rank(fts, websearch_to_tsquery($4)) DESC
 LIMIT 
-  CAST($2 AS integer) OFFSET CAST($2 AS integer)*(CAST($3 AS integer)-1)
+  CAST($5 AS integer) OFFSET CAST($5 AS integer)*(CAST($6 AS integer)-1)
 `
 
 type SearchParams struct {
 	WebsearchToTsquery string `json:"websearch_to_tsquery"`
+	OrderBy            string `json:"order_by"`
+	OrderDir           string `json:"order_dir"`
+	Q                  string `json:"q"`
 	Size               int32  `json:"size"`
 	Page               int32  `json:"page"`
 }
 
 func (q *Queries) Search(ctx context.Context, arg SearchParams) ([]ItemItem, error) {
-	rows, err := q.db.Query(ctx, search, arg.WebsearchToTsquery, arg.Size, arg.Page)
+	rows, err := q.db.Query(ctx, search,
+		arg.WebsearchToTsquery,
+		arg.OrderBy,
+		arg.OrderDir,
+		arg.Q,
+		arg.Size,
+		arg.Page,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -435,13 +469,23 @@ FROM
   item.item
 WHERE
   category = $1 AND fts @@ to_tsquery($2)
+ORDER BY 
+  CASE WHEN $3 = 'posted_at' AND $4 = 'asc'  THEN posted_at END ASC,
+  CASE WHEN $3 = 'posted_at' AND $4 = 'desc' THEN posted_at END DESC,
+  CASE WHEN $3 = 'price' AND $4 = 'asc'      THEN price END ASC,
+  CASE WHEN $3 = 'price' AND $4 = 'desc'     THEN price END DESC,
+  
+  ts_rank(fts, websearch_to_tsquery($5)) DESC
 LIMIT 
-  CAST($3 AS integer) OFFSET CAST($3 AS integer)*(CAST($4 AS integer)-1)
+  CAST($6 AS integer) OFFSET CAST($6 AS integer)*(CAST($7 AS integer)-1)
 `
 
 type SearchByCategoryParams struct {
 	Category  string `json:"category"`
 	ToTsquery string `json:"to_tsquery"`
+	OrderBy   string `json:"order_by"`
+	OrderDir  string `json:"order_dir"`
+	Q         string `json:"q"`
 	Size      int32  `json:"size"`
 	Page      int32  `json:"page"`
 }
@@ -450,6 +494,9 @@ func (q *Queries) SearchByCategory(ctx context.Context, arg SearchByCategoryPara
 	rows, err := q.db.Query(ctx, searchByCategory,
 		arg.Category,
 		arg.ToTsquery,
+		arg.OrderBy,
+		arg.OrderDir,
+		arg.Q,
 		arg.Size,
 		arg.Page,
 	)
