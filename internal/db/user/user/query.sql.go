@@ -14,7 +14,7 @@ INSERT INTO
   "user"."user" (email, password, first_name, last_name)
 VALUES
   ($1, $2, $3, $4)
-RETURNING email, password, liked_items, first_name, last_name, id, verified, avatar
+RETURNING email, password, first_name, last_name, id, verified, avatar
 `
 
 type CreateParams struct {
@@ -46,7 +46,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (UserUser, error
 
 const get = `-- name: Get :one
 SELECT
-  email, password, liked_items, first_name, last_name, id, verified, avatar
+  email, password, first_name, last_name, id, verified, avatar
 FROM
   "user"."user"
 WHERE
@@ -70,7 +70,7 @@ func (q *Queries) Get(ctx context.Context, email string) (UserUser, error) {
 
 const getByID = `-- name: GetByID :one
 SELECT
-  email, password, liked_items, first_name, last_name, id, verified, avatar
+  email, password, first_name, last_name, id, verified, avatar
 FROM
   "user"."user"
 WHERE
@@ -94,7 +94,7 @@ func (q *Queries) GetByID(ctx context.Context, id string) (UserUser, error) {
 
 const getMany = `-- name: GetMany :many
 SELECT
-  email, password, liked_items, first_name, last_name, id, verified, avatar
+  email, password, first_name, last_name, id, verified, avatar
 FROM
   "user"."user"
 `

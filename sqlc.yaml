@@ -105,6 +105,13 @@ sql:
       go:
         package: "userviewed"
         out: "internal/db/user/viewed"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_empty_slices: true
+
+  - engine: postgresql
+    database:
+      managed: true
     queries: "sqlc/user/verify/query.sql"
     schema: "sqlc/user/verify/schema.sql"
     gen:

@@ -3,7 +3,7 @@ package model
 import (
 	userliked "github.com/dooleyonline/backend/internal/db/user/liked"
 	useruser "github.com/dooleyonline/backend/internal/db/user/user"
-  userverify "github.com/dooleyonline/backend/internal/db/user/verify"
+	userverify "github.com/dooleyonline/backend/internal/db/user/verify"
 	userviewed "github.com/dooleyonline/backend/internal/db/user/viewed"
 )
 

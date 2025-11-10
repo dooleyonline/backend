@@ -5,12 +5,11 @@
 package useruser
 
 type UserUser struct {
-	Email      string  `json:"email"`
-	Password   string  `json:"password"`
-	LikedItems []int64 `json:"liked_items"`
-	FirstName  string  `json:"first_name"`
-	LastName   string  `json:"last_name"`
-	ID         string  `json:"id"`
-	Verified   bool    `json:"verified"`
-	Avatar     string  `json:"avatar"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	ID        string `json:"id"`
+	Verified  bool   `json:"verified"`
+	Avatar    string `json:"avatar"`
 }

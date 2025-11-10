@@ -12,8 +12,8 @@ import (
 	itemitem "github.com/dooleyonline/backend/internal/db/item/item"
 	userliked "github.com/dooleyonline/backend/internal/db/user/liked"
 	useruser "github.com/dooleyonline/backend/internal/db/user/user"
-	userviewed "github.com/dooleyonline/backend/internal/db/user/viewed"
 	userverify "github.com/dooleyonline/backend/internal/db/user/verify"
+	userviewed "github.com/dooleyonline/backend/internal/db/user/viewed"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
