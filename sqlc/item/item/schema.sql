@@ -29,3 +29,5 @@ create table item.item (
 ) TABLESPACE pg_default;
 
 create index IF not exists item_fts on item.item using gin (fts) TABLESPACE pg_default;
+
+

@@ -13,6 +13,7 @@ import (
 	userliked "github.com/dooleyonline/backend/internal/db/user/liked"
 	useruser "github.com/dooleyonline/backend/internal/db/user/user"
 	userviewed "github.com/dooleyonline/backend/internal/db/user/viewed"
+	userverify "github.com/dooleyonline/backend/internal/db/user/verify"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -33,6 +34,7 @@ type user struct {
 	User   *useruser.Queries
 	Liked  *userliked.Queries
 	Viewed *userviewed.Queries
+	Verify *userverify.Queries
 }
 
 type chat struct {
@@ -56,6 +58,7 @@ func New(ctx context.Context, cfg *config.Config) (*DB, error) {
 		User:   useruser.New(pool),
 		Liked:  userliked.New(pool),
 		Viewed: userviewed.New(pool),
+		Verify: userverify.New(pool),
 	}
 
 	chat := &chat{

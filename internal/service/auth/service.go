@@ -40,8 +40,6 @@ func (s *Service) Login(ctx context.Context, params *LoginParams) (*LoginResult,
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
-	user.Password = ""
-
 	token, err := s.CreateJWT(params.Email, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create token: %w", err)
@@ -82,4 +80,12 @@ func (s *Service) GetMe(ctx context.Context, id string) (*model.User, error) {
 	user.Password = ""
 
 	return &user, nil
+}
+
+func (s *Service) Get(ctx context.Context, id string) (*model.Verification, error) {
+	verify, err := s.db.User.Verify.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &verify, nil
 }
