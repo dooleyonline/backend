@@ -34,14 +34,6 @@ definitions:
       subcategory:
         type: string
     type: object
-  itemsvc.ViewParams:
-    properties:
-      itemID:
-        format: int64
-        type: integer
-      userID:
-        type: string
-    type: object
   model.Category:
     properties:
       icon:
@@ -135,10 +127,6 @@ definitions:
         type: string
       last_name:
         type: string
-      liked_items:
-        items:
-          type: integer
-        type: array
       password:
         type: string
     type: object
@@ -181,13 +169,15 @@ definitions:
     type: object
   usersvc.UpdateParams:
     properties:
-      avatar_id:
+      avatarID:
         type: string
       email:
         type: string
-      first_name:
+      firstName:
         type: string
-      last_name:
+      lastName:
+        type: string
+      userID:
         type: string
     type: object
 host: localhost:8080
@@ -621,17 +611,15 @@ paths:
   /item/{id}/view:
     post:
       parameters:
-      - description: ItemID, UserID
-        in: body
-        name: item
+      - description: Item ID
+        in: path
+        name: id
         required: true
-        schema:
-          $ref: '#/definitions/itemsvc.ViewParams'
+        type: integer
       responses:
         "204":
           description: No Content
-      summary: Increment item views by itemID and add to user.viewed table if the
-        view's authenticated
+      summary: Increment item views by itemID and add to user.viewed table
       tags:
       - item
   /item/batch:
@@ -758,7 +746,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.User'
-      summary: Get seller by ID
+      summary: Get user by ID
       tags:
       - user
   /user/liked:

@@ -717,16 +717,14 @@ const docTemplate = `{
                 "tags": [
                     "item"
                 ],
-                "summary": "Increment item views by itemID and add to user.viewed table if the view's authenticated",
+                "summary": "Increment item views by itemID and add to user.viewed table",
                 "parameters": [
                     {
-                        "description": "ItemID, UserID",
-                        "name": "item",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/itemsvc.ViewParams"
-                        }
+                        "type": "integer",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -907,7 +905,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Get seller by ID",
+                "summary": "Get user by ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -977,18 +975,6 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "subcategory": {
-                    "type": "string"
-                }
-            }
-        },
-        "itemsvc.ViewParams": {
-            "type": "object",
-            "properties": {
-                "itemID": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "userID": {
                     "type": "string"
                 }
             }
@@ -1135,12 +1121,6 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 },
-                "liked_items": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "password": {
                     "type": "string"
                 }
@@ -1206,16 +1186,19 @@ const docTemplate = `{
         "usersvc.UpdateParams": {
             "type": "object",
             "properties": {
-                "avatar_id": {
+                "avatarID": {
                     "type": "string"
                 },
                 "email": {
                     "type": "string"
                 },
-                "first_name": {
+                "firstName": {
                     "type": "string"
                 },
-                "last_name": {
+                "lastName": {
+                    "type": "string"
+                },
+                "userID": {
                     "type": "string"
                 }
             }
