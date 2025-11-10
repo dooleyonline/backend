@@ -12,4 +12,5 @@ type UserUser struct {
 	LastName   string  `json:"last_name"`
 	ID         string  `json:"id"`
 	Verified   bool    `json:"verified"`
+	Avatar     string  `json:"avatar"`
 }

@@ -10,7 +10,6 @@ import (
 	itemitem "github.com/dooleyonline/backend/internal/db/item/item"
 	useruser "github.com/dooleyonline/backend/internal/db/user/user"
 	"github.com/dooleyonline/backend/internal/model"
-	"github.com/dooleyonline/backend/internal/storage"
 )
 
 type Service struct {
@@ -247,13 +246,4 @@ func (s *Service) GetBatch(ctx context.Context, ids *[]int64) ([]model.Item, err
 		return nil, err
 	}
 	return items, nil
-}
-
-func (s *Service) GetUploadPresignURL(ctx context.Context, contentType string) (*storage.PresignResult, error) {
-	storage := storage.New(s.cfg)
-	res, err := storage.PresignUpload(ctx, contentType)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
 }

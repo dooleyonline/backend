@@ -63,7 +63,7 @@ definitions:
   model.ChatParticipant:
     properties:
       last_read_message_id:
-        $ref: '#/definitions/pgtype.Int8'
+        $ref: "#/definitions/pgtype.Int8"
       room_id:
         type: string
       user_id:
@@ -108,6 +108,8 @@ definitions:
     type: object
   model.User:
     properties:
+      avatar:
+        type: string
       email:
         type: string
       first_name:
@@ -133,10 +135,10 @@ definitions:
       valid:
         type: boolean
     type: object
-  storage.PresignResult:
+  storagesvc.PresignResult:
     properties:
       headers:
-        $ref: '#/definitions/http.Header'
+        $ref: "#/definitions/http.Header"
       image_id:
         type: string
       url:
@@ -153,11 +155,15 @@ definitions:
       password:
         type: string
     type: object
-  verifysvc.SendParams:
+  usersvc.UpdateParams:
     properties:
+      avatar_id:
+        type: string
       email:
         type: string
-      userId:
+      first_name:
+        type: string
+      last_name:
         type: string
     type: object
 host: localhost:8080
@@ -177,7 +183,7 @@ paths:
   /:
     get:
       produces:
-      - text/plain
+        - text/plain
       responses:
         "200":
           description: OK
@@ -187,65 +193,66 @@ paths:
   /auth/login:
     post:
       consumes:
-      - application/json
+        - application/json
       parameters:
-      - description: Login Params
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/authsvc.LoginParams'
+        - description: Login Params
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: "#/definitions/authsvc.LoginParams"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: User
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: "#/definitions/model.User"
       summary: Log in
       tags:
-      - auth
+        - auth
   /auth/logout:
     post:
       consumes:
-      - application/json
+        - application/json
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
       summary: Log out
       tags:
-      - auth
+        - auth
   /auth/me:
     get:
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: "#/definitions/model.User"
         "401":
           description: Unauthorized
       summary: Get current authenticated user
       tags:
-      - auth
+        - auth
   /auth/verification:
     post:
       consumes:
-      - application/json
-      description: Sends (or resends) a verification link to the provided email. Returns
+        - application/json
+      description:
+        Sends (or resends) a verification link to the provided email. Returns
         204 on success.
       parameters:
-      - description: Email payload
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/verifysvc.SendParams'
+        - description: Email payload
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/verifysvc.SendParams"
       produces:
-      - application/json
+        - application/json
       responses:
         "204":
           description: No Content
@@ -263,19 +270,20 @@ paths:
             type: object
       summary: Send verification email
       tags:
-      - verify
+        - verify
   /auth/verification/{id}:
     post:
-      description: Consumes the verification token from the path and marks the user
+      description:
+        Consumes the verification token from the path and marks the user
         verified.
       parameters:
-      - description: Verification token (UUID)
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: Verification token (UUID)
+          in: path
+          name: id
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: user verified
@@ -303,206 +311,206 @@ paths:
             type: object
       summary: Verify user by token
       tags:
-      - verify
+        - verify
   /category:
     get:
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.Category'
+              $ref: "#/definitions/model.Category"
             type: array
       summary: Get all categories
       tags:
-      - category
+        - category
   /category/{name}:
     get:
       parameters:
-      - description: Category name
-        in: path
-        name: name
-        required: true
-        type: string
+        - description: Category name
+          in: path
+          name: name
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Category'
+            $ref: "#/definitions/model.Category"
       summary: Get category by name
       tags:
-      - category
+        - category
   /chat/{roomID}:
     delete:
       parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
+        - description: Room ID
+          in: path
+          name: roomID
+          required: true
+          type: string
       responses:
         "204":
           description: No Content
       summary: Delete a chat room
       tags:
-      - chat
+        - chat
   /chat/{roomID}/messages:
     get:
       parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
+        - description: Room ID
+          in: path
+          name: roomID
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.ChatMessage'
+              $ref: "#/definitions/model.ChatMessage"
             type: array
       summary: Get latest messages
       tags:
-      - chat
+        - chat
   /chat/{roomID}/participants:
     get:
       parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
+        - description: Room ID
+          in: path
+          name: roomID
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.ChatParticipant'
+              $ref: "#/definitions/model.ChatParticipant"
             type: array
       summary: Get participants in a chat room
       tags:
-      - chat
+        - chat
   /chat/{roomID}/participants/{userID}:
     delete:
       parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
-      - description: User ID
-        in: path
-        name: userID
-        required: true
-        type: string
+        - description: Room ID
+          in: path
+          name: roomID
+          required: true
+          type: string
+        - description: User ID
+          in: path
+          name: userID
+          required: true
+          type: string
       responses:
         "204":
           description: No Content
       summary: Remove a user from a chat room
       tags:
-      - chat
+        - chat
     post:
       parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
-      - description: User ID
-        in: body
-        name: userID
-        required: true
-        schema:
+        - description: Room ID
+          in: path
+          name: roomID
+          required: true
           type: string
+        - description: User ID
+          in: body
+          name: userID
+          required: true
+          schema:
+            type: string
       responses:
         "204":
           description: No Content
       summary: Add a user to a chat room
       tags:
-      - chat
+        - chat
   /chat/{roomID}/ws:
     get:
       parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
+        - description: Room ID
+          in: path
+          name: roomID
+          required: true
+          type: string
       responses:
         "200":
           description: OK
       summary: Handle WebSocket connections
       tags:
-      - chat
+        - chat
   /chat/messages/{messageID}:
     delete:
       parameters:
-      - description: Message ID
-        format: int64
-        in: path
-        name: messageID
-        required: true
-        type: integer
+        - description: Message ID
+          format: int64
+          in: path
+          name: messageID
+          required: true
+          type: integer
       responses:
         "204":
           description: No Content
       summary: Delete a message
       tags:
-      - chat
+        - chat
     patch:
       parameters:
-      - description: Message ID
-        format: int64
-        in: path
-        name: messageID
-        required: true
-        type: integer
-      - description: New message body
-        in: body
-        name: body
-        required: true
-        schema:
-          type: string
+        - description: Message ID
+          format: int64
+          in: path
+          name: messageID
+          required: true
+          type: integer
+        - description: New message body
+          in: body
+          name: body
+          required: true
+          schema:
+            type: string
       responses:
         "204":
           description: No Content
       summary: Edit an existing message
       tags:
-      - chat
+        - chat
   /chat/rooms:
     get:
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.ChatParticipant'
+              $ref: "#/definitions/model.ChatParticipant"
             type: array
       summary: Get chat rooms for a user
       tags:
-      - chat
+        - chat
     post:
       parameters:
-      - description: User IDs
-        in: body
-        name: userIDs
-        required: true
-        schema:
-          items:
-            type: string
-          type: array
+        - description: User IDs
+          in: body
+          name: userIDs
+          required: true
+          schema:
+            items:
+              type: string
+            type: array
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -510,281 +518,304 @@ paths:
             type: string
       summary: Create a new room
       tags:
-      - chat
+        - chat
   /item:
     get:
       parameters:
-      - description: Seller filter
-        in: query
-        name: seller
-        type: string
-      - description: Search query
-        in: query
-        name: q
-        type: string
-      - description: Category filter
-        in: query
-        name: category
-        type: string
-      - description: Order by
-        in: query
-        name: orderby
-        type: string
-      - description: Order direction
-        in: query
-        name: orderdir
-        type: string
-      - description: Page number
-        format: int32
-        in: query
-        name: page
-        type: integer
+        - description: Seller filter
+          in: query
+          name: seller
+          type: string
+        - description: Search query
+          in: query
+          name: q
+          type: string
+        - description: Category filter
+          in: query
+          name: category
+          type: string
+        - description: Order by
+          in: query
+          name: orderby
+          type: string
+        - description: Order direction
+          in: query
+          name: orderdir
+          type: string
+        - description: Page number
+          format: int32
+          in: query
+          name: page
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.Item'
+              $ref: "#/definitions/model.Item"
             type: array
       summary: Get many items
       tags:
-      - item
+        - item
     post:
       consumes:
-      - application/json
+        - application/json
       parameters:
-      - description: Item
-        in: body
-        name: item
-        required: true
-        schema:
-          $ref: '#/definitions/itemsvc.MutationParams'
+        - description: Item
+          in: body
+          name: item
+          required: true
+          schema:
+            $ref: "#/definitions/itemsvc.MutationParams"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.Item'
+            $ref: "#/definitions/model.Item"
       summary: Create item
       tags:
-      - item
+        - item
   /item/{id}:
     delete:
       parameters:
-      - description: Item ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Item ID
+          in: path
+          name: id
+          required: true
+          type: integer
       responses:
         "204":
           description: No Content
       summary: Delete item by ID
       tags:
-      - item
+        - item
     get:
       parameters:
-      - description: Item ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Item ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Item'
+            $ref: "#/definitions/model.Item"
       summary: Get item by ID
       tags:
-      - item
+        - item
     put:
       consumes:
-      - application/json
+        - application/json
       parameters:
-      - description: Item ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Item
-        in: body
-        name: item
-        required: true
-        schema:
-          $ref: '#/definitions/itemsvc.MutationParams'
+        - description: Item ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Item
+          in: body
+          name: item
+          required: true
+          schema:
+            $ref: "#/definitions/itemsvc.MutationParams"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Item'
+            $ref: "#/definitions/model.Item"
       summary: Update item by ID
       tags:
-      - item
+        - item
   /item/{id}/like:
     post:
       parameters:
-      - description: Item ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Item ID
+          in: path
+          name: id
+          required: true
+          type: integer
       responses:
         "204":
           description: No Content
       summary: Like an item
       tags:
-      - item
+        - item
   /item/{id}/sell:
     post:
       parameters:
-      - description: Item ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Item ID
+          in: path
+          name: id
+          required: true
+          type: integer
       responses:
         "204":
           description: No Content
       summary: Update sold_at property by ID
       tags:
-      - item
+        - item
   /item/{id}/unlike:
     post:
       parameters:
-      - description: Item ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Item ID
+          in: path
+          name: id
+          required: true
+          type: integer
       responses:
         "204":
           description: No Content
       summary: Unlike an item
       tags:
-      - item
+        - item
   /item/{id}/view:
     post:
       parameters:
-      - description: Item ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Item ID
+          in: path
+          name: id
+          required: true
+          type: integer
       responses:
         "204":
           description: No Content
       summary: Increment item views by ID
       tags:
-      - item
+        - item
   /item/batch:
     post:
       consumes:
-      - application/json
+        - application/json
       parameters:
-      - description: Item IDs
-        in: body
-        name: item_IDs
-        required: true
-        schema:
-          items:
-            type: integer
-          type: array
-      - description: Page number
-        format: int32
-        in: query
-        name: page
-        type: integer
+        - description: Item IDs
+          in: body
+          name: item_IDs
+          required: true
+          schema:
+            items:
+              type: integer
+            type: array
+        - description: Page number
+          format: int32
+          in: query
+          name: page
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.Item'
+              $ref: "#/definitions/model.Item"
             type: array
       summary: Get items in bulk by list of IDs
       tags:
-      - item
-  /item/presign:
+        - item
+  /storage/presign:
     post:
       consumes:
-      - application/json
+        - application/json
       parameters:
-      - description: Content type of the item to be uploaded
-        in: query
-        name: type
-        required: true
-        type: string
+        - description: Content type of the item to be uploaded
+          in: query
+          name: type
+          required: true
+          type: string
+        - description: Storage bucket name
+          in: query
+          name: bucket
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/storage.PresignResult'
+            $ref: "#/definitions/storagesvc.PresignResult"
       summary: Generate presigned URL for item upload
       tags:
-      - item
+        - util
   /user:
     get:
       consumes:
-      - application/json
+        - application/json
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.User'
+              $ref: "#/definitions/model.User"
             type: array
       summary: Get many users
       tags:
-      - user
+        - user
     post:
       consumes:
-      - application/json
+        - application/json
       parameters:
-      - description: User
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/usersvc.CreateParams'
+        - description: User
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: "#/definitions/usersvc.CreateParams"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: "#/definitions/model.User"
       summary: Create user
       tags:
-      - user
+        - user
+    put:
+      consumes:
+        - application/json
+      parameters:
+        - description: User
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: "#/definitions/usersvc.UpdateParams"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update user
+      tags:
+        - user
   /user/{id}:
     get:
       parameters:
-      - description: User ID (UUID)
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: User ID (UUID)
+          in: path
+          name: id
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: "#/definitions/model.User"
       summary: Get seller by ID
       tags:
-      - user
+        - user
 swagger: "2.0"

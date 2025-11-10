@@ -680,37 +680,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/item/presign": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "item"
-                ],
-                "summary": "Generate presigned URL for item upload",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Content type of the item to be uploaded",
-                        "name": "type",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/storage.PresignResult"
-                        }
-                    }
-                }
-            }
-        },
         "/item/{id}": {
             "get": {
                 "produces": [
@@ -885,6 +854,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/storage/presign": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "util"
+                ],
+                "summary": "Generate presigned URL for item upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Content type of the item to be uploaded",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Storage bucket name",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/storagesvc.PresignResult"
+                        }
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "consumes": [
@@ -906,6 +913,34 @@ const docTemplate = `{
                                 "$ref": "#/definitions/model.User"
                             }
                         }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update user",
+                "parameters": [
+                    {
+                        "description": "User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/usersvc.UpdateParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             },
@@ -1136,6 +1171,9 @@ const docTemplate = `{
         "model.User": {
             "type": "object",
             "properties": {
+                "avatar": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -1174,7 +1212,7 @@ const docTemplate = `{
                 }
             }
         },
-        "storage.PresignResult": {
+        "storagesvc.PresignResult": {
             "type": "object",
             "properties": {
                 "headers": {
@@ -1205,13 +1243,19 @@ const docTemplate = `{
                 }
             }
         },
-        "verifysvc.SendParams": {
+        "usersvc.UpdateParams": {
             "type": "object",
             "properties": {
+                "avatar_id": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
-                "userId": {
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
                     "type": "string"
                 }
             }

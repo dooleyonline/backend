@@ -302,35 +302,3 @@ func (h *Handler) GetBatch(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
-
-// GetUploadURL godoc
-//
-//	@Summary	Generate presigned URL for item upload
-//	@Tags		item
-//	@Accept		json
-//	@Produce	json
-//	@Param		type	query		string	true	"Content type of the item to be uploaded"
-//	@Success	200		{object}	storage.PresignResult
-//	@Router		/item/presign [post]
-func (h *Handler) GetUploadURL(c echo.Context) error {
-	var (
-		req = c.Request()
-		ctx = req.Context()
-	)
-
-	var contentType string
-	if err := echo.QueryParamsBinder(c).String("type", &contentType).BindError(); err != nil {
-		return echo.ErrBadRequest.WithInternal(err)
-	}
-
-	if contentType == "" {
-		return echo.ErrBadRequest
-	}
-
-	res, err := h.svc.GetUploadPresignURL(ctx, contentType)
-	if err != nil {
-		return echo.ErrInternalServerError.WithInternal(err)
-	}
-
-	return c.JSON(http.StatusOK, res)
-}

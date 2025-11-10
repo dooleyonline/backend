@@ -73,3 +73,25 @@ func (s *Service) Get(ctx context.Context, id string) (*model.User, error) {
 
 	return &user, nil
 }
+
+type UpdateParams struct {
+	UserID    string `json:"-"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	AvatarID  string `json:"avatar_id"`
+}
+
+func (s *Service) Update(ctx context.Context, params UpdateParams) error {
+	err := s.db.User.User.Update(ctx, useruser.UpdateParams{
+		ID:        params.UserID,
+		Email:     params.Email,
+		FirstName: params.FirstName,
+		LastName:  params.LastName,
+		Avatar:    params.AvatarID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update user avatar: %w", err)
+	}
+	return nil
+}

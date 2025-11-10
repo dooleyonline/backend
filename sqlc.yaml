@@ -82,7 +82,7 @@ sql:
         sql_package: "pgx/v5"
         emit_json_tags: true
         emit_empty_slices: true
-        
+
   - engine: "postgresql"
     database:
       managed: true
@@ -111,6 +111,9 @@ overrides:
           pointer: true
         nullable: true
       - db_type: "uuid"
+        go_type: "string"
+      - db_type: "uuid"
+        nullable: true
         go_type: "string"
       - db_type: "text"
         go_type: "string"
