@@ -1154,7 +1154,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "last_read_message_id": {
-                    "$ref": "#/definitions/pgtype.Int8"
+                    "type": "integer"
                 },
                 "room_id": {
                     "type": "string"
@@ -1271,18 +1271,6 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "string"
-                }
-            }
-        },
-        "pgtype.Int8": {
-            "type": "object",
-            "properties": {
-                "int64": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "valid": {
-                    "type": "boolean"
                 }
             }
         },
