@@ -69,7 +69,7 @@ func (s *Service) CookieOptions() (*CookieOptionsResult, error) {
 	return &CookieOptionsResult{
 		AuthTokenName: s.cfg.AuthTokenName,
 		AuthTokenExp:  s.cfg.AuthTokenExp,
-		Secure:        s.cfg.IsProd,
+		Secure:        true,
 	}, nil
 }
 
