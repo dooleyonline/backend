@@ -62,12 +62,12 @@ func (h *Handler) Create(c echo.Context) error {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }
 
-// GetSeller godoc
+// Get godoc
 //
-//	@Summary	Get seller by ID
+//	@Summary	Get user by ID
 //	@Tags		user
 //	@Produce	json
 //	@Param		id	path		string	true	"User ID (UUID)"
@@ -89,5 +89,5 @@ func (h *Handler) Get(c echo.Context) error {
 		return echo.ErrNotFound.WithInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, *res)
+	return c.JSON(http.StatusOK, res)
 }
