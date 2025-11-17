@@ -104,6 +104,7 @@ type ParticipantParams struct {
 }
 
 func (s *Service) AddParticipant(ctx context.Context, p *ParticipantParams) error {
+	// TODO: Check if
 	if err := s.db.Chat.Room.AddParticipant(ctx, chatroom.AddParticipantParams{
 		UserID: p.UserID,
 		RoomID: p.RoomID,
