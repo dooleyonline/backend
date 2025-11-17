@@ -1,8 +1,10 @@
 package chathandler
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
 	chatsvc "github.com/dooleyonline/backend/internal/service/chat"
@@ -26,8 +28,9 @@ func (h *Handler) GetMessages(c echo.Context) error {
 
 	var (
 		roomID string
+		page   int32
 	)
-	if err := echo.PathParamsBinder(c).String("roomID", &roomID).BindError(); err != nil {
+	if err := echo.PathParamsBinder(c).String("roomID", &roomID).Int32("page", &page).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
@@ -40,7 +43,7 @@ func (h *Handler) GetMessages(c echo.Context) error {
 		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant"))
 	}
 
-	res, err := h.svc.GetLatestMessages(ctx, roomID)
+	res, err := h.svc.GetLatestMessages(ctx, roomID, page)
 	if err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
@@ -256,14 +259,47 @@ func (h *Handler) GetRooms(c echo.Context) error {
 		req    = c.Request()
 		ctx    = req.Context()
 		userID = c.(shared.Context).UserID
+		res    = c.Response()
 	)
 
-	rooms, err := h.svc.GetRooms(ctx, userID)
-	if err != nil {
-		return echo.ErrInternalServerError.WithInternal(err)
+	res.Header().Set("Content-Type", "text/event-stream")
+	res.Header().Set("Cache-Control", "no-cache")
+	res.Header().Set("Connection", "keep-alive")
+
+	flusher, ok := res.Writer.(http.Flusher)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, "streaming unsupported")
 	}
 
-	return c.JSON(http.StatusOK, rooms)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			rooms, err := h.svc.GetRooms(ctx, userID)
+			if err != nil {
+				return echo.ErrInternalServerError.WithInternal(err)
+			}
+
+			payload, err := json.Marshal(rooms)
+			if err != nil {
+				c.Logger().Errorf("marshal rooms failed: %v", err)
+				continue
+			}
+
+			// Send SSE event
+			_, _ = res.Write([]byte("event: rooms\n"))
+			_, _ = res.Write([]byte("data: "))
+			_, _ = res.Write(payload)
+			_, _ = res.Write([]byte("\n\n"))
+
+			flusher.Flush()
+
+		}
+	}
 }
 
 // GetParticipants godoc

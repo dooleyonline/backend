@@ -91,10 +91,10 @@ func (s *Service) DeleteRoom(ctx context.Context, roomID string) error {
 	return s.db.Chat.Room.DeleteRoom(ctx, roomID)
 }
 
-func (s *Service) GetLatestMessages(ctx context.Context, roomID string) ([]model.ChatMessage, error) {
+func (s *Service) GetLatestMessages(ctx context.Context, roomID string, page int32) ([]model.ChatMessage, error) {
 	return s.db.Chat.Message.GetMany(ctx, chatmessage.GetManyParams{
 		RoomID: roomID,
-		Limit:  20,
+		Page:   page,
 	})
 }
 
@@ -139,8 +139,40 @@ func (s *Service) RemoveParticipant(ctx context.Context, p *ParticipantParams) e
 	return nil
 }
 
-func (s *Service) GetRooms(ctx context.Context, userID string) ([]model.ChatParticipant, error) {
-	return s.db.Chat.Participant.GetByUserID(ctx, userID)
+type GetRoomsResult struct {
+	RoomID            string `json:"room_id"`
+	UserID            string `json:"user_id"`
+	LastReadMessageID *int64 `json:"last_read_message_id"`
+	ReadAll           bool   `json:"read_all"`
+}
+
+func (s *Service) GetRooms(ctx context.Context, userID string) ([]GetRoomsResult, error) {
+	participants, err := s.db.Chat.Participant.GetByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]GetRoomsResult, 0, len(participants))
+	for _, p := range participants {
+		lastMsgID, err := s.db.Chat.Message.Get(ctx, p.RoomID)
+		if err != nil {
+			return nil, err
+		}
+
+		readAll := false
+		if p.LastReadMessageID == nil {
+			readAll = true
+		} else if p.LastReadMessageID != nil {
+			readAll = (lastMsgID.ID == *p.LastReadMessageID)
+		}
+		results = append(results, GetRoomsResult{
+			RoomID:            p.RoomID,
+			UserID:            p.UserID,
+			LastReadMessageID: p.LastReadMessageID,
+			ReadAll:           readAll,
+		})
+	}
+	return results, nil
 }
 
 func (s *Service) GetParticipants(ctx context.Context, roomID string) ([]model.ChatParticipant, error) {
@@ -160,4 +192,16 @@ func (s *Service) IsParticipant(ctx context.Context, roomID string, userID strin
 		return false, nil
 	}
 	return true, nil
+}
+
+func (s *Service) UpdateLastReadMessageID(ctx context.Context, roomID string, userID string) error {
+	messageID, err := s.db.Chat.Message.Get(ctx, roomID)
+	if err != nil {
+		return err
+	}
+	return s.db.Chat.Participant.UpdateLastReadMessageID(ctx, chatparticipant.UpdateLastReadMessageIDParams{
+		RoomID:          roomID,
+		UserID:          userID,
+		LastReadMessageID: &messageID.ID,
+	})
 }
