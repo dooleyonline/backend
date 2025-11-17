@@ -33,10 +33,10 @@ func (s *Service) GetMany(ctx context.Context) ([]model.User, error) {
 }
 
 type CreateParams struct {
-	Email     string
-	Password  string
-	FirstName string
-	LastName  string
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 }
 
 func (s *Service) Create(ctx context.Context, p *CreateParams) (*model.User, error) {
