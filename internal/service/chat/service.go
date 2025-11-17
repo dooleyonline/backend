@@ -2,6 +2,7 @@ package chatsvc
 
 import (
 	"context"
+	"errors"
 	"slices"
 
 	"github.com/bwmarrin/snowflake"
@@ -11,6 +12,7 @@ import (
 	chatparticipant "github.com/dooleyonline/backend/internal/db/chat/participant"
 	chatroom "github.com/dooleyonline/backend/internal/db/chat/room"
 	"github.com/dooleyonline/backend/internal/model"
+	"github.com/jackc/pgx/v5"
 )
 
 type Service struct {
@@ -36,8 +38,7 @@ type CreateMessageParams struct {
 	Message string
 }
 
-func (s *Service) CreateMessage(ctx context.Context, p *CreateMessageParams) error {
-
+func (s *Service) CreateMessage(ctx context.Context, p *CreateMessageParams) (model.ChatMessage, error) {
 	dbparams := chatmessage.CreateParams{
 		ID:     s.GenerateID(),
 		RoomID: p.RoomID,
@@ -45,9 +46,10 @@ func (s *Service) CreateMessage(ctx context.Context, p *CreateMessageParams) err
 		Body:   p.Message,
 	}
 	if err := s.db.Chat.Message.Create(ctx, dbparams); err != nil {
-		return err
+		return model.ChatMessage{}, err
 	}
-	return nil
+
+	return s.GetMessageByID(ctx, dbparams.ID)
 }
 
 type EditMessageParams struct {
@@ -70,19 +72,56 @@ func (s *Service) DeleteMessage(ctx context.Context, messageID int64) error {
 	return s.db.Chat.Message.Delete(ctx, messageID)
 }
 
+func (s *Service) GetMessageByID(ctx context.Context, messageID int64) (model.ChatMessage, error) {
+	const q = `
+SELECT
+  room_id, sent_by, body, id, edited, sent_at
+FROM
+  chat.message
+WHERE
+  id = $1
+`
+	row := s.db.Pool.QueryRow(ctx, q, messageID)
+	var msg model.ChatMessage
+	if err := row.Scan(
+		&msg.RoomID,
+		&msg.SentBy,
+		&msg.Body,
+		&msg.ID,
+		&msg.Edited,
+		&msg.SentAt,
+	); err != nil {
+		return model.ChatMessage{}, err
+	}
+	return msg, nil
+}
+
 func (s *Service) CreateRoom(ctx context.Context, users []string) (string, error) {
-	id, err := s.db.Chat.Room.CreateRoom(ctx, users)
+	tx, err := s.db.Pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return "", err
+	}
+	defer tx.Rollback(ctx)
+
+	room := chatroom.New(tx)
+	participant := chatparticipant.New(tx)
+
+	id, err := room.CreateRoom(ctx, users)
 	if err != nil {
 		return "", err
 	}
 
 	for _, user := range users {
-		if err := s.db.Chat.Participant.Create(ctx, chatparticipant.CreateParams{
+		if err := participant.Create(ctx, chatparticipant.CreateParams{
 			RoomID: id,
 			UserID: user,
 		}); err != nil {
 			return "", err
 		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return "", err
 	}
 	return id, nil
 }
@@ -104,39 +143,57 @@ type ParticipantParams struct {
 }
 
 func (s *Service) AddParticipant(ctx context.Context, p *ParticipantParams) error {
-	if err := s.db.Chat.Room.AddParticipant(ctx, chatroom.AddParticipantParams{
+	tx, err := s.db.Pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	room := chatroom.New(tx)
+	participant := chatparticipant.New(tx)
+
+	if err := room.AddParticipant(ctx, chatroom.AddParticipantParams{
 		UserID: p.UserID,
 		RoomID: p.RoomID,
 	}); err != nil {
 		return err
 	}
 
-	if err := s.db.Chat.Participant.Create(ctx, chatparticipant.CreateParams{
+	if err := participant.Create(ctx, chatparticipant.CreateParams{
 		RoomID: p.RoomID,
 		UserID: p.UserID,
 	}); err != nil {
 		return err
 	}
 
-	return nil
+	return tx.Commit(ctx)
 }
 
 func (s *Service) RemoveParticipant(ctx context.Context, p *ParticipantParams) error {
-	if err := s.db.Chat.Room.RemoveParticipant(ctx, chatroom.RemoveParticipantParams{
+	tx, err := s.db.Pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	room := chatroom.New(tx)
+	participant := chatparticipant.New(tx)
+
+	if err := room.RemoveParticipant(ctx, chatroom.RemoveParticipantParams{
 		UserID: p.UserID,
 		RoomID: p.RoomID,
 	}); err != nil {
 		return err
 	}
 
-	if err := s.db.Chat.Participant.Delete(ctx, chatparticipant.DeleteParams{
+	if err := participant.Delete(ctx, chatparticipant.DeleteParams{
 		RoomID: p.RoomID,
 		UserID: p.UserID,
 	}); err != nil {
 		return err
 	}
 
-	return nil
+	return tx.Commit(ctx)
 }
 
 type GetRoomsResult struct {
@@ -154,16 +211,23 @@ func (s *Service) GetRooms(ctx context.Context, userID string) ([]GetRoomsResult
 
 	results := make([]GetRoomsResult, 0, len(participants))
 	for _, p := range participants {
-		lastMsgID, err := s.db.Chat.Message.Get(ctx, p.RoomID)
+		var (
+			lastMsg *model.ChatMessage
+		)
+		msg, err := s.db.Chat.Message.Get(ctx, p.RoomID)
 		if err != nil {
-			return nil, err
+			if errors.Is(err, pgx.ErrNoRows) {
+				lastMsg = nil
+			} else {
+				return nil, err
+			}
+		} else {
+			lastMsg = &msg
 		}
 
-		readAll := false
-		if p.LastReadMessageID == nil {
-			readAll = true
-		} else if p.LastReadMessageID != nil {
-			readAll = (lastMsgID.ID == *p.LastReadMessageID)
+		readAll := lastMsg == nil
+		if !readAll && p.LastReadMessageID != nil {
+			readAll = lastMsg.ID == *p.LastReadMessageID
 		}
 		results = append(results, GetRoomsResult{
 			RoomID:            p.RoomID,
@@ -197,11 +261,22 @@ func (s *Service) IsParticipant(ctx context.Context, roomID string, userID strin
 func (s *Service) UpdateLastReadMessageID(ctx context.Context, roomID string, userID string) error {
 	messageID, err := s.db.Chat.Message.Get(ctx, roomID)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
 		return err
 	}
 	return s.db.Chat.Participant.UpdateLastReadMessageID(ctx, chatparticipant.UpdateLastReadMessageIDParams{
-		RoomID:          roomID,
-		UserID:          userID,
+		RoomID:            roomID,
+		UserID:            userID,
 		LastReadMessageID: &messageID.ID,
+	})
+}
+
+func (s *Service) UpdateLastReadMessageIDTo(ctx context.Context, roomID string, userID string, messageID int64) error {
+	return s.db.Chat.Participant.UpdateLastReadMessageID(ctx, chatparticipant.UpdateLastReadMessageIDParams{
+		RoomID:            roomID,
+		UserID:            userID,
+		LastReadMessageID: &messageID,
 	})
 }

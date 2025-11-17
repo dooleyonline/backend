@@ -12,8 +12,8 @@ import (
 )
 
 type Handler struct {
-	svc    *chatsvc.Service
-	hub    *Hub
+	svc *chatsvc.Service
+	hub *Hub
 }
 
 func New(svc *chatsvc.Service) *Handler {
@@ -80,17 +80,6 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant"))
 	}
 
-
-	if err := h.svc.UpdateLastReadMessageID(ctx, roomID, userID); err != nil{
-		return echo.ErrInternalServerError.WithInternal(err)
-	}
-
-	defer func() {
-		if err := h.svc.UpdateLastReadMessageID(ctx, roomID, userID); err != nil{
-			c.Logger().Errorf("failed to update last read message id: %v", err)
-		}
-	}()
-
 	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
@@ -108,6 +97,16 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 		h.hub.unregister <- client
 	}()
 
+	var lastReadMsgID *int64
+	defer func() {
+		if lastReadMsgID == nil {
+			return
+		}
+		if err := h.svc.UpdateLastReadMessageIDTo(ctx, roomID, userID, *lastReadMsgID); err != nil {
+			c.Logger().Errorf("failed to update last read message id: %v", err)
+		}
+	}()
+
 	for {
 		_, m, err := conn.ReadMessage()
 		if err != nil {
@@ -122,16 +121,17 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 			Message: msg,
 		}
 
-		if err := h.svc.CreateMessage(ctx, params); err != nil {
-			conn.WriteJSON(err)
+		created, err := h.svc.CreateMessage(ctx, params)
+		if err != nil {
+			_ = conn.WriteJSON(map[string]string{"error": "failed to create message"})
 			continue
 		}
 
-		h.hub.broadcast <- &model.ChatMessage{
-			SentBy: userID,
-			RoomID: roomID,
-			Body:   msg,
-		}
+		id := created.ID
+		lastReadMsgID = &id
+
+		msgCopy := created
+		h.hub.broadcast <- &msgCopy
 	}
 
 	return nil

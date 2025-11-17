@@ -8,6 +8,7 @@ import (
 
 	"github.com/dooleyonline/backend/internal/api/shared"
 	chatsvc "github.com/dooleyonline/backend/internal/service/chat"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -30,8 +31,14 @@ func (h *Handler) GetMessages(c echo.Context) error {
 		roomID string
 		page   int32
 	)
-	if err := echo.PathParamsBinder(c).String("roomID", &roomID).Int32("page", &page).BindError(); err != nil {
+	if err := echo.PathParamsBinder(c).String("roomID", &roomID).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
+	}
+	if err := echo.QueryParamsBinder(c).Int32("page", &page).BindError(); err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
+	}
+	if page < 1 {
+		page = 1
 	}
 
 	isParticipant, err := h.svc.IsParticipant(ctx, roomID, userID)
@@ -61,13 +68,25 @@ func (h *Handler) GetMessages(c echo.Context) error {
 //	@Router		/chat/messages/{messageID} [patch]
 func (h *Handler) EditMessage(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
 	var msgID int64
 	if err := echo.PathParamsBinder(c).Int64("messageID", &msgID).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	msg, err := h.svc.GetMessageByID(ctx, msgID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return echo.ErrNotFound
+		}
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+	if msg.SentBy != userID {
+		return echo.ErrForbidden.WithInternal(errors.New("user is not the sender of this message"))
 	}
 
 	var body string
@@ -94,13 +113,25 @@ func (h *Handler) EditMessage(c echo.Context) error {
 //	@Router		/chat/messages/{messageID} [delete]
 func (h *Handler) DeleteMessage(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
 	var msgID int64
 	if err := echo.PathParamsBinder(c).Int64("messageID", &msgID).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	msg, err := h.svc.GetMessageByID(ctx, msgID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return echo.ErrNotFound
+		}
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+	if msg.SentBy != userID {
+		return echo.ErrForbidden.WithInternal(errors.New("user is not the sender of this message"))
 	}
 
 	if err := h.svc.DeleteMessage(ctx, msgID); err != nil {
@@ -150,13 +181,22 @@ func (h *Handler) CreateRoom(c echo.Context) error {
 //	@Router		/chat/{roomID} [delete]
 func (h *Handler) DeleteRoom(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
 	var roomID string
 	if err := echo.PathParamsBinder(c).String("roomID", &roomID).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	isParticipant, err := h.svc.IsParticipant(ctx, roomID, userID)
+	if err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+	if !isParticipant {
+		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant of this room"))
 	}
 
 	if err := h.svc.DeleteRoom(ctx, roomID); err != nil {
@@ -216,14 +256,15 @@ func (h *Handler) AddParticipant(c echo.Context) error {
 //	@Router		/chat/{roomID}/participants/{userID} [delete]
 func (h *Handler) RemoveParticipant(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
-	var roomID, userID string
+	var roomID, participantID string
 	if err := echo.PathParamsBinder(c).
 		String("roomID", &roomID).
-		String("userID", &userID).
+		String("userID", &participantID).
 		BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
@@ -239,7 +280,7 @@ func (h *Handler) RemoveParticipant(c echo.Context) error {
 
 	if err := h.svc.RemoveParticipant(ctx, &chatsvc.ParticipantParams{
 		RoomID: roomID,
-		UserID: userID,
+		UserID: participantID,
 	}); err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
