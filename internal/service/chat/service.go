@@ -2,6 +2,8 @@ package chatsvc
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"slices"
 
 	"github.com/bwmarrin/snowflake"
@@ -156,12 +158,21 @@ func (s *Service) GetRooms(ctx context.Context, userID string) ([]GetRoomsResult
 	for _, p := range participants {
 		lastMsgID, err := s.db.Chat.Message.Get(ctx, p.RoomID)
 		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				results = append(results, GetRoomsResult{
+					RoomID:            p.RoomID,
+					UserID:            p.UserID,
+					LastReadMessageID: p.LastReadMessageID,
+					ReadAll:           false, 
+				})
+				continue
+			}
 			return nil, err
 		}
 
 		readAll := false
 		if p.LastReadMessageID == nil {
-			readAll = true
+			readAll = false
 		} else if p.LastReadMessageID != nil {
 			readAll = (lastMsgID.ID == *p.LastReadMessageID)
 		}
@@ -200,8 +211,8 @@ func (s *Service) UpdateLastReadMessageID(ctx context.Context, roomID string, us
 		return err
 	}
 	return s.db.Chat.Participant.UpdateLastReadMessageID(ctx, chatparticipant.UpdateLastReadMessageIDParams{
-		RoomID:          roomID,
-		UserID:          userID,
+		RoomID:            roomID,
+		UserID:            userID,
 		LastReadMessageID: &messageID.ID,
 	})
 }

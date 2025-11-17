@@ -1,6 +1,7 @@
 package chathandler
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -281,7 +282,11 @@ func (h *Handler) GetRooms(c echo.Context) error {
 		case <-ticker.C:
 			rooms, err := h.svc.GetRooms(ctx, userID)
 			if err != nil {
-				return echo.ErrInternalServerError.WithInternal(err)
+				if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+					return nil
+				}
+				c.Logger().Errorf("failed to get rooms: %v", err)
+				continue
 			}
 
 			payload, err := json.Marshal(rooms)
