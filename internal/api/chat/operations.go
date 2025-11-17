@@ -1,6 +1,7 @@
 package chathandler
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -305,6 +306,8 @@ func (h *Handler) GetRooms(c echo.Context) error {
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 
+	lastPayload := []byte{}
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -322,13 +325,15 @@ func (h *Handler) GetRooms(c echo.Context) error {
 			}
 
 			// Send SSE event
-			_, _ = res.Write([]byte("event: rooms\n"))
-			_, _ = res.Write([]byte("data: "))
-			_, _ = res.Write(payload)
-			_, _ = res.Write([]byte("\n\n"))
+			if !bytes.Equal(payload, lastPayload) {
+				_, _ = res.Write([]byte("event: rooms\n"))
+				_, _ = res.Write([]byte("data: "))
+				_, _ = res.Write(payload)
+				_, _ = res.Write([]byte("\n\n"))
 
-			flusher.Flush()
-
+				flusher.Flush()
+				lastPayload = payload
+			}
 		}
 	}
 }
