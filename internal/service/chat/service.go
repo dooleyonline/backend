@@ -39,30 +39,38 @@ type CreateMessageParams struct {
 }
 
 func (s *Service) CreateMessage(ctx context.Context, p *CreateMessageParams) (model.ChatMessage, error) {
-	dbparams := chatmessage.CreateParams{
-		ID:     s.GenerateID(),
+	messageID := s.GenerateID()
+	if err := s.db.Chat.Message.Create(ctx, chatmessage.CreateParams{
+		ID:     messageID,
 		RoomID: p.RoomID,
 		SentBy: p.UserID,
 		Body:   p.Message,
-	}
-	if err := s.db.Chat.Message.Create(ctx, dbparams); err != nil {
+	}); err != nil {
 		return model.ChatMessage{}, err
 	}
 
-	return s.GetMessageByID(ctx, dbparams.ID)
+	return s.db.Chat.Message.GetByID(ctx, messageID)
 }
 
 type EditMessageParams struct {
-	ID   int64
-	Body string
+	UserID    string
+	MessageID int64
+	Body      string
 }
 
 func (s *Service) EditMessage(ctx context.Context, p *EditMessageParams) error {
-	dbparams := chatmessage.EditMessageParams{
-		ID:   p.ID,
-		Body: p.Body,
+	msg, err := s.GetMessageByID(ctx, p.MessageID)
+	if err != nil {
+		return err
 	}
-	if err := s.db.Chat.Message.EditMessage(ctx, dbparams); err != nil {
+	if msg.SentBy != p.UserID {
+		return errors.New("user is not the sender of this message")
+	}
+
+	if err := s.db.Chat.Message.EditMessage(ctx, chatmessage.EditMessageParams{
+		ID:   p.MessageID,
+		Body: p.Body,
+	}); err != nil {
 		return err
 	}
 	return nil
@@ -73,27 +81,7 @@ func (s *Service) DeleteMessage(ctx context.Context, messageID int64) error {
 }
 
 func (s *Service) GetMessageByID(ctx context.Context, messageID int64) (model.ChatMessage, error) {
-	const q = `
-SELECT
-  room_id, sent_by, body, id, edited, sent_at
-FROM
-  chat.message
-WHERE
-  id = $1
-`
-	row := s.db.Pool.QueryRow(ctx, q, messageID)
-	var msg model.ChatMessage
-	if err := row.Scan(
-		&msg.RoomID,
-		&msg.SentBy,
-		&msg.Body,
-		&msg.ID,
-		&msg.Edited,
-		&msg.SentAt,
-	); err != nil {
-		return model.ChatMessage{}, err
-	}
-	return msg, nil
+	return s.db.Chat.Message.GetByID(ctx, messageID)
 }
 
 func (s *Service) CreateRoom(ctx context.Context, users []string) (string, error) {
@@ -209,34 +197,33 @@ func (s *Service) GetRooms(ctx context.Context, userID string) ([]GetRoomsResult
 		return nil, err
 	}
 
-	results := make([]GetRoomsResult, 0, len(participants))
+	res := make([]GetRoomsResult, 0, len(participants))
 	for _, p := range participants {
 		var (
-			lastMsg *model.ChatMessage
+			latestMessage *model.ChatMessage
 		)
-		msg, err := s.db.Chat.Message.Get(ctx, p.RoomID)
+		msg, err := s.db.Chat.Message.GetLatestMessage(ctx, p.RoomID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				lastMsg = nil
+				latestMessage = nil
 			} else {
 				return nil, err
 			}
 		} else {
-			lastMsg = &msg
+			latestMessage = &msg
 		}
 
-		readAll := lastMsg == nil
-		if !readAll && p.LastReadMessageID != nil {
-			readAll = lastMsg.ID == *p.LastReadMessageID
-		}
-		results = append(results, GetRoomsResult{
+		// if last message of the room is nil, then read all
+		// if last read message is not nil and last message of the room is equal to last read message, then read all
+		readAll := latestMessage == nil || (p.LastReadMessageID != nil && latestMessage.ID == *p.LastReadMessageID)
+		res = append(res, GetRoomsResult{
 			RoomID:            p.RoomID,
 			UserID:            p.UserID,
 			LastReadMessageID: p.LastReadMessageID,
 			ReadAll:           readAll,
 		})
 	}
-	return results, nil
+	return res, nil
 }
 
 func (s *Service) GetParticipants(ctx context.Context, roomID string) ([]model.ChatParticipant, error) {
@@ -258,22 +245,7 @@ func (s *Service) IsParticipant(ctx context.Context, roomID string, userID strin
 	return true, nil
 }
 
-func (s *Service) UpdateLastReadMessageID(ctx context.Context, roomID string, userID string) error {
-	messageID, err := s.db.Chat.Message.Get(ctx, roomID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil
-		}
-		return err
-	}
-	return s.db.Chat.Participant.UpdateLastReadMessageID(ctx, chatparticipant.UpdateLastReadMessageIDParams{
-		RoomID:            roomID,
-		UserID:            userID,
-		LastReadMessageID: &messageID.ID,
-	})
-}
-
-func (s *Service) UpdateLastReadMessageIDTo(ctx context.Context, roomID string, userID string, messageID int64) error {
+func (s *Service) UpdateLastReadMessageID(ctx context.Context, roomID string, userID string, messageID int64) error {
 	return s.db.Chat.Participant.UpdateLastReadMessageID(ctx, chatparticipant.UpdateLastReadMessageIDParams{
 		RoomID:            roomID,
 		UserID:            userID,

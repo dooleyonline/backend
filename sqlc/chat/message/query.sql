@@ -17,7 +17,7 @@ LIMIT
   10 OFFSET 10*(CAST(@page AS integer)-1);
 
 
--- name: Get :one
+-- name: GetLatestMessage :one
 SELECT 
   *
 FROM
@@ -27,6 +27,14 @@ WHERE
 ORDER BY 
   sent_at DESC
 LIMIT 1;
+
+-- name: GetByID :one
+SELECT
+  *
+FROM
+  chat.message
+WHERE
+  id = $1;
 
 
 -- name: Delete :exec

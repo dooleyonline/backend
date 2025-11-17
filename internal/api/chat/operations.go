@@ -31,12 +31,13 @@ func (h *Handler) GetMessages(c echo.Context) error {
 		roomID string
 		page   int32
 	)
-	if err := echo.PathParamsBinder(c).String("roomID", &roomID).BindError(); err != nil {
+
+	if err := echo.PathParamsBinder(c).
+		String("roomID", &roomID).
+		Int32("page", &page).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
-	if err := echo.QueryParamsBinder(c).Int32("page", &page).BindError(); err != nil {
-		return echo.ErrBadRequest.WithInternal(err)
-	}
+
 	if page < 1 {
 		page = 1
 	}
@@ -73,31 +74,17 @@ func (h *Handler) EditMessage(c echo.Context) error {
 		userID = c.(shared.Context).UserID
 	)
 
-	var msgID int64
-	if err := echo.PathParamsBinder(c).Int64("messageID", &msgID).BindError(); err != nil {
+	var params chatsvc.EditMessageParams
+	params.UserID = userID
+	if err := echo.PathParamsBinder(c).Int64("messageID", &params.MessageID).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	msg, err := h.svc.GetMessageByID(ctx, msgID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return echo.ErrNotFound
-		}
-		return echo.ErrInternalServerError.WithInternal(err)
-	}
-	if msg.SentBy != userID {
-		return echo.ErrForbidden.WithInternal(errors.New("user is not the sender of this message"))
-	}
-
-	var body string
-	if err := c.Bind(&body); err != nil {
+	if err := c.Bind(&params.Body); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	if err := h.svc.EditMessage(ctx, &chatsvc.EditMessageParams{
-		ID:   msgID,
-		Body: body,
-	}); err != nil {
+	if err := h.svc.EditMessage(ctx, &params); err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
@@ -222,7 +209,10 @@ func (h *Handler) AddParticipant(c echo.Context) error {
 	)
 
 	var roomID, participantID string
-	if err := echo.PathParamsBinder(c).String("roomID", &roomID).String("userID", &participantID).BindError(); err != nil {
+	if err := echo.PathParamsBinder(c).
+		String("roomID", &roomID).
+		String("userID", &participantID).
+		BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 

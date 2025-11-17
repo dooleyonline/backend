@@ -102,8 +102,8 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 		if lastReadMsgID == nil {
 			return
 		}
-		if err := h.svc.UpdateLastReadMessageIDTo(ctx, roomID, userID, *lastReadMsgID); err != nil {
-			c.Logger().Errorf("failed to update last read message id: %v", err)
+		if err := h.svc.UpdateLastReadMessageID(ctx, roomID, userID, *lastReadMsgID); err != nil {
+			echo.ErrInternalServerError.WithInternal(err)
 		}
 	}()
 

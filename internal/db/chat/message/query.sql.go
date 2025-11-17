@@ -64,7 +64,30 @@ func (q *Queries) EditMessage(ctx context.Context, arg EditMessageParams) error 
 	return err
 }
 
-const get = `-- name: Get :one
+const getByID = `-- name: GetByID :one
+SELECT
+  room_id, sent_by, body, id, edited, sent_at
+FROM
+  chat.message
+WHERE
+  id = $1
+`
+
+func (q *Queries) GetByID(ctx context.Context, id int64) (ChatMessage, error) {
+	row := q.db.QueryRow(ctx, getByID, id)
+	var i ChatMessage
+	err := row.Scan(
+		&i.RoomID,
+		&i.SentBy,
+		&i.Body,
+		&i.ID,
+		&i.Edited,
+		&i.SentAt,
+	)
+	return i, err
+}
+
+const getLatestMessage = `-- name: GetLatestMessage :one
 SELECT 
   room_id, sent_by, body, id, edited, sent_at
 FROM
@@ -76,8 +99,8 @@ ORDER BY
 LIMIT 1
 `
 
-func (q *Queries) Get(ctx context.Context, roomID string) (ChatMessage, error) {
-	row := q.db.QueryRow(ctx, get, roomID)
+func (q *Queries) GetLatestMessage(ctx context.Context, roomID string) (ChatMessage, error) {
+	row := q.db.QueryRow(ctx, getLatestMessage, roomID)
 	var i ChatMessage
 	err := row.Scan(
 		&i.RoomID,
