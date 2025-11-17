@@ -10,6 +10,7 @@ import (
 	chatroom "github.com/dooleyonline/backend/internal/db/chat/room"
 	itemcategory "github.com/dooleyonline/backend/internal/db/item/category"
 	itemitem "github.com/dooleyonline/backend/internal/db/item/item"
+	userblock "github.com/dooleyonline/backend/internal/db/user/block"
 	userliked "github.com/dooleyonline/backend/internal/db/user/liked"
 	useruser "github.com/dooleyonline/backend/internal/db/user/user"
 	userverify "github.com/dooleyonline/backend/internal/db/user/verify"
@@ -35,6 +36,7 @@ type user struct {
 	Liked  *userliked.Queries
 	Viewed *userviewed.Queries
 	Verify *userverify.Queries
+	Block  *userblock.Queries
 }
 
 type chat struct {
@@ -59,6 +61,7 @@ func New(ctx context.Context, cfg *config.Config) (*DB, error) {
 		Liked:  userliked.New(pool),
 		Viewed: userviewed.New(pool),
 		Verify: userverify.New(pool),
+		Block:  userblock.New(pool),
 	}
 
 	chat := &chat{

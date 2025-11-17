@@ -12,7 +12,7 @@ FROM
   "user"."block"
 WHERE blocked_id=$1;
 
--- name: block :exec
+-- name: Block :exec
 INSERT INTO
 "user"."block" (blocker_id, blocked_id)
 VALUES

@@ -9,6 +9,24 @@ import (
 	"context"
 )
 
+const block = `-- name: Block :exec
+INSERT INTO
+"user"."block" (blocker_id, blocked_id)
+VALUES
+($1, $2)
+RETURNING blocker_id, blocked_id, created_at
+`
+
+type BlockParams struct {
+	BlockerID string `json:"blocker_id"`
+	BlockedID string `json:"blocked_id"`
+}
+
+func (q *Queries) Block(ctx context.Context, arg BlockParams) error {
+	_, err := q.db.Exec(ctx, block, arg.BlockerID, arg.BlockedID)
+	return err
+}
+
 const getBlocksByBlockedID = `-- name: GetBlocksByBlockedID :many
 SELECT
   blocker_id
@@ -80,23 +98,5 @@ type UnblockParams struct {
 
 func (q *Queries) Unblock(ctx context.Context, arg UnblockParams) error {
 	_, err := q.db.Exec(ctx, unblock, arg.BlockerID, arg.BlockedID)
-	return err
-}
-
-const block = `-- name: block :exec
-INSERT INTO
-"user"."block" (blocker_id, blocked_id)
-VALUES
-($1, $2)
-RETURNING blocker_id, blocked_id, created_at
-`
-
-type blockParams struct {
-	BlockerID string `json:"blocker_id"`
-	BlockedID string `json:"blocked_id"`
-}
-
-func (q *Queries) block(ctx context.Context, arg blockParams) error {
-	_, err := q.db.Exec(ctx, block, arg.BlockerID, arg.BlockedID)
 	return err
 }
