@@ -3,6 +3,7 @@ package chathandler
 import (
 	"errors"
 	"net/http"
+	"sync"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
 	"github.com/dooleyonline/backend/internal/model"
@@ -29,9 +30,12 @@ func New(svc *chatsvc.Service) *Handler {
 }
 
 type Client struct {
-	conn   *websocket.Conn
-	roomID string
-	userID string
+	conn          *websocket.Conn
+	mu 				sync.Mutex
+
+	roomID        string
+	userID        string
+	lastReadMsgID int64
 }
 
 type Hub struct {
@@ -84,7 +88,6 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 	if err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
-	defer conn.Close()
 
 	client := &Client{
 		conn:   conn,
@@ -95,15 +98,15 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 	h.hub.register <- client
 	defer func() {
 		h.hub.unregister <- client
-	}()
 
-	var lastReadMsgID *int64
-	defer func() {
-		if lastReadMsgID == nil {
-			return
-		}
-		if err := h.svc.UpdateLastReadMessageID(ctx, roomID, userID, *lastReadMsgID); err != nil {
-			echo.ErrInternalServerError.WithInternal(err)
+		client.mu.Lock()
+		lastRead := client.lastReadMsgID
+		client.mu.Unlock()
+
+		if lastRead != 0 {
+			if err := h.svc.UpdateLastReadMessageID(ctx, roomID, userID, lastRead); err != nil {
+				c.Logger().Errorf("failed to update last read message ID: %v", err)
+			}
 		}
 	}()
 
@@ -127,11 +130,7 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 			continue
 		}
 
-		id := created.ID
-		lastReadMsgID = &id
-
-		msgCopy := created
-		h.hub.broadcast <- &msgCopy
+		h.hub.broadcast <- &created
 	}
 
 	return nil
@@ -160,10 +159,16 @@ func (h *Hub) run() {
 			roomID := message.RoomID
 			if clients, ok := h.rooms[roomID]; ok {
 				for c := range clients {
+					c.mu.Lock()
 					err := c.conn.WriteJSON(message)
+					c.mu.Unlock()
 					if err != nil {
 						c.conn.Close()
 						delete(clients, c)
+					} else {
+						c.mu.Lock()
+						c.lastReadMsgID = message.ID
+						c.mu.Unlock()
 					}
 				}
 			}
