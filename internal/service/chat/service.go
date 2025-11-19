@@ -38,7 +38,7 @@ type CreateMessageParams struct {
 	Message string
 }
 
-func (s *Service) CreateMessage(ctx context.Context, p *CreateMessageParams) (model.ChatMessage, error) {
+func (s *Service) CreateMessage(ctx context.Context, p *CreateMessageParams) error {
 	messageID := s.GenerateID()
 	if err := s.db.Chat.Message.Create(ctx, chatmessage.CreateParams{
 		ID:     messageID,
@@ -46,10 +46,10 @@ func (s *Service) CreateMessage(ctx context.Context, p *CreateMessageParams) (mo
 		SentBy: p.UserID,
 		Body:   p.Message,
 	}); err != nil {
-		return model.ChatMessage{}, err
+		return  err
 	}
 
-	return s.db.Chat.Message.GetByID(ctx, messageID)
+	return nil
 }
 
 type EditMessageParams struct {
@@ -245,10 +245,14 @@ func (s *Service) IsParticipant(ctx context.Context, roomID string, userID strin
 	return true, nil
 }
 
-func (s *Service) UpdateLastReadMessageID(ctx context.Context, roomID string, userID string, messageID int64) error {
+func (s *Service) UpdateLastReadMessageID(ctx context.Context, roomID string, userID string) error {
+	messageID, err := s.db.Chat.Message.GetLatestMessage(ctx, roomID)
+	if err != nil {
+		return err
+	}
 	return s.db.Chat.Participant.UpdateLastReadMessageID(ctx, chatparticipant.UpdateLastReadMessageIDParams{
-		RoomID:            roomID,
-		UserID:            userID,
-		LastReadMessageID: &messageID,
+		RoomID:          roomID,
+		UserID:          userID,
+		LastReadMessageID: &messageID.ID,
 	})
 }

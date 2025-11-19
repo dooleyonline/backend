@@ -3,7 +3,6 @@ package chathandler
 import (
 	"errors"
 	"net/http"
-	"sync"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
 	"github.com/dooleyonline/backend/internal/model"
@@ -30,12 +29,9 @@ func New(svc *chatsvc.Service) *Handler {
 }
 
 type Client struct {
-	conn          *websocket.Conn
-	mu 				sync.Mutex
-
-	roomID        string
-	userID        string
-	lastReadMsgID int64
+	conn   *websocket.Conn
+	roomID string
+	userID string
 }
 
 type Hub struct {
@@ -84,10 +80,21 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant"))
 	}
 
+	if err := h.svc.UpdateLastReadMessageID(ctx, roomID, userID); err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+
+	defer func() {
+		if err := h.svc.UpdateLastReadMessageID(ctx, roomID, userID); err != nil {
+			c.Logger().Errorf("failed to update last read message id: %v", err)
+		}
+	}()
+
 	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
+	defer conn.Close()
 
 	client := &Client{
 		conn:   conn,
@@ -98,16 +105,6 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 	h.hub.register <- client
 	defer func() {
 		h.hub.unregister <- client
-
-		client.mu.Lock()
-		lastRead := client.lastReadMsgID
-		client.mu.Unlock()
-
-		if lastRead != 0 {
-			if err := h.svc.UpdateLastReadMessageID(ctx, roomID, userID, lastRead); err != nil {
-				c.Logger().Errorf("failed to update last read message ID: %v", err)
-			}
-		}
 	}()
 
 	for {
@@ -124,13 +121,16 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 			Message: msg,
 		}
 
-		created, err := h.svc.CreateMessage(ctx, params)
-		if err != nil {
-			_ = conn.WriteJSON(map[string]string{"error": "failed to create message"})
+		if err := h.svc.CreateMessage(ctx, params); err != nil {
+			conn.WriteJSON(err)
 			continue
 		}
 
-		h.hub.broadcast <- &created
+		h.hub.broadcast <- &model.ChatMessage{
+			SentBy: userID,
+			RoomID: roomID,
+			Body:   msg,
+		}
 	}
 
 	return nil
@@ -159,16 +159,10 @@ func (h *Hub) run() {
 			roomID := message.RoomID
 			if clients, ok := h.rooms[roomID]; ok {
 				for c := range clients {
-					c.mu.Lock()
 					err := c.conn.WriteJSON(message)
-					c.mu.Unlock()
 					if err != nil {
 						c.conn.Close()
 						delete(clients, c)
-					} else {
-						c.mu.Lock()
-						c.lastReadMsgID = message.ID
-						c.mu.Unlock()
 					}
 				}
 			}
