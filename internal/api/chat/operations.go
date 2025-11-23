@@ -284,7 +284,7 @@ func (h *Handler) RemoveParticipant(c echo.Context) error {
 //	@Summary	Get chat rooms for a user
 //	@Tags		chat
 //	@Produce	json
-//	@Success	200	{array}	model.ChatParticipant
+//	@Success	200	{array}	chatsvc.GetRoomsResult
 //	@Router		/chat/rooms [get]
 func (h *Handler) GetRooms(c echo.Context) error {
 	var (

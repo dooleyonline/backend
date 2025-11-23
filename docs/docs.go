@@ -340,7 +340,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.ChatParticipant"
+                                "$ref": "#/definitions/chatsvc.GetRoomsResult"
                             }
                         }
                     }
@@ -1065,6 +1065,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "chatsvc.GetRoomsResult": {
+            "type": "object",
+            "properties": {
+                "last_message": {
+                    "$ref": "#/definitions/model.ChatMessage"
+                },
+                "read_all": {
+                    "type": "boolean"
+                },
+                "room_id": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }

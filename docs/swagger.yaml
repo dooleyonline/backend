@@ -14,6 +14,17 @@ definitions:
       userId:
         type: string
     type: object
+  chatsvc.GetRoomsResult:
+    properties:
+      last_message:
+        $ref: '#/definitions/model.ChatMessage'
+      read_all:
+        type: boolean
+      room_id:
+        type: string
+      title:
+        type: string
+    type: object
   http.Header:
     additionalProperties:
       items:
@@ -507,7 +518,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.ChatParticipant'
+              $ref: '#/definitions/chatsvc.GetRoomsResult'
             type: array
       summary: Get chat rooms for a user
       tags:
