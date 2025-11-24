@@ -1,11 +1,15 @@
 package chathandler
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
 	chatsvc "github.com/dooleyonline/backend/internal/service/chat"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -26,9 +30,17 @@ func (h *Handler) GetMessages(c echo.Context) error {
 
 	var (
 		roomID string
+		page   int32
 	)
-	if err := echo.PathParamsBinder(c).String("roomID", &roomID).BindError(); err != nil {
+
+	if err := echo.PathParamsBinder(c).
+		String("roomID", &roomID).
+		Int32("page", &page).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	if page < 1 {
+		page = 1
 	}
 
 	isParticipant, err := h.svc.IsParticipant(ctx, roomID, userID)
@@ -40,7 +52,7 @@ func (h *Handler) GetMessages(c echo.Context) error {
 		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant"))
 	}
 
-	res, err := h.svc.GetLatestMessages(ctx, roomID)
+	res, err := h.svc.GetLatestMessages(ctx, roomID, page)
 	if err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
@@ -58,24 +70,22 @@ func (h *Handler) GetMessages(c echo.Context) error {
 //	@Router		/chat/messages/{messageID} [patch]
 func (h *Handler) EditMessage(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
-	var msgID int64
-	if err := echo.PathParamsBinder(c).Int64("messageID", &msgID).BindError(); err != nil {
+	var params chatsvc.EditMessageParams
+	params.UserID = userID
+	if err := echo.PathParamsBinder(c).Int64("messageID", &params.MessageID).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	var body string
-	if err := c.Bind(&body); err != nil {
+	if err := c.Bind(&params.Body); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	if err := h.svc.EditMessage(ctx, &chatsvc.EditMessageParams{
-		ID:   msgID,
-		Body: body,
-	}); err != nil {
+	if err := h.svc.EditMessage(ctx, &params); err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
@@ -91,13 +101,25 @@ func (h *Handler) EditMessage(c echo.Context) error {
 //	@Router		/chat/messages/{messageID} [delete]
 func (h *Handler) DeleteMessage(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
 	var msgID int64
 	if err := echo.PathParamsBinder(c).Int64("messageID", &msgID).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	msg, err := h.svc.GetMessageByID(ctx, msgID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return echo.ErrNotFound
+		}
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+	if msg.SentBy != userID {
+		return echo.ErrForbidden.WithInternal(errors.New("user is not the sender of this message"))
 	}
 
 	if err := h.svc.DeleteMessage(ctx, msgID); err != nil {
@@ -147,13 +169,22 @@ func (h *Handler) CreateRoom(c echo.Context) error {
 //	@Router		/chat/{roomID} [delete]
 func (h *Handler) DeleteRoom(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
 	var roomID string
 	if err := echo.PathParamsBinder(c).String("roomID", &roomID).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	isParticipant, err := h.svc.IsParticipant(ctx, roomID, userID)
+	if err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+	if !isParticipant {
+		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant of this room"))
 	}
 
 	if err := h.svc.DeleteRoom(ctx, roomID); err != nil {
@@ -179,7 +210,10 @@ func (h *Handler) AddParticipant(c echo.Context) error {
 	)
 
 	var roomID, participantID string
-	if err := echo.PathParamsBinder(c).String("roomID", &roomID).String("userID", &participantID).BindError(); err != nil {
+	if err := echo.PathParamsBinder(c).
+		String("roomID", &roomID).
+		String("userID", &participantID).
+		BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
@@ -213,14 +247,15 @@ func (h *Handler) AddParticipant(c echo.Context) error {
 //	@Router		/chat/{roomID}/participants/{userID} [delete]
 func (h *Handler) RemoveParticipant(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
-	var roomID, userID string
+	var roomID, participantID string
 	if err := echo.PathParamsBinder(c).
 		String("roomID", &roomID).
-		String("userID", &userID).
+		String("userID", &participantID).
 		BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
@@ -236,7 +271,7 @@ func (h *Handler) RemoveParticipant(c echo.Context) error {
 
 	if err := h.svc.RemoveParticipant(ctx, &chatsvc.ParticipantParams{
 		RoomID: roomID,
-		UserID: userID,
+		UserID: participantID,
 	}); err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
@@ -249,21 +284,58 @@ func (h *Handler) RemoveParticipant(c echo.Context) error {
 //	@Summary	Get chat rooms for a user
 //	@Tags		chat
 //	@Produce	json
-//	@Success	200	{array}	model.ChatParticipant
+//	@Success	200	{array}	chatsvc.GetRoomsResult
 //	@Router		/chat/rooms [get]
 func (h *Handler) GetRooms(c echo.Context) error {
 	var (
 		req    = c.Request()
 		ctx    = req.Context()
 		userID = c.(shared.Context).UserID
+		res    = c.Response()
 	)
 
-	rooms, err := h.svc.GetRooms(ctx, userID)
-	if err != nil {
-		return echo.ErrInternalServerError.WithInternal(err)
+	res.Header().Set("Content-Type", "text/event-stream")
+	res.Header().Set("Cache-Control", "no-cache")
+	res.Header().Set("Connection", "keep-alive")
+
+	flusher, ok := res.Writer.(http.Flusher)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, "streaming unsupported")
 	}
 
-	return c.JSON(http.StatusOK, rooms)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	lastPayload := []byte{}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			rooms, err := h.svc.GetRooms(ctx, userID)
+			if err != nil {
+				return echo.ErrInternalServerError.WithInternal(err)
+			}
+
+			payload, err := json.Marshal(rooms)
+			if err != nil {
+				c.Logger().Errorf("marshal rooms failed: %v", err)
+				continue
+			}
+
+			// Send SSE event
+			if !bytes.Equal(payload, lastPayload) {
+				_, _ = res.Write([]byte("event: rooms\n"))
+				_, _ = res.Write([]byte("data: "))
+				_, _ = res.Write(payload)
+				_, _ = res.Write([]byte("\n\n"))
+
+				flusher.Flush()
+				lastPayload = payload
+			}
+		}
+	}
 }
 
 // GetParticipants godoc
