@@ -115,7 +115,7 @@ func (h *Handler) Update(c echo.Context) error {
 	if err := c.Bind(&params); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
-	params.UserID = userID
+	params.ID = userID
 
 	err := h.svc.Update(ctx, params)
 	if err != nil {

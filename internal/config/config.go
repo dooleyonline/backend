@@ -111,7 +111,7 @@ func New() (*Config, error) {
 		FrontendUrl: "https://dooleyonline.net",
 		ServerAddr:  ":" + port,
 
-		ItemPageSize: 10,
+		ItemPageSize: 20,
 
 		DatabaseUrl: databaseUrl,
 
