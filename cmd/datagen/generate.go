@@ -51,8 +51,8 @@ func generate(ctx context.Context, categories []string) ([]itemsvc.MutationParam
 }
 
 func geminiConfig(categories []string) *genai.GenerateContentConfig {
-	randImages := make([]string, 3)
-	for i := range 3 {
+	randImages := make([]string, 5)
+	for i := range 5 {
 		img := rand.IntN(len(imageEnum))
 		randImages[i] = imageEnum[img]
 	}
