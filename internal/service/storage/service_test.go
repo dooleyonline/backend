@@ -3,14 +3,18 @@ package storagesvc
 import (
 	"bytes"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/db"
 
+	_ "embed"
+
 	"github.com/stretchr/testify/assert"
 )
+
+//go:embed test.png
+var testImage []byte
 
 func TestPresignUploadText(t *testing.T) {
 	cfg, err := config.New()
@@ -59,15 +63,10 @@ func TestPresignUploadImage(t *testing.T) {
 		t.Fatal("failed to initialize config:", err)
 	}
 
-	payload, err := os.Open("../../../test.png")
-	if err != nil {
-		t.Fatal("failed to open test image:", err)
-	}
-	defer payload.Close()
+	payload := bytes.NewReader(testImage)
 
 	contentType := "image/png"
 	bucket := "item"
-
 
 	db, err := db.New(t.Context(), cfg)
 	if err != nil {

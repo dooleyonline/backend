@@ -4,12 +4,8 @@
 
 package chatparticipant
 
-import (
-	"github.com/jackc/pgx/v5/pgtype"
-)
-
 type ChatParticipant struct {
-	RoomID            string      `json:"room_id"`
-	UserID            string      `json:"user_id"`
-	LastReadMessageID pgtype.Int8 `json:"last_read_message_id"`
+	RoomID            string `json:"room_id"`
+	UserID            string `json:"user_id"`
+	LastReadMessageID *int64 `json:"last_read_message_id"`
 }

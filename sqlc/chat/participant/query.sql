@@ -37,3 +37,12 @@ FROM
   chat.participant
 WHERE
   room_id = $1; 
+
+-- name: UpdateLastReadMessageID :exec
+UPDATE
+  chat.participant
+SET
+  last_read_message_id = $3
+WHERE
+  room_id = $1
+  AND user_id = $2;

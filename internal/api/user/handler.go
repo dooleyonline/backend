@@ -80,9 +80,9 @@ func (h *Handler) Get(c echo.Context) error {
 		ctx = req.Context()
 	)
 
-	id := c.Param("id")
-	if id == "" {
-		return echo.ErrBadRequest
+	var id string
+	if err := echo.PathParamsBinder(c).String("id", &id).BindError(); err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
 	}
 
 	res, err := h.svc.Get(ctx, id)

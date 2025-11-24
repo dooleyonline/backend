@@ -6,5 +6,6 @@ package chatroom
 
 type ChatRoom struct {
 	ID           string   `json:"id"`
+	Title        string   `json:"title"`
 	Participants []string `json:"participants"`
 }
