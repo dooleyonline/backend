@@ -21,7 +21,7 @@ const (
 	EnvPassword = "DATAGEN_PASSWORD"
 
 	Prompt = `Generate a list of items to post on an online secondhand marketplace.
-	Make sure the images follow this pattern: sample/<any integer between 0 and 10>.webp.`
+	Randomize the images array.`
 )
 
 var (
@@ -82,9 +82,11 @@ func main() {
 	var success atomic.Int64
 	for _, item := range items {
 		wg.Go(func() {
-			if err := createItem(ctx, cfg, client, cred, item); err == nil {
-				success.Add(1)
+			if err := createItem(ctx, cfg, client, cred, item); err != nil {
+				slog.Error("failed to create item", slog.Any("error", err))
+				return
 			}
+			success.Add(1)
 		})
 	}
 

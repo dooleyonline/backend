@@ -64,6 +64,55 @@ func (q *Queries) EditMessage(ctx context.Context, arg EditMessageParams) error 
 	return err
 }
 
+const getByID = `-- name: GetByID :one
+SELECT
+  room_id, sent_by, body, id, edited, sent_at
+FROM
+  chat.message
+WHERE
+  id = $1
+`
+
+func (q *Queries) GetByID(ctx context.Context, id int64) (ChatMessage, error) {
+	row := q.db.QueryRow(ctx, getByID, id)
+	var i ChatMessage
+	err := row.Scan(
+		&i.RoomID,
+		&i.SentBy,
+		&i.Body,
+		&i.ID,
+		&i.Edited,
+		&i.SentAt,
+	)
+	return i, err
+}
+
+const getLatestMessage = `-- name: GetLatestMessage :one
+SELECT 
+  room_id, sent_by, body, id, edited, sent_at
+FROM
+  chat.message
+WHERE
+  room_id = $1
+ORDER BY 
+  sent_at DESC
+LIMIT 1
+`
+
+func (q *Queries) GetLatestMessage(ctx context.Context, roomID string) (ChatMessage, error) {
+	row := q.db.QueryRow(ctx, getLatestMessage, roomID)
+	var i ChatMessage
+	err := row.Scan(
+		&i.RoomID,
+		&i.SentBy,
+		&i.Body,
+		&i.ID,
+		&i.Edited,
+		&i.SentAt,
+	)
+	return i, err
+}
+
 const getMany = `-- name: GetMany :many
 SELECT
   room_id, sent_by, body, id, edited, sent_at
@@ -73,16 +122,17 @@ WHERE
   room_id = $1
 ORDER BY
   sent_at DESC
-LIMIT $2
+LIMIT 
+  10 OFFSET 10*(CAST($2 AS integer)-1)
 `
 
 type GetManyParams struct {
 	RoomID string `json:"room_id"`
-	Limit  int64  `json:"limit"`
+	Page   int32  `json:"page"`
 }
 
 func (q *Queries) GetMany(ctx context.Context, arg GetManyParams) ([]ChatMessage, error) {
-	rows, err := q.db.Query(ctx, getMany, arg.RoomID, arg.Limit)
+	rows, err := q.db.Query(ctx, getMany, arg.RoomID, arg.Page)
 	if err != nil {
 		return nil, err
 	}

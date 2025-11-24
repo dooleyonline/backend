@@ -105,12 +105,13 @@ func New() (*Config, error) {
 	}
 
 	cfg := &Config{
-		IsProd:      env == "prod",
-		Url:         "https://api.dooleyonline.net",
-		FrontendUrl: "https://dooleyonline.vercel.app",
+		IsProd: env == "prod",
+		// Url:         "https://api.dooleyonline.net",
+		Url:         "http://localhost:8080",
+		FrontendUrl: "https://dooleyonline.net",
 		ServerAddr:  ":" + port,
 
-		ItemPageSize: 10,
+		ItemPageSize: 20,
 
 		DatabaseUrl: databaseUrl,
 
