@@ -27,7 +27,7 @@ func (s *Service) CreateVerification(ctx context.Context, sendparams SendParams)
 	link := fmt.Sprintf("%s%s?id=%s&token=%s", s.cfg.FrontendUrl, "/auth/verify", ver.ID, ver.Token)
 
 	params := &resend.SendEmailRequest{
-		From:    "no-reply@dooleyonline.net",
+		From:    "hello@dooleyonline.net",
 		To:      []string{sendparams.Email},
 		Subject: "Verify your email",
 		Html: fmt.Sprintf(`
