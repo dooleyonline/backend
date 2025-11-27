@@ -99,7 +99,6 @@ func corsMiddleware() echo.MiddlewareFunc {
 }
 
 func authMiddleware(cfg *config.Config) echo.MiddlewareFunc {
-
 	tokenLookup := func(c echo.Context) ([]string, error) {
 		tokenCookie, err := c.Cookie(cfg.AuthTokenName)
 		if err != nil {

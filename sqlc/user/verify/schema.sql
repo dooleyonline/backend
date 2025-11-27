@@ -3,7 +3,8 @@ set search_path TO "user";
 
 
 create table "user".verification (
-  id uuid not null default gen_random_uuid (),
+  id uuid not null default gen_random_uuid(),
+  token uuid not null default gen_random_uuid(),
   user_id uuid not null,
   expired_at timestamp with time zone not null default (now() + '00:10:00'::interval),
   constraint verify_pkey primary key (id)

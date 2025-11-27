@@ -74,9 +74,11 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.GET("/user/:id", user.Get)
 
 	// auth routes
+	e.GET("/auth/me", auth.GetMe)
 	e.POST("/auth/login", auth.Login)
-	e.POST("/auth/verification", auth.CreateVerification)
-	e.POST("/auth/verification/:id", auth.VerifyUser)
+	e.POST("/auth/verify", auth.CreateVerification)
+	e.GET("/auth/verify/:id", auth.GetVerification)
+	e.POST("/auth/verify/:id", auth.VerifyUser)
 
 	// storage routes
 	e.POST("/storage/presign", storage.PresignUpload)
@@ -97,7 +99,6 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	protected.GET("/user/viewed", user.GetViews)
 
 	protected.POST("/auth/logout", auth.Logout)
-	protected.GET("/auth/me", auth.GetMe)
 
 	protected.POST("/chat/rooms", chat.CreateRoom)
 	protected.GET("/chat/rooms", chat.GetRooms)

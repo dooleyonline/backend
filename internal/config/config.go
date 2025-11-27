@@ -108,7 +108,7 @@ func New() (*Config, error) {
 		IsProd: env == "prod",
 		// Url:         "https://api.dooleyonline.net",
 		Url:         "http://localhost:8080",
-		FrontendUrl: "https://dooleyonline.net",
+		FrontendUrl: "http://localhost:3000",
 		ServerAddr:  ":" + port,
 
 		ItemPageSize: 20,

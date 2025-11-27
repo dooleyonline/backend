@@ -119,10 +119,7 @@ func (h *Handler) GetMe(c echo.Context) error {
 //	@Accept			json
 //	@Produce		json
 //	@Param			request	body	authsvc.SendParams	true	"Email payload"
-//	@Success		204
-//	@Failure		400	{object}	map[string]string	"invalid request body"
-//	@Failure		500	{object}	map[string]string	"internal error"
-//	@Router			/auth/verification [post]
+//	@Router			/auth/verify [post]
 func (h *Handler) CreateVerification(c echo.Context) error {
 	var (
 		req = c.Request()
@@ -134,13 +131,41 @@ func (h *Handler) CreateVerification(c echo.Context) error {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	_, err := h.svc.CreateVerification(ctx, params)
-
+	id, err := h.svc.CreateVerification(ctx, params)
 	if err != nil {
 		return echo.ErrInternalServerError.WithInternal(err)
 	}
 
-	return nil
+	return c.JSON(http.StatusOK, id)
+}
+
+// GetVerification godoc
+//
+//	@Description	Get verification by id
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			query	string true	"Verification ID"
+//	@Router			/auth/verify/{id} [get]
+func (h *Handler) GetVerification(c echo.Context) error {
+	var (
+		req = c.Request()
+		ctx = req.Context()
+	)
+
+	var verID string
+	if err := echo.PathParamsBinder(c).
+		String("id", &verID).
+		BindError(); err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	verification, err := h.svc.GetVerification(ctx, verID)
+	if err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+
+	return c.JSON(http.StatusOK, verification)
 }
 
 // VerifyUser godoc
@@ -154,22 +179,31 @@ func (h *Handler) CreateVerification(c echo.Context) error {
 //	@Failure		400	{object}	map[string]string	"invalid token format"
 //	@Failure		401	{object}	map[string]string	"invalid or expired token"
 //	@Failure		500	{object}	map[string]string	"internal error"
-//	@Router			/auth/verification/{id} [post]
+//	@Router			/auth/verify/{id} [post]
 func (h *Handler) VerifyUser(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
 	)
 
-	var id string
-	if err := echo.PathParamsBinder(c).String("id", &id).BindError(); err != nil {
+	var verificationID string
+	if err := echo.PathParamsBinder(c).
+		String("id", &verificationID).
+		BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
 
-	err := h.svc.VerifyUserEmail(ctx, id)
+	var params struct {
+		Token string `json:"token"`
+	}
+	if err := c.Bind(&params); err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
+	}
+
+	err := h.svc.VerifyUserEmail(ctx, verificationID, params.Token)
 	if err != nil {
 		return echo.ErrUnauthorized.WithInternal(err)
 	}
 
-	return nil
+	return c.NoContent(http.StatusNoContent)
 }

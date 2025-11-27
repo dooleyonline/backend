@@ -12,19 +12,24 @@ import (
 const create = `-- name: Create :one
 
 INSERT INTO "user".verification (user_id)
-VALUES ($1) RETURNING id, user_id, expired_at
+VALUES ($1) RETURNING id, token, user_id, expired_at
 `
 
 func (q *Queries) Create(ctx context.Context, userID string) (UserVerification, error) {
 	row := q.db.QueryRow(ctx, create, userID)
 	var i UserVerification
-	err := row.Scan(&i.ID, &i.UserID, &i.ExpiredAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Token,
+		&i.UserID,
+		&i.ExpiredAt,
+	)
 	return i, err
 }
 
 const get = `-- name: Get :one
 
-SELECT id, user_id, expired_at
+SELECT id, token, user_id, expired_at
 FROM "user".verification
 WHERE id = $1
 `
@@ -32,6 +37,11 @@ WHERE id = $1
 func (q *Queries) Get(ctx context.Context, id string) (UserVerification, error) {
 	row := q.db.QueryRow(ctx, get, id)
 	var i UserVerification
-	err := row.Scan(&i.ID, &i.UserID, &i.ExpiredAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Token,
+		&i.UserID,
+		&i.ExpiredAt,
+	)
 	return i, err
 }

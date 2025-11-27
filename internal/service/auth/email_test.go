@@ -23,7 +23,7 @@ func TestEmailSend(t *testing.T) {
 	svc := authsvc.New(cfg, db)
 	id, err := svc.CreateVerification(ctx, authsvc.SendParams{
 		Email:  "taeeunk1208@gmail.com",
-		UserId: "0f10d091-43c6-4667-a5f7-bafd9e4795df",
+		UserID: "0f10d091-43c6-4667-a5f7-bafd9e4795df",
 	})
 	if err != nil {
 		t.Fatalf("failed to send verification email: %v", err)
