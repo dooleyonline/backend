@@ -259,6 +259,9 @@ func (s *Service) IsParticipant(ctx context.Context, roomID string, userID strin
 func (s *Service) UpdateLastReadMessageID(ctx context.Context, roomID string, userID string) error {
 	messageID, err := s.db.Chat.Message.GetLatestMessage(ctx, roomID)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
 		return err
 	}
 	return s.db.Chat.Participant.UpdateLastReadMessageID(ctx, chatparticipant.UpdateLastReadMessageIDParams{

@@ -34,7 +34,10 @@ func (h *Handler) GetMessages(c echo.Context) error {
 	)
 
 	if err := echo.PathParamsBinder(c).
-		String("roomID", &roomID).
+		String("roomID", &roomID).BindError(); err != nil {
+		return echo.ErrBadRequest.WithInternal(err)
+	}
+	if err := echo.QueryParamsBinder(c).
 		Int32("page", &page).BindError(); err != nil {
 		return echo.ErrBadRequest.WithInternal(err)
 	}
