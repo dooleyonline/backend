@@ -72,24 +72,6 @@ func (s *Service) Get(ctx context.Context, id string) (*model.User, error) {
 	return &user, nil
 }
 
-func (s *Service) GetLikes(ctx context.Context) ([]model.Liked, error) {
-	liked, err := s.db.User.Liked.GetAll(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get liked table: %w", err)
-	}
-
-	return liked, nil
-}
-
-func (s *Service) GetViews(ctx context.Context) ([]model.Viewed, error) {
-	viewed, err := s.db.User.Viewed.GetAll(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get viewed table: %w", err)
-	}
-
-	return viewed, nil
-}
-
 type UpdateParams struct {
 	UserID    string
 	Email     string
@@ -110,4 +92,12 @@ func (s *Service) Update(ctx context.Context, params UpdateParams) error {
 		return fmt.Errorf("failed to update user avatar: %w", err)
 	}
 	return nil
+}
+
+func (s *Service) GetLikedViewed(ctx context.Context) ([]useruser.GetAllLikedViewedRow, error) {
+	row, err := s.db.User.User.GetAllLikedViewed(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get liked, viewed items grouped by userID %w", err)
+	}
+	return row, nil
 }

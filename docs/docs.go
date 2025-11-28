@@ -976,6 +976,28 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/interactions": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get the liked, viewed items group by userID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/useruser.GetAllLikedViewedRow"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/user/liked": {
             "get": {
                 "produces": [
@@ -1334,6 +1356,26 @@ const docTemplate = `{
                 },
                 "userID": {
                     "type": "string"
+                }
+            }
+        },
+        "useruser.GetAllLikedViewedRow": {
+            "type": "object",
+            "properties": {
+                "liked_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "viewed_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         }

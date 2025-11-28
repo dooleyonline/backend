@@ -35,7 +35,10 @@ sql:
     database:
       managed: true
     queries: "sqlc/user/user/query.sql"
-    schema: "sqlc/user/user/schema.sql"
+    schema:
+      - "sqlc/user/user/schema.sql"
+      - "sqlc/user/liked/schema.sql"
+      - "sqlc/user/viewed/schema.sql"
     gen:
       go:
         package: "useruser"

@@ -189,6 +189,19 @@ definitions:
       userID:
         type: string
     type: object
+  useruser.GetAllLikedViewedRow:
+    properties:
+      liked_items:
+        items:
+          type: integer
+        type: array
+      user_id:
+        type: string
+      viewed_items:
+        items:
+          type: integer
+        type: array
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -837,6 +850,20 @@ paths:
           schema:
             $ref: '#/definitions/model.User'
       summary: Get user by ID
+      tags:
+      - user
+  /user/interactions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/useruser.GetAllLikedViewedRow'
+            type: array
+      summary: Get the liked, viewed items group by userID
       tags:
       - user
   /user/liked:

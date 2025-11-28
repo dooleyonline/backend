@@ -79,12 +79,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.POST("/user", user.Create)
 	e.GET("/user/:id", user.Get)
 	e.PUT("/user", user.Update)
-
-	// user.liked routes
-	e.GET("/user/liked", user.GetLikes)
-
-	// user.viewed routes
-	e.GET("/user/viewed", user.GetViews)
+	e.GET("/user/interactions", user.GetLikedViewed)
 
 	// auth routes
 	e.POST("/auth/login", auth.Login)

@@ -125,41 +125,20 @@ func (h *Handler) Update(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-// GetLikes godoc
+// GetLikedViewed godoc
 //
-//	@Summary	Get the entire liked table.
+//	@Summary	Get the liked, viewed items group by userID
 //	@Tags		user
 //	@Produce	json
-//	@Success	200	{array}	model.Liked
-//	@Router		/user/liked [get]
-func (h *Handler) GetLikes(c echo.Context) error {
+//	@Success	200	{object}	[]useruser.GetAllLikedViewedRow
+//	@Router		/user/interactions [get]
+func (h *Handler) GetLikedViewed(c echo.Context) error {
 	var (
 		req = c.Request()
 		ctx = req.Context()
 	)
 
-	res, err := h.svc.GetLikes(ctx)
-	if err != nil {
-		return echo.ErrNotFound.WithInternal(err)
-	}
-
-	return c.JSON(http.StatusOK, res)
-}
-
-// GetViews godoc
-//
-//	@Summary	Get the entire viewed table.
-//	@Tags		user
-//	@Produce	json
-//	@Success	200	{object}	model.Viewed
-//	@Router		/user/viewed [get]
-func (h *Handler) GetViews(c echo.Context) error {
-	var (
-		req = c.Request()
-		ctx = req.Context()
-	)
-
-	res, err := h.svc.GetViews(ctx)
+	res, err := h.svc.GetLikedViewed(ctx)
 	if err != nil {
 		return echo.ErrNotFound.WithInternal(err)
 	}

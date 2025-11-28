@@ -1,9 +1,3 @@
--- name: GetAll :many
-SELECT
-  *
-FROM
-  "user"."liked";
-
 -- name: Like :exec
 INSERT INTO
 "user"."liked" (user_id, item_id)
