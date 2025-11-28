@@ -10,10 +10,32 @@ SELECT
 FROM
   chat.message
 WHERE
-  room_id = $1
+  room_id = @room_id
 ORDER BY
   sent_at DESC
-LIMIT $2;
+LIMIT 
+  10 OFFSET 10*(CAST(@page AS integer)-1);
+
+
+-- name: GetLatestMessage :one
+SELECT 
+  *
+FROM
+  chat.message
+WHERE
+  room_id = $1
+ORDER BY 
+  sent_at DESC
+LIMIT 1;
+
+-- name: GetByID :one
+SELECT
+  *
+FROM
+  chat.message
+WHERE
+  id = $1;
+
 
 -- name: Delete :exec
 DELETE FROM
@@ -28,3 +50,4 @@ SET
   body = $2, edited = true
 WHERE
   id = $1;
+

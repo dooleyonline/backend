@@ -56,6 +56,22 @@ func (q *Queries) DeleteRoom(ctx context.Context, id string) error {
 	return err
 }
 
+const getRoomByID = `-- name: GetRoomByID :one
+SELECT
+  id, title, participants
+FROM
+  chat.room
+WHERE
+  id = $1
+`
+
+func (q *Queries) GetRoomByID(ctx context.Context, id string) (ChatRoom, error) {
+	row := q.db.QueryRow(ctx, getRoomByID, id)
+	var i ChatRoom
+	err := row.Scan(&i.ID, &i.Title, &i.Participants)
+	return i, err
+}
+
 const removeParticipant = `-- name: RemoveParticipant :exec
 UPDATE
   chat.room

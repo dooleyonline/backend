@@ -12,6 +12,7 @@ import (
 
 	"github.com/dooleyonline/backend/internal/config"
 	"github.com/dooleyonline/backend/internal/model"
+	itemsvc "github.com/dooleyonline/backend/internal/service/item"
 )
 
 type Credential struct {
@@ -87,7 +88,7 @@ func getCategories(cfg *config.Config, client *http.Client) ([]string, error) {
 	return categoriesStr, nil
 }
 
-func createItem(ctx context.Context, cfg *config.Config, client *http.Client, cred *http.Cookie, item model.Item) error {
+func createItem(ctx context.Context, cfg *config.Config, client *http.Client, cred *http.Cookie, item itemsvc.MutationParams) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 
@@ -114,8 +115,12 @@ func createItem(ctx context.Context, cfg *config.Config, client *http.Client, cr
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("request did not respond with 200")
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			return fmt.Errorf("failed to read request body: %w", err)
+		}
+		return fmt.Errorf("request failed: %s", string(body))
 	}
 
 	return nil

@@ -14,6 +14,17 @@ definitions:
       userId:
         type: string
     type: object
+  chatsvc.GetRoomsResult:
+    properties:
+      last_message:
+        $ref: '#/definitions/model.ChatMessage'
+      read_all:
+        type: boolean
+      room_id:
+        type: string
+      title:
+        type: string
+    type: object
   http.Header:
     additionalProperties:
       items:
@@ -70,7 +81,7 @@ definitions:
   model.ChatParticipant:
     properties:
       last_read_message_id:
-        $ref: '#/definitions/pgtype.Int8'
+        type: integer
       room_id:
         type: string
       user_id:
@@ -147,14 +158,6 @@ definitions:
         type: integer
       user_id:
         type: string
-    type: object
-  pgtype.Int8:
-    properties:
-      int64:
-        format: int64
-        type: integer
-      valid:
-        type: boolean
     type: object
   storagesvc.PresignResult:
     properties:
@@ -528,7 +531,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.ChatParticipant'
+              $ref: '#/definitions/chatsvc.GetRoomsResult'
             type: array
       summary: Get chat rooms for a user
       tags:

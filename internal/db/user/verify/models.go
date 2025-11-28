@@ -10,6 +10,7 @@ import (
 
 type UserVerification struct {
 	ID        string    `json:"id"`
+	Token     string    `json:"token"`
 	UserID    string    `json:"user_id"`
 	ExpiredAt time.Time `json:"expired_at"`
 }

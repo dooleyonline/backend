@@ -43,6 +43,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	storage := storagehandler.New(services.Storage)
 	chat := chathandler.New(services.Chat)
 
+	// public API
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
@@ -50,7 +51,6 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.Use(loggerMiddleware())
 	e.Use(errorMiddleware())
 	e.Use(corsMiddleware())
-	e.Use(authMiddleware(cfg, protectedRoutes))
 	e.Use(contextMiddleware(cfg))
 
 	e.GET("/", hello)
@@ -60,14 +60,8 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 
 	// item routes
 	e.GET("/item", item.GetMany)
-	e.POST("/item", item.Create)
 	e.GET("/item/:id", item.Get)
-	e.PUT("/item/:id", item.Update)
-	e.DELETE("/item/:id", item.Delete)
 	e.POST("/item/:id/view", item.View)
-	e.POST("/item/:id/sell", item.Sell)
-	e.POST("/item/:id/like", item.Like)
-	e.POST("/item/:id/unlike", item.Unlike)
 	e.POST("/item/batch", item.GetBatch)
 
 	// category
@@ -82,42 +76,44 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.GET("/user/interactions", user.GetLikedViewed)
 
 	// auth routes
-	e.POST("/auth/login", auth.Login)
-	e.POST("/auth/logout", auth.Logout)
 	e.GET("/auth/me", auth.GetMe)
-	e.POST("/auth/verification", auth.CreateVerification)
-	e.POST("/auth/verification/:id", auth.VerifyUser)
+	e.POST("/auth/login", auth.Login)
+	e.POST("/auth/verify", auth.CreateVerification)
+	e.GET("/auth/verify/:id", auth.GetVerification)
+	e.POST("/auth/verify/:id", auth.VerifyUser)
 
 	// storage routes
 	e.POST("/storage/presign", storage.PresignUpload)
 
-	// chat routes
-	e.POST("/chat/rooms", chat.CreateRoom)
-	e.GET("/chat/rooms", chat.GetRooms)
-	e.DELETE("/chat/:roomID", chat.DeleteRoom)
-	e.GET("/chat/:roomID/messages", chat.GetMessages)
-	e.PATCH("/chat/messages/:messageID", chat.EditMessage)
-	e.DELETE("/chat/messages/:messageID", chat.DeleteMessage)
-	e.GET("/chat/:roomID/participants", chat.GetParticipants)
-	e.POST("/chat/:roomID/participants/:userID", chat.AddParticipant)
-	e.DELETE("/chat/:roomID/participants/:userID", chat.RemoveParticipant)
-	e.GET("/chat/:roomID/ws", chat.HandleConnections)
+	// protected API routes
+	protected := e.Group("")
+	protected.Use(authMiddleware(cfg))
+
+	protected.POST("/item", item.Create)
+	protected.PUT("/item/:id", item.Update)
+	protected.DELETE("/item/:id", item.Delete)
+	protected.POST("/item/:id/sell", item.Sell)
+	protected.POST("/item/:id/like", item.Like)
+	protected.POST("/item/:id/unlike", item.Unlike)
+
+	protected.PUT("/user", user.Update)
+	protected.GET("/user/liked", user.GetLikes)
+	protected.GET("/user/viewed", user.GetViews)
+
+	protected.POST("/auth/logout", auth.Logout)
+
+	protected.POST("/chat/rooms", chat.CreateRoom)
+	protected.GET("/chat/rooms", chat.GetRooms)
+	protected.DELETE("/chat/:roomID", chat.DeleteRoom)
+	protected.GET("/chat/:roomID/messages", chat.GetMessages)
+	protected.PATCH("/chat/messages/:messageID", chat.EditMessage)
+	protected.DELETE("/chat/messages/:messageID", chat.DeleteMessage)
+	protected.GET("/chat/:roomID/participants", chat.GetParticipants)
+	protected.POST("/chat/:roomID/participants/:userID", chat.AddParticipant)
+	protected.DELETE("/chat/:roomID/participants/:userID", chat.RemoveParticipant)
+	protected.GET("/chat/:roomID/ws", chat.HandleConnections)
 
 	return e, nil
-}
-
-type routesConfig map[string][]string
-
-// define routes to protect with auth middleware
-var protectedRoutes = routesConfig{
-	"/item":            {http.MethodPost},
-	"/item/:id":        {http.MethodPut, http.MethodDelete},
-	"/item/:id/sell":   {http.MethodPost},
-	"/item/:id/like":   {http.MethodPost},
-	"/item/:id/unlike": {http.MethodPost},
-	"/user":            {http.MethodPut},
-	"/auth/logout":     {http.MethodPost},
-	"/chat/*":          {http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPatch},
 }
 
 // hello godoc

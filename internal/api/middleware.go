@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"slices"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
 	"github.com/dooleyonline/backend/internal/config"
@@ -99,15 +98,7 @@ func corsMiddleware() echo.MiddlewareFunc {
 	)
 }
 
-func authMiddleware(cfg *config.Config, protectedRoutes routesConfig) echo.MiddlewareFunc {
-	isPublic := func(c echo.Context) bool {
-		r, ok := protectedRoutes[c.Path()]
-		if !ok {
-			return true
-		}
-		return !slices.Contains(r, c.Request().Method)
-	}
-
+func authMiddleware(cfg *config.Config) echo.MiddlewareFunc {
 	tokenLookup := func(c echo.Context) ([]string, error) {
 		tokenCookie, err := c.Cookie(cfg.AuthTokenName)
 		if err != nil {
@@ -118,7 +109,6 @@ func authMiddleware(cfg *config.Config, protectedRoutes routesConfig) echo.Middl
 	}
 
 	config := echoJWT.Config{
-		Skipper:    isPublic,
 		SigningKey: []byte(cfg.AuthTokenSecret),
 		ContextKey: "user",
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {

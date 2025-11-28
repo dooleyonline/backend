@@ -272,7 +272,7 @@ func (h *Handler) Unlike(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-// GetBulk godoc
+// GetBatch godoc
 //
 //	@Summary	Get items in bulk by list of IDs
 //	@Tags		item

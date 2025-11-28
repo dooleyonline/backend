@@ -11,6 +11,14 @@ DELETE FROM
 WHERE
   id = $1;
 
+-- name: GetRoomByID :one
+SELECT
+  *
+FROM
+  chat.room
+WHERE
+  id = $1;
+
 -- name: AddParticipant :exec
 UPDATE
   chat.room

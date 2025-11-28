@@ -24,6 +24,7 @@ func New(svc *chatsvc.Service) *Handler {
 		unregister: make(chan *Client),
 	}
 	go hub.run()
+
 	return &Handler{svc, hub}
 }
 
@@ -78,6 +79,16 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 	if !isParticipant {
 		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant"))
 	}
+
+	if err := h.svc.UpdateLastReadMessageID(ctx, roomID, userID); err != nil {
+		return echo.ErrInternalServerError.WithInternal(err)
+	}
+
+	defer func() {
+		if err := h.svc.UpdateLastReadMessageID(ctx, roomID, userID); err != nil {
+			c.Logger().Errorf("failed to update last read message id: %v", err)
+		}
+	}()
 
 	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {

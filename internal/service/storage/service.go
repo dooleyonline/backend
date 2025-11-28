@@ -2,8 +2,6 @@ package storagesvc
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -56,7 +54,7 @@ func (s *Service) PresignUpload(ctx context.Context, params PresignParams) (*Pre
 	signedURI, signedHeaders, err := s.signer.PresignHTTP(ctx,
 		credentials(s.cfg),
 		req,
-		hashPayload(""),
+		"UNSIGNED-PAYLOAD",
 		"s3",
 		s.cfg.StorageRegion,
 		time.Now(),
@@ -86,9 +84,4 @@ func credentials(cfg *config.Config) aws.Credentials {
 
 func buildURL(key string, bucket string, cfg *config.Config) (string, error) {
 	return url.JoinPath(cfg.StorageS3Url, bucket, key)
-}
-
-func hashPayload(payload string) string {
-	ha := sha256.Sum256([]byte(payload))
-	return hex.EncodeToString(ha[:])
 }

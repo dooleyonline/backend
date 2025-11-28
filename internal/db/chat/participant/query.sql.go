@@ -122,3 +122,24 @@ func (q *Queries) GetByUserID(ctx context.Context, userID string) ([]ChatPartici
 	}
 	return items, nil
 }
+
+const updateLastReadMessageID = `-- name: UpdateLastReadMessageID :exec
+UPDATE
+  chat.participant
+SET
+  last_read_message_id = $3
+WHERE
+  room_id = $1
+  AND user_id = $2
+`
+
+type UpdateLastReadMessageIDParams struct {
+	RoomID            string `json:"room_id"`
+	UserID            string `json:"user_id"`
+	LastReadMessageID *int64 `json:"last_read_message_id"`
+}
+
+func (q *Queries) UpdateLastReadMessageID(ctx context.Context, arg UpdateLastReadMessageIDParams) error {
+	_, err := q.db.Exec(ctx, updateLastReadMessageID, arg.RoomID, arg.UserID, arg.LastReadMessageID)
+	return err
+}
