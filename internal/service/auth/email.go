@@ -47,6 +47,15 @@ func (s *Service) GetVerification(ctx context.Context, verficicationID string) (
 	if err != nil {
 		return nil, fmt.Errorf("failed to get verification: %w", err)
 	}
+	user, err := s.db.User.User.GetByID(ctx, verification.UserID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	if user.Verified {
+		return nil, errors.New("user is already verified")
+	}
+
 	if verification.ExpiredAt.Before(time.Now()) {
 		return nil, errors.New("email verification has expired")
 	}
