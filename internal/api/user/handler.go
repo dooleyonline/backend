@@ -148,7 +148,7 @@ func (h *Handler) GetLikedViewed(c echo.Context) error {
 
 // GetLiked godoc
 //
-//	@Summary	Get the liked items group by login userID
+//	@Summary	Get liked items by login userID
 //	@Tags		user
 //	@Produce	json
 //	@Success	200	{object}	[]model.Item
