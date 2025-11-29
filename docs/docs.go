@@ -114,7 +114,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/verification": {
+        "/auth/verify": {
             "post": {
                 "description": "Sends (or resends) a verification link to the provided email. Returns 204 on success.",
                 "consumes": [
@@ -138,32 +138,32 @@ const docTemplate = `{
                         }
                     }
                 ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "invalid request body",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "internal error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
-        "/auth/verification/{id}": {
+        "/auth/verify/{id}": {
+            "get": {
+                "description": "Get verification by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Verification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
             "post": {
                 "description": "Consumes the verification token from the path and marks the user verified.",
                 "produces": [
@@ -1006,34 +1006,15 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Get the entire liked table.",
+                "summary": "Get the liked items group by login userID",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.Liked"
+                                "$ref": "#/definitions/model.Item"
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "/user/viewed": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Get the entire viewed table.",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Viewed"
                         }
                     }
                 }
@@ -1086,7 +1067,7 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "userId": {
+                "userID": {
                     "type": "string"
                 }
             }
@@ -1259,20 +1240,6 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Liked": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "item_id": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
         "model.User": {
             "type": "object",
             "properties": {
@@ -1296,20 +1263,6 @@ const docTemplate = `{
                 },
                 "verified": {
                     "type": "boolean"
-                }
-            }
-        },
-        "model.Viewed": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "item_id": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "string"
                 }
             }
         },
@@ -1347,7 +1300,7 @@ const docTemplate = `{
         "usersvc.UpdateParams": {
             "type": "object",
             "properties": {
-                "avatarID": {
+                "avatar": {
                     "type": "string"
                 },
                 "email": {
@@ -1356,10 +1309,10 @@ const docTemplate = `{
                 "firstName": {
                     "type": "string"
                 },
-                "lastName": {
+                "id": {
                     "type": "string"
                 },
-                "userID": {
+                "lastName": {
                     "type": "string"
                 }
             }

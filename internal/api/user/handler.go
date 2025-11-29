@@ -146,7 +146,7 @@ func (h *Handler) GetLikedViewed(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-// GetLikes godoc
+// GetLiked godoc
 //
 //	@Summary	Get the liked items group by login userID
 //	@Tags		user
