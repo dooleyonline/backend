@@ -101,3 +101,17 @@ func (s *Service) GetLikedViewed(ctx context.Context) ([]useruser.GetAllLikedVie
 	}
 	return row, nil
 }
+
+func (s *Service) GetLiked(ctx context.Context, userID string) ([]model.Item, error) {
+	itemIDs, err := s.db.User.Liked.GetLiked(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get liked itemIDs  %w", err)
+	}
+
+	items, err := s.db.Item.Item.GetBatch(ctx, itemIDs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get liked items %w", err)
+	}
+
+	return items, nil
+}

@@ -97,7 +97,7 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	protected.POST("/item/:id/unlike", item.Unlike)
 
 	protected.PUT("/user", user.Update)
-	protected.GET("/user/liked", user.GetLikes)
+	protected.GET("/user/liked", user.GetLiked)
 	protected.GET("/user/viewed", user.GetViews)
 
 	protected.POST("/auth/logout", auth.Logout)

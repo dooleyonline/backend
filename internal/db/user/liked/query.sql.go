@@ -9,6 +9,32 @@ import (
 	"context"
 )
 
+const getLiked = `-- name: GetLiked :many
+SELECT item_id
+FROM "user"."liked"
+WHERE user_id = $1
+`
+
+func (q *Queries) GetLiked(ctx context.Context, userID string) ([]int64, error) {
+	rows, err := q.db.Query(ctx, getLiked, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var item_id int64
+		if err := rows.Scan(&item_id); err != nil {
+			return nil, err
+		}
+		items = append(items, item_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const like = `-- name: Like :exec
 INSERT INTO
 "user"."liked" (user_id, item_id)
