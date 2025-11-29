@@ -26,3 +26,30 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) error {
 	_, err := q.db.Exec(ctx, create, arg.UserID, arg.ItemID)
 	return err
 }
+
+const getViewed = `-- name: GetViewed :many
+SELECT
+item_id
+FROM "user"."viewed"
+WHERE user_id = $1
+`
+
+func (q *Queries) GetViewed(ctx context.Context, userID string) ([]int64, error) {
+	rows, err := q.db.Query(ctx, getViewed, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var item_id int64
+		if err := rows.Scan(&item_id); err != nil {
+			return nil, err
+		}
+		items = append(items, item_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

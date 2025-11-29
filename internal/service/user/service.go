@@ -115,3 +115,17 @@ func (s *Service) GetLiked(ctx context.Context, userID string) ([]model.Item, er
 
 	return items, nil
 }
+
+func (s *Service) GetViewed(ctx context.Context, userID string) ([]model.Item, error) {
+	itemIDs, err := s.db.User.Viewed.GetViewed(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get viewed itemIDs  %w", err)
+	}
+
+	items, err := s.db.Item.Item.GetBatch(ctx, itemIDs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get viewed items %w", err)
+	}
+
+	return items, nil
+}

@@ -863,7 +863,21 @@ paths:
             items:
               $ref: '#/definitions/model.Item'
             type: array
-      summary: Get the liked items group by login userID
+      summary: Get liked items by login userID
+      tags:
+      - user
+  /user/viewed:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Item'
+            type: array
+      summary: Get viewed items by login userID
       tags:
       - user
 swagger: "2.0"

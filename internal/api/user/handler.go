@@ -167,3 +167,25 @@ func (h *Handler) GetLiked(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
+
+// GetViewed godoc
+//
+//	@Summary	Get viewed items by login userID
+//	@Tags		user
+//	@Produce	json
+//	@Success	200	{object}	[]model.Item
+//	@Router		/user/viewed [get]
+func (h *Handler) GetViewed(c echo.Context) error {
+	var (
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
+	)
+
+	res, err := h.svc.GetViewed(ctx, userID)
+	if err != nil {
+		return echo.ErrNotFound.WithInternal(err)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}

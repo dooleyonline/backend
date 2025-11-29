@@ -1006,7 +1006,29 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Get the liked items group by login userID",
+                "summary": "Get liked items by login userID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Item"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/viewed": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get viewed items by login userID",
                 "responses": {
                     "200": {
                         "description": "OK",
