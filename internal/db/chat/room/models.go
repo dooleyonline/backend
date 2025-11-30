@@ -6,6 +6,6 @@ package chatroom
 
 type ChatRoom struct {
 	ID           string   `json:"id"`
-	Title        string   `json:"title"`
+	MessageCount int64    `json:"message_count"`
 	Participants []string `json:"participants"`
 }

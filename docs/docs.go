@@ -463,35 +463,6 @@ const docTemplate = `{
             }
         },
         "/chat/{roomID}/participants/{userID}": {
-            "post": {
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Add a user to a chat room",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "User ID",
-                        "name": "userID",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            },
             "delete": {
                 "tags": [
                     "chat"
@@ -1075,13 +1046,13 @@ const docTemplate = `{
                 "last_message": {
                     "$ref": "#/definitions/model.ChatMessage"
                 },
+                "message_count": {
+                    "type": "integer"
+                },
                 "read_all": {
                     "type": "boolean"
                 },
                 "room_id": {
-                    "type": "string"
-                },
-                "title": {
                     "type": "string"
                 }
             }

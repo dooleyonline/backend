@@ -197,49 +197,6 @@ func (h *Handler) DeleteRoom(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-// AddParticipant godoc
-//
-//	@Summary	Add a user to a chat room
-//	@Tags		chat
-//	@Param		roomID	path	string	true	"Room ID"
-//	@Param		userID	body	string	true	"User ID"
-//	@Success	204
-//	@Router		/chat/{roomID}/participants/{userID} [post]
-func (h *Handler) AddParticipant(c echo.Context) error {
-	var (
-		req    = c.Request()
-		ctx    = req.Context()
-		userID = c.(shared.Context).UserID
-	)
-
-	var roomID, participantID string
-	if err := echo.PathParamsBinder(c).
-		String("roomID", &roomID).
-		String("userID", &participantID).
-		BindError(); err != nil {
-		return echo.ErrBadRequest.WithInternal(err)
-	}
-
-	isParticipant, err := h.svc.IsParticipant(ctx, roomID, userID)
-	if err != nil {
-		return echo.ErrInternalServerError.WithInternal(err)
-	}
-	if !isParticipant {
-		return echo.ErrForbidden.WithInternal(errors.New("user is not a participant and does not have authority to add another user"))
-	}
-
-	params := &chatsvc.ParticipantParams{
-		RoomID: roomID,
-		UserID: participantID,
-	}
-
-	if err := h.svc.AddParticipant(ctx, params); err != nil {
-		return echo.ErrInternalServerError.WithInternal(err)
-	}
-
-	return c.NoContent(http.StatusNoContent)
-}
-
 // RemoveParticipant godoc
 //
 //	@Summary	Remove a user from a chat room

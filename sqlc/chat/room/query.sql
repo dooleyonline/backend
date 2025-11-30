@@ -37,3 +37,11 @@ WHERE
   id = @room_id
   AND participants @> ARRAY[@user_id::uuid];
 
+
+-- name: IncrementMessageCount :exec
+UPDATE
+  chat.room
+SET
+  message_count = message_count + 1
+WHERE
+  id = $1;

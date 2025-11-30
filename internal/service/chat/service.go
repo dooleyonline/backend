@@ -3,6 +3,7 @@ package chatsvc
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 
 	"github.com/bwmarrin/snowflake"
@@ -39,14 +40,31 @@ type CreateMessageParams struct {
 }
 
 func (s *Service) CreateMessage(ctx context.Context, p *CreateMessageParams) error {
+	tx, err := s.db.Pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	messageTx := s.db.Chat.Message.WithTx(tx)
+	roomTx := s.db.Chat.Room.WithTx(tx)
+
 	messageID := s.GenerateID()
-	if err := s.db.Chat.Message.Create(ctx, chatmessage.CreateParams{
+	if err := messageTx.Create(ctx, chatmessage.CreateParams{
 		ID:     messageID,
 		RoomID: p.RoomID,
 		SentBy: p.UserID,
 		Body:   p.Message,
 	}); err != nil {
-		return err
+		return fmt.Errorf("failed to create message: %w", err)
+	}
+
+	if err := roomTx.IncrementMessageCount(ctx, p.RoomID); err != nil {
+		return fmt.Errorf("failed to increment message count: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
@@ -71,7 +89,7 @@ func (s *Service) EditMessage(ctx context.Context, p *EditMessageParams) error {
 		ID:   p.MessageID,
 		Body: p.Body,
 	}); err != nil {
-		return err
+		return fmt.Errorf("failed to edit message: %w", err)
 	}
 	return nil
 }
@@ -85,7 +103,7 @@ func (s *Service) GetMessageByID(ctx context.Context, messageID int64) (model.Ch
 }
 
 func (s *Service) CreateRoom(ctx context.Context, users []string) (string, error) {
-	tx, err := s.db.Pool.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := s.db.Pool.Begin(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -96,7 +114,7 @@ func (s *Service) CreateRoom(ctx context.Context, users []string) (string, error
 
 	id, err := room.CreateRoom(ctx, users)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to create room: %w", err)
 	}
 
 	for _, user := range users {
@@ -104,12 +122,12 @@ func (s *Service) CreateRoom(ctx context.Context, users []string) (string, error
 			RoomID: id,
 			UserID: user,
 		}); err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to create participant: %w", err)
 		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to commit transaction: %w", err)
 	}
 	return id, nil
 }
@@ -130,35 +148,8 @@ type ParticipantParams struct {
 	UserID string
 }
 
-func (s *Service) AddParticipant(ctx context.Context, p *ParticipantParams) error {
-	tx, err := s.db.Pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	room := chatroom.New(tx)
-	participant := chatparticipant.New(tx)
-
-	if err := room.AddParticipant(ctx, chatroom.AddParticipantParams{
-		UserID: p.UserID,
-		RoomID: p.RoomID,
-	}); err != nil {
-		return err
-	}
-
-	if err := participant.Create(ctx, chatparticipant.CreateParams{
-		RoomID: p.RoomID,
-		UserID: p.UserID,
-	}); err != nil {
-		return err
-	}
-
-	return tx.Commit(ctx)
-}
-
 func (s *Service) RemoveParticipant(ctx context.Context, p *ParticipantParams) error {
-	tx, err := s.db.Pool.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := s.db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -171,14 +162,14 @@ func (s *Service) RemoveParticipant(ctx context.Context, p *ParticipantParams) e
 		UserID: p.UserID,
 		RoomID: p.RoomID,
 	}); err != nil {
-		return err
+		return fmt.Errorf("failed to remove participant from room: %w", err)
 	}
 
 	if err := participant.Delete(ctx, chatparticipant.DeleteParams{
 		RoomID: p.RoomID,
 		UserID: p.UserID,
 	}); err != nil {
-		return err
+		return fmt.Errorf("failed to delete participant: %w", err)
 	}
 
 	return tx.Commit(ctx)
@@ -192,10 +183,10 @@ func (s *Service) RemoveParticipant(ctx context.Context, p *ParticipantParams) e
 // }
 
 type GetRoomsResult struct {
-	RoomID      string             `json:"room_id"`
-	Title       string             `json:"title"`
-	LastMessage *model.ChatMessage `json:"last_message"`
-	ReadAll     bool               `json:"read_all"`
+	RoomID       string             `json:"room_id"`
+	LastMessage  *model.ChatMessage `json:"last_message"`
+	MessageCount int64              `json:"message_count"`
+	ReadAll      bool               `json:"read_all"`
 }
 
 func (s *Service) GetRooms(ctx context.Context, userID string) ([]GetRoomsResult, error) {
@@ -228,10 +219,10 @@ func (s *Service) GetRooms(ctx context.Context, userID string) ([]GetRoomsResult
 		// if last read message is not nil and last message of the room is equal to last read message, then read all
 		readAll := latestMessage == nil || (p.LastReadMessageID != nil && latestMessage.ID == *p.LastReadMessageID)
 		res = append(res, GetRoomsResult{
-			RoomID:      p.RoomID,
-			Title:       room.Title,
-			LastMessage: latestMessage,
-			ReadAll:     readAll,
+			RoomID:       p.RoomID,
+			LastMessage:  latestMessage,
+			MessageCount: room.MessageCount,
+			ReadAll:      readAll,
 		})
 	}
 	return res, nil

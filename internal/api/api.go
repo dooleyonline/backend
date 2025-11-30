@@ -106,7 +106,6 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	protected.PATCH("/chat/messages/:messageID", chat.EditMessage)
 	protected.DELETE("/chat/messages/:messageID", chat.DeleteMessage)
 	protected.GET("/chat/:roomID/participants", chat.GetParticipants)
-	protected.POST("/chat/:roomID/participants/:userID", chat.AddParticipant)
 	protected.DELETE("/chat/:roomID/participants/:userID", chat.RemoveParticipant)
 	protected.GET("/chat/:roomID/ws", chat.HandleConnections)
 

@@ -58,7 +58,7 @@ func (q *Queries) DeleteRoom(ctx context.Context, id string) error {
 
 const getRoomByID = `-- name: GetRoomByID :one
 SELECT
-  id, title, participants
+  id, message_count, participants
 FROM
   chat.room
 WHERE
@@ -68,8 +68,22 @@ WHERE
 func (q *Queries) GetRoomByID(ctx context.Context, id string) (ChatRoom, error) {
 	row := q.db.QueryRow(ctx, getRoomByID, id)
 	var i ChatRoom
-	err := row.Scan(&i.ID, &i.Title, &i.Participants)
+	err := row.Scan(&i.ID, &i.MessageCount, &i.Participants)
 	return i, err
+}
+
+const incrementMessageCount = `-- name: IncrementMessageCount :exec
+UPDATE
+  chat.room
+SET
+  message_count = message_count + 1
+WHERE
+  id = $1
+`
+
+func (q *Queries) IncrementMessageCount(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, incrementMessageCount, id)
+	return err
 }
 
 const removeParticipant = `-- name: RemoveParticipant :exec
