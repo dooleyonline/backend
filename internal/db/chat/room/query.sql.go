@@ -108,7 +108,7 @@ func (q *Queries) RemoveParticipant(ctx context.Context, arg RemoveParticipantPa
 
 const syncAllMessageCounts = `-- name: SyncAllMessageCounts :exec
 UPDATE
-  chat.room r
+  chat.room room
 SET
   message_count = COALESCE(m.count, 0)
 FROM (
@@ -116,7 +116,7 @@ FROM (
   FROM chat.message
   GROUP BY room_id
 ) m
-WHERE r.id = m.room_id
+WHERE room.id = m.room_id
 `
 
 func (q *Queries) SyncAllMessageCounts(ctx context.Context) error {

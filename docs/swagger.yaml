@@ -20,6 +20,10 @@ definitions:
         $ref: '#/definitions/model.ChatMessage'
       message_count:
         type: integer
+      participants:
+        items:
+          type: string
+        type: array
       read_all:
         type: boolean
       room_id:
@@ -76,15 +80,6 @@ definitions:
       sent_at:
         type: string
       sent_by:
-        type: string
-    type: object
-  model.ChatParticipant:
-    properties:
-      last_read_message_id:
-        type: integer
-      room_id:
-        type: string
-      user_id:
         type: string
     type: object
   model.Item:
@@ -400,26 +395,6 @@ paths:
               $ref: '#/definitions/model.ChatMessage'
             type: array
       summary: Get latest messages
-      tags:
-      - chat
-  /chat/{roomID}/participants:
-    get:
-      parameters:
-      - description: Room ID
-        in: path
-        name: roomID
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.ChatParticipant'
-            type: array
-      summary: Get participants in a chat room
       tags:
       - chat
   /chat/{roomID}/participants/{userID}:

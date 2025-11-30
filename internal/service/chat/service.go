@@ -187,6 +187,7 @@ type GetRoomsResult struct {
 	LastMessage  *model.ChatMessage `json:"last_message"`
 	MessageCount int64              `json:"message_count"`
 	ReadAll      bool               `json:"read_all"`
+	Participants []string           `json:"participants"`
 }
 
 func (s *Service) GetRooms(ctx context.Context, userID string) ([]GetRoomsResult, error) {
@@ -215,6 +216,16 @@ func (s *Service) GetRooms(ctx context.Context, userID string) ([]GetRoomsResult
 			return nil, err
 		}
 
+		participants, err := s.db.Chat.Participant.GetByRoomID(ctx, p.RoomID)
+		if err != nil {
+			return nil, err
+		}
+
+		pIDs := make([]string, 0, len(participants))
+		for _, participant := range participants {
+			pIDs = append(pIDs, participant.UserID)
+		}
+
 		// if last message of the room is nil, then read all
 		// if last read message is not nil and last message of the room is equal to last read message, then read all
 		readAll := latestMessage == nil || (p.LastReadMessageID != nil && latestMessage.ID == *p.LastReadMessageID)
@@ -223,17 +234,14 @@ func (s *Service) GetRooms(ctx context.Context, userID string) ([]GetRoomsResult
 			LastMessage:  latestMessage,
 			MessageCount: room.MessageCount,
 			ReadAll:      readAll,
+			Participants: pIDs,
 		})
 	}
 	return res, nil
 }
 
-func (s *Service) GetParticipants(ctx context.Context, roomID string) ([]model.ChatParticipant, error) {
-	return s.db.Chat.Participant.GetByRoomID(ctx, roomID)
-}
-
 func (s *Service) IsParticipant(ctx context.Context, roomID string, userID string) (bool, error) {
-	participants, err := s.GetParticipants(ctx, roomID)
+	participants, err := s.db.Chat.Participant.GetByRoomID(ctx, roomID)
 	if err != nil {
 		return false, err
 	}

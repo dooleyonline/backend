@@ -431,37 +431,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/{roomID}/participants": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "chat"
-                ],
-                "summary": "Get participants in a chat room",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Room ID",
-                        "name": "roomID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.ChatParticipant"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/chat/{roomID}/participants/{userID}": {
             "delete": {
                 "tags": [
@@ -1049,6 +1018,12 @@ const docTemplate = `{
                 "message_count": {
                     "type": "integer"
                 },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "read_all": {
                     "type": "boolean"
                 },
@@ -1134,20 +1109,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sent_by": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.ChatParticipant": {
-            "type": "object",
-            "properties": {
-                "last_read_message_id": {
-                    "type": "integer"
-                },
-                "room_id": {
-                    "type": "string"
-                },
-                "user_id": {
                     "type": "string"
                 }
             }

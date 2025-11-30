@@ -297,30 +297,3 @@ func (h *Handler) GetRooms(c echo.Context) error {
 		}
 	}
 }
-
-// GetParticipants godoc
-//
-//	@Summary	Get participants in a chat room
-//	@Tags		chat
-//	@Produce	json
-//	@Param		roomID	path	string	true	"Room ID"
-//	@Success	200		{array}	model.ChatParticipant
-//	@Router		/chat/{roomID}/participants [get]
-func (h *Handler) GetParticipants(c echo.Context) error {
-	var (
-		req = c.Request()
-		ctx = req.Context()
-	)
-
-	var roomID string
-	if err := echo.PathParamsBinder(c).String("roomID", &roomID).BindError(); err != nil {
-		return echo.ErrBadRequest.WithInternal(err)
-	}
-
-	participants, err := h.svc.GetParticipants(ctx, roomID)
-	if err != nil {
-		return echo.ErrInternalServerError.WithInternal(err)
-	}
-
-	return c.JSON(http.StatusOK, participants)
-}
