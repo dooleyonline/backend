@@ -45,3 +45,15 @@ SET
   message_count = message_count + 1
 WHERE
   id = $1;
+
+-- name: SyncAllMessageCounts :exec
+UPDATE
+  chat.room room
+SET
+  message_count = COALESCE(m.count, 0)
+FROM (
+  SELECT room_id, COUNT(*) as count
+  FROM chat.message
+  GROUP BY room_id
+) m
+WHERE room.id = m.room_id; 

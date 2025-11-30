@@ -261,3 +261,11 @@ func (s *Service) UpdateLastReadMessageID(ctx context.Context, roomID string, us
 		LastReadMessageID: &messageID.ID,
 	})
 }
+
+func (s *Service) SyncAllMessageCounts(ctx context.Context) error {
+	if err := s.db.Chat.Room.SyncAllMessageCounts(ctx); err != nil {
+		return fmt.Errorf("failed to sync all message counts: %w", err)
+	}
+
+	return nil
+}

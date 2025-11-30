@@ -61,7 +61,9 @@ sql:
     database:
       managed: true
     queries: "sqlc/chat/room/query.sql"
-    schema: "sqlc/chat/room/schema.sql"
+    schema: 
+    - "sqlc/chat/room/schema.sql"
+    - "sqlc/chat/message/schema.sql"
     gen:
       go:
         package: "chatroom"

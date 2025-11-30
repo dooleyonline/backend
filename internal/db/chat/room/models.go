@@ -4,6 +4,19 @@
 
 package chatroom
 
+import (
+	"time"
+)
+
+type ChatMessage struct {
+	RoomID string    `json:"room_id"`
+	SentBy string    `json:"sent_by"`
+	Body   string    `json:"body"`
+	ID     int64     `json:"id"`
+	Edited bool      `json:"edited"`
+	SentAt time.Time `json:"sent_at"`
+}
+
 type ChatRoom struct {
 	ID           string   `json:"id"`
 	MessageCount int64    `json:"message_count"`

@@ -105,3 +105,21 @@ func (q *Queries) RemoveParticipant(ctx context.Context, arg RemoveParticipantPa
 	_, err := q.db.Exec(ctx, removeParticipant, arg.UserID, arg.RoomID)
 	return err
 }
+
+const syncAllMessageCounts = `-- name: SyncAllMessageCounts :exec
+UPDATE
+  chat.room r
+SET
+  message_count = COALESCE(m.count, 0)
+FROM (
+  SELECT room_id, COUNT(*) as count
+  FROM chat.message
+  GROUP BY room_id
+) m
+WHERE r.id = m.room_id
+`
+
+func (q *Queries) SyncAllMessageCounts(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, syncAllMessageCounts)
+	return err
+}
