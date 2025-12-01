@@ -1,4 +1,4 @@
-create schema "chat";
+create schema if not exists "chat";
 set search_path to "chat";
 
 create table "chat"."message" (

@@ -30,3 +30,25 @@ func TestGetroom(t *testing.T) {
 	t.Logf("got %d rooms: %+v", len(rooms), rooms)
 
 }
+func TestSyncAllMessageCounts(t *testing.T) {
+	ctx := t.Context()
+
+	cfg, err := config.New()
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
+	}
+
+	db, err := db.New(ctx, cfg)
+	if err != nil {
+		t.Fatalf("failed to connect to db: %v", err)
+	}
+	svc := chatsvc.New(cfg, db)
+
+	t.Log("Syncing message counts for all rooms...")
+	
+	if err := svc.SyncAllMessageCounts(ctx); err != nil {
+		t.Fatalf("SyncAllMessageCounts returned error: %v", err)
+	}
+
+	t.Log("Successfully synced all room message counts")
+}
