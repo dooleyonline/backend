@@ -115,7 +115,6 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 	for {
 		_, m, err := conn.ReadMessage()
 		if err != nil {
-			slog.Info("read message failed", slog.Any("error", err))
 			break
 		}
 
