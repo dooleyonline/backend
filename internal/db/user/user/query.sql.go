@@ -68,6 +68,48 @@ func (q *Queries) Get(ctx context.Context, email string) (UserUser, error) {
 	return i, err
 }
 
+const getAllLikedViewed = `-- name: GetAllLikedViewed :many
+SELECT
+    u.user_id,
+    ARRAY_AGG(DISTINCT l.item_id)  FILTER (WHERE l.item_id IS NOT NULL)  AS liked_items,
+    ARRAY_AGG(DISTINCT v.item_id) FILTER (WHERE v.item_id IS NOT NULL) AS viewed_items
+FROM (
+    SELECT user_id FROM "user"."liked"
+    UNION
+    SELECT user_id FROM "user"."viewed"
+) AS u
+LEFT JOIN "user"."liked"  AS l ON l.user_id = u.user_id
+LEFT JOIN "user"."viewed" AS v ON v.user_id = u.user_id
+GROUP BY u.user_id
+ORDER BY u.user_id
+`
+
+type GetAllLikedViewedRow struct {
+	UserID      string  `json:"user_id"`
+	LikedItems  []int64 `json:"liked_items"`
+	ViewedItems []int64 `json:"viewed_items"`
+}
+
+func (q *Queries) GetAllLikedViewed(ctx context.Context) ([]GetAllLikedViewedRow, error) {
+	rows, err := q.db.Query(ctx, getAllLikedViewed)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAllLikedViewedRow{}
+	for rows.Next() {
+		var i GetAllLikedViewedRow
+		if err := rows.Scan(&i.UserID, &i.LikedItems, &i.ViewedItems); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getByID = `-- name: GetByID :one
 SELECT
   email, password, first_name, last_name, id, verified, avatar

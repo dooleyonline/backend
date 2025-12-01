@@ -46,3 +46,18 @@ SET
   verified = TRUE
 WHERE
   id = $1;
+
+-- name: GetAllLikedViewed :many
+SELECT
+    u.user_id,
+    ARRAY_AGG(DISTINCT l.item_id)  FILTER (WHERE l.item_id IS NOT NULL)  AS liked_items,
+    ARRAY_AGG(DISTINCT v.item_id) FILTER (WHERE v.item_id IS NOT NULL) AS viewed_items
+FROM (
+    SELECT user_id FROM "user"."liked"
+    UNION
+    SELECT user_id FROM "user"."viewed"
+) AS u
+LEFT JOIN "user"."liked"  AS l ON l.user_id = u.user_id
+LEFT JOIN "user"."viewed" AS v ON v.user_id = u.user_id
+GROUP BY u.user_id
+ORDER BY u.user_id;

@@ -11,7 +11,7 @@ definitions:
     properties:
       email:
         type: string
-      userId:
+      userID:
         type: string
     type: object
   chatsvc.GetRoomsResult:
@@ -124,15 +124,6 @@ definitions:
       views:
         type: integer
     type: object
-  model.Liked:
-    properties:
-      created_at:
-        type: string
-      item_id:
-        type: integer
-      user_id:
-        type: string
-    type: object
   model.User:
     properties:
       avatar:
@@ -149,15 +140,6 @@ definitions:
         type: string
       verified:
         type: boolean
-    type: object
-  model.Viewed:
-    properties:
-      created_at:
-        type: string
-      item_id:
-        type: integer
-      user_id:
-        type: string
     type: object
   storagesvc.PresignResult:
     properties:
@@ -181,16 +163,29 @@ definitions:
     type: object
   usersvc.UpdateParams:
     properties:
-      avatarID:
+      avatar:
         type: string
       email:
         type: string
       firstName:
         type: string
+      id:
+        type: string
       lastName:
         type: string
-      userID:
+    type: object
+  useruser.GetAllLikedViewedRow:
+    properties:
+      liked_items:
+        items:
+          type: integer
+        type: array
+      user_id:
         type: string
+      viewed_items:
+        items:
+          type: integer
+        type: array
     type: object
 host: localhost:8080
 info:
@@ -263,7 +258,7 @@ paths:
       summary: Get current authenticated user
       tags:
       - auth
-  /auth/verification:
+  /auth/verify:
     post:
       consumes:
       - application/json
@@ -278,25 +273,26 @@ paths:
           $ref: '#/definitions/authsvc.SendParams'
       produces:
       - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: invalid request body
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: internal error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+      responses: {}
       summary: Send verification email
       tags:
       - auth
-  /auth/verification/{id}:
+  /auth/verify/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get verification by id
+      parameters:
+      - description: Verification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      tags:
+      - auth
     post:
       description: Consumes the verification token from the path and marks the user
         verified.
@@ -842,6 +838,20 @@ paths:
       summary: Get user by ID
       tags:
       - user
+  /user/interactions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/useruser.GetAllLikedViewedRow'
+            type: array
+      summary: Get the liked, viewed items group by userID
+      tags:
+      - user
   /user/liked:
     get:
       produces:
@@ -851,9 +861,9 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.Liked'
+              $ref: '#/definitions/model.Item'
             type: array
-      summary: Get the entire liked table.
+      summary: Get liked items by login userID
       tags:
       - user
   /user/viewed:
@@ -864,8 +874,10 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Viewed'
-      summary: Get the entire viewed table.
+            items:
+              $ref: '#/definitions/model.Item'
+            type: array
+      summary: Get viewed items by login userID
       tags:
       - user
 swagger: "2.0"

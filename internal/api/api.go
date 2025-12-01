@@ -72,6 +72,8 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	e.GET("/user", user.GetMany)
 	e.POST("/user", user.Create)
 	e.GET("/user/:id", user.Get)
+	e.PUT("/user", user.Update)
+	e.GET("/user/interactions", user.GetLikedViewed)
 
 	// auth routes
 	e.GET("/auth/me", auth.GetMe)
@@ -95,8 +97,8 @@ func New(ctx context.Context, cfg *config.Config, db *db.DB) (*echo.Echo, error)
 	protected.POST("/item/:id/unlike", item.Unlike)
 
 	protected.PUT("/user", user.Update)
-	protected.GET("/user/liked", user.GetLikes)
-	protected.GET("/user/viewed", user.GetViews)
+	protected.GET("/user/liked", user.GetLiked)
+	protected.GET("/user/viewed", user.GetViewed)
 
 	protected.POST("/auth/logout", auth.Logout)
 

@@ -4,6 +4,16 @@
 
 package useruser
 
+import (
+	"time"
+)
+
+type UserLiked struct {
+	UserID    string    `json:"user_id"`
+	ItemID    int64     `json:"item_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type UserUser struct {
 	Email     string `json:"email"`
 	Password  string `json:"password"`
@@ -12,4 +22,10 @@ type UserUser struct {
 	ID        string `json:"id"`
 	Verified  bool   `json:"verified"`
 	Avatar    string `json:"avatar"`
+}
+
+type UserViewed struct {
+	UserID    string    `json:"user_id"`
+	ItemID    int64     `json:"item_id"`
+	CreatedAt time.Time `json:"created_at"`
 }

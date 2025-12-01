@@ -145,7 +145,7 @@ func (h *Handler) CreateVerification(c echo.Context) error {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			query	string true	"Verification ID"
+//	@Param			id	path	string	true	"Verification ID"
 //	@Router			/auth/verify/{id} [get]
 func (h *Handler) GetVerification(c echo.Context) error {
 	var (

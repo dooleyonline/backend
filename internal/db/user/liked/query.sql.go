@@ -9,26 +9,25 @@ import (
 	"context"
 )
 
-const getAll = `-- name: GetAll :many
-SELECT
-  user_id, item_id, created_at
-FROM
-  "user"."liked"
+const getLiked = `-- name: GetLiked :many
+SELECT item_id
+FROM "user"."liked"
+WHERE user_id = $1
 `
 
-func (q *Queries) GetAll(ctx context.Context) ([]UserLiked, error) {
-	rows, err := q.db.Query(ctx, getAll)
+func (q *Queries) GetLiked(ctx context.Context, userID string) ([]int64, error) {
+	rows, err := q.db.Query(ctx, getLiked, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []UserLiked{}
+	items := []int64{}
 	for rows.Next() {
-		var i UserLiked
-		if err := rows.Scan(&i.UserID, &i.ItemID, &i.CreatedAt); err != nil {
+		var item_id int64
+		if err := rows.Scan(&item_id); err != nil {
 			return nil, err
 		}
-		items = append(items, i)
+		items = append(items, item_id)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

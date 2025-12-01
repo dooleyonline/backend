@@ -1,4 +1,4 @@
-create schema "user";
+create schema IF NOT EXISTS "user";
 set search_path TO "user";
 
 create table "user"."liked" (

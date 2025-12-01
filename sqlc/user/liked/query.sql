@@ -1,8 +1,7 @@
--- name: GetAll :many
-SELECT
-  *
-FROM
-  "user"."liked";
+-- name: GetLiked :many
+SELECT item_id
+FROM "user"."liked"
+WHERE user_id = $1;
 
 -- name: Like :exec
 INSERT INTO
