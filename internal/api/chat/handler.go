@@ -1,7 +1,9 @@
 package chathandler
 
 import (
+	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/dooleyonline/backend/internal/api/shared"
@@ -16,14 +18,14 @@ type Handler struct {
 	hub *Hub
 }
 
-func New(svc *chatsvc.Service) *Handler {
+func New(ctx context.Context, svc *chatsvc.Service) *Handler {
 	hub := &Hub{
 		rooms:      make(map[string]map[*Client]bool),
 		broadcast:  make(chan *model.ChatMessage),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 	}
-	go hub.run()
+	go hub.run(ctx)
 
 	return &Handler{svc, hub}
 }
@@ -104,12 +106,16 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 
 	h.hub.register <- client
 	defer func() {
-		h.hub.unregister <- client
+		select {
+		case h.hub.unregister <- client:
+		default:
+		}
 	}()
 
 	for {
 		_, m, err := conn.ReadMessage()
 		if err != nil {
+			slog.Info("read message failed", slog.Any("error", err))
 			break
 		}
 
@@ -133,12 +139,22 @@ func (h *Handler) HandleConnections(c echo.Context) error {
 		}
 	}
 
-	return nil
+	return c.NoContent(http.StatusNoContent)
 }
 
-func (h *Hub) run() {
+func (h *Hub) run(ctx context.Context) {
 	for {
 		select {
+		case <-ctx.Done():
+			for _, conns := range h.rooms {
+				for conn, _ := range conns {
+					conn.conn.Close()
+				}
+			}
+			close(h.register)
+			close(h.unregister)
+			close(h.broadcast)
+			return
 		case c := <-h.register:
 			if h.rooms[c.roomID] == nil {
 				h.rooms[c.roomID] = make(map[*Client]bool)

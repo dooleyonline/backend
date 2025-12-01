@@ -36,6 +36,35 @@ func (q *Queries) GetAll(ctx context.Context) ([]UserLiked, error) {
 	return items, nil
 }
 
+const getByUserID = `-- name: GetByUserID :many
+SELECT
+  user_id, item_id, created_at
+FROM
+  "user"."liked"
+WHERE
+  user_id = $1
+`
+
+func (q *Queries) GetByUserID(ctx context.Context, userID string) ([]UserLiked, error) {
+	rows, err := q.db.Query(ctx, getByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []UserLiked{}
+	for rows.Next() {
+		var i UserLiked
+		if err := rows.Scan(&i.UserID, &i.ItemID, &i.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const like = `-- name: Like :exec
 INSERT INTO
 "user"."liked" (user_id, item_id)

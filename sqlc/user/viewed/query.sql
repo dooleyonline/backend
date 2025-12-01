@@ -10,3 +10,11 @@ INSERT INTO
 VALUES
 ($1, $2)
 RETURNING *;
+
+-- name: GetByUserID :many
+SELECT
+  *
+FROM
+  "user"."viewed"
+WHERE
+  user_id = $1;

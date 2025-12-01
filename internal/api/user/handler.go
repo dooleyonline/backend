@@ -134,11 +134,12 @@ func (h *Handler) Update(c echo.Context) error {
 //	@Router		/user/liked [get]
 func (h *Handler) GetLikes(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
-	res, err := h.svc.GetLikes(ctx)
+	res, err := h.svc.GetLikes(ctx, userID)
 	if err != nil {
 		return echo.ErrNotFound.WithInternal(err)
 	}
@@ -155,11 +156,12 @@ func (h *Handler) GetLikes(c echo.Context) error {
 //	@Router		/user/viewed [get]
 func (h *Handler) GetViews(c echo.Context) error {
 	var (
-		req = c.Request()
-		ctx = req.Context()
+		req    = c.Request()
+		ctx    = req.Context()
+		userID = c.(shared.Context).UserID
 	)
 
-	res, err := h.svc.GetViews(ctx)
+	res, err := h.svc.GetViews(ctx, userID)
 	if err != nil {
 		return echo.ErrNotFound.WithInternal(err)
 	}

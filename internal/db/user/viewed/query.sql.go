@@ -53,3 +53,32 @@ func (q *Queries) GetAll(ctx context.Context) ([]UserViewed, error) {
 	}
 	return items, nil
 }
+
+const getByUserID = `-- name: GetByUserID :many
+SELECT
+  user_id, item_id, created_at
+FROM
+  "user"."viewed"
+WHERE
+  user_id = $1
+`
+
+func (q *Queries) GetByUserID(ctx context.Context, userID string) ([]UserViewed, error) {
+	rows, err := q.db.Query(ctx, getByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []UserViewed{}
+	for rows.Next() {
+		var i UserViewed
+		if err := rows.Scan(&i.UserID, &i.ItemID, &i.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

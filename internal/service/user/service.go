@@ -72,8 +72,8 @@ func (s *Service) Get(ctx context.Context, id string) (*model.User, error) {
 	return &user, nil
 }
 
-func (s *Service) GetLikes(ctx context.Context) ([]model.Liked, error) {
-	liked, err := s.db.User.Liked.GetAll(ctx)
+func (s *Service) GetLikes(ctx context.Context, userID string) ([]model.Liked, error) {
+	liked, err := s.db.User.Liked.GetByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get liked table: %w", err)
 	}
@@ -81,8 +81,8 @@ func (s *Service) GetLikes(ctx context.Context) ([]model.Liked, error) {
 	return liked, nil
 }
 
-func (s *Service) GetViews(ctx context.Context) ([]model.Viewed, error) {
-	viewed, err := s.db.User.Viewed.GetAll(ctx)
+func (s *Service) GetViews(ctx context.Context, userID string) ([]model.Viewed, error) {
+	viewed, err := s.db.User.Viewed.GetByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get viewed table: %w", err)
 	}

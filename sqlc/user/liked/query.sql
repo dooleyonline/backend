@@ -17,3 +17,11 @@ DELETE FROM
 WHERE
 user_id = $1 AND item_id = $2
 RETURNING *;
+
+-- name: GetByUserID :many
+SELECT
+  *
+FROM
+  "user"."liked"
+WHERE
+  user_id = $1;
